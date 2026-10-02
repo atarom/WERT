@@ -1,8 +1,6 @@
 <div align="center">
   <img src="logo.png" alt="WERT" width="180">
 
-  <h1>WERT</h1>
-
   <p>Wenceslau Evita Rastre Trobable</p>
 
   <p>
