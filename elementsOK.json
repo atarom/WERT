@@ -3,20 +3,20 @@
   "elements": [
     {
       "type": "node",
+      "id": 9908919203,
+      "name": "Arroyo Cervera",
+      "coordinates": [
+        1.9758768,
+        41.4467161
+      ]
+    },
+    {
+      "type": "node",
       "id": 2392501856,
       "name": "Avenida",
       "coordinates": [
         3.021514,
         41.7927813
-      ]
-    },
-    {
-      "type": "node",
-      "id": 2406382156,
-      "name": "Iglesia Nueva Apostólica",
-      "coordinates": [
-        2.1667984,
-        41.4268087
       ]
     },
     {
@@ -39,24 +39,6 @@
     },
     {
       "type": "node",
-      "id": 3933603558,
-      "name": "Sierra de Segura",
-      "coordinates": [
-        2.6346703,
-        39.5847042
-      ]
-    },
-    {
-      "type": "node",
-      "id": 4196749016,
-      "name": "Torrente",
-      "coordinates": [
-        0.569513,
-        41.8310187
-      ]
-    },
-    {
-      "type": "node",
       "id": 4362324696,
       "name": "Avenida",
       "coordinates": [
@@ -75,29 +57,11 @@
     },
     {
       "type": "node",
-      "id": 4881181797,
-      "name": "Sierra Nevada",
-      "coordinates": [
-        2.1834715,
-        41.4420581
-      ]
-    },
-    {
-      "type": "node",
       "id": 4884880913,
       "name": "Avenida",
       "coordinates": [
         3.0152763,
         39.4286409
-      ]
-    },
-    {
-      "type": "node",
-      "id": 5537450422,
-      "name": "Rio Azul Restaurant",
-      "coordinates": [
-        2.1600868,
-        41.3914461
       ]
     },
     {
@@ -111,74 +75,11 @@
     },
     {
       "type": "node",
-      "id": 7021744971,
-      "name": "Sierra",
-      "coordinates": [
-        3.1464774,
-        39.470163
-      ]
-    },
-    {
-      "type": "node",
-      "id": 7058306887,
-      "name": "Iglesia de Jesucristo de los últimos días",
-      "coordinates": [
-        2.1354486,
-        41.3853978
-      ]
-    },
-    {
-      "type": "node",
       "id": 7247490784,
       "name": "Avenida",
       "coordinates": [
         2.7161898,
         39.5785131
-      ]
-    },
-    {
-      "type": "node",
-      "id": 8356890099,
-      "name": "Iglesia Bíblica Valle Hebrón",
-      "coordinates": [
-        2.1431038,
-        41.4213036
-      ]
-    },
-    {
-      "type": "node",
-      "id": 8544879041,
-      "name": "Camino al Bienestar",
-      "coordinates": [
-        2.1671289,
-        41.4380588
-      ]
-    },
-    {
-      "type": "node",
-      "id": 9908919203,
-      "name": "Arroyo Cervera",
-      "coordinates": [
-        1.9758768,
-        41.4467161
-      ]
-    },
-    {
-      "type": "node",
-      "id": 9916524317,
-      "name": "Torrente",
-      "coordinates": [
-        3.2703098,
-        39.4541056
-      ]
-    },
-    {
-      "type": "node",
-      "id": 10304557910,
-      "name": "Puerto Plata Dominican Restaurant",
-      "coordinates": [
-        2.1783604,
-        41.3856059
       ]
     },
     {
@@ -192,74 +93,11 @@
     },
     {
       "type": "node",
-      "id": 11843456961,
-      "name": "Ríos Running",
-      "coordinates": [
-        2.4244674,
-        41.5336059
-      ]
-    },
-    {
-      "type": "node",
-      "id": 11843576623,
-      "name": "Ríos Running Berga",
-      "coordinates": [
-        1.8456339,
-        42.1008128
-      ]
-    },
-    {
-      "type": "node",
-      "id": 13764168041,
-      "name": "Rio Express",
-      "coordinates": [
-        1.1612472,
-        41.376685
-      ]
-    },
-    {
-      "type": "node",
       "id": 13959296401,
       "name": "Avenida",
       "coordinates": [
         3.1816014,
         42.260282
-      ]
-    },
-    {
-      "type": "node",
-      "id": 14234884468,
-      "name": "Centro Médico Lisboa S.L.",
-      "coordinates": [
-        2.1598038,
-        41.4284891
-      ]
-    },
-    {
-      "type": "way",
-      "id": 88364210,
-      "name": "Sierra de Segura",
-      "coordinates": [
-        2.648959594,
-        39.58534265
-      ]
-    },
-    {
-      "type": "way",
-      "id": 361230338,
-      "name": "Río Grande",
-      "coordinates": [
-        2.1194905,
-        41.423591
-      ]
-    },
-    {
-      "type": "way",
-      "id": 361230339,
-      "name": "Río Grande",
-      "coordinates": [
-        2.1193862,
-        41.4235394
       ]
     },
     {
@@ -273,29 +111,362 @@
     },
     {
       "type": "way",
-      "id": 450795768,
-      "name": "Río Tranquilo",
-      "coordinates": [
-        3.1546766,
-        42.2768614
-      ]
-    },
-    {
-      "type": "way",
-      "id": 570065189,
-      "name": "Sierra Morena esencia Iberica",
-      "coordinates": [
-        2.377566949,
-        41.5104975
-      ]
-    },
-    {
-      "type": "way",
       "id": 604329456,
       "name": "Avenida",
       "coordinates": [
         2.712562754,
         39.7664514
+      ]
+    },
+    {
+      "type": "node",
+      "id": 8544879041,
+      "name": "Camino al Bienestar",
+      "coordinates": [
+        2.1671289,
+        41.4380588
+      ]
+    },
+    {
+      "type": "node",
+      "id": 5505011645,
+      "name": "Centro Chandra - Karla Raspall",
+      "coordinates": [
+        2.4778168,
+        42.1691062
+      ]
+    },
+    {
+      "type": "node",
+      "id": 9122762515,
+      "name": "Centro Cristiano el Buen Sembrador. Ministerio Asamblea de Dios",
+      "coordinates": [
+        2.9650426,
+        42.2686282
+      ]
+    },
+    {
+      "type": "node",
+      "id": 3975772023,
+      "name": "Centro Cristiano Internacional",
+      "coordinates": [
+        3.1241354,
+        42.0417896
+      ]
+    },
+    {
+      "type": "node",
+      "id": 11934635862,
+      "name": "Centro Cultural Andaluz",
+      "coordinates": [
+        1.974528,
+        41.4470922
+      ]
+    },
+    {
+      "type": "way",
+      "id": 708227100,
+      "name": "Centro Cultural Andaluz",
+      "coordinates": [
+        2.271784553,
+        41.54155805
+      ]
+    },
+    {
+      "type": "node",
+      "id": 3560955995,
+      "name": "Centro Cultural Castellano-manchego",
+      "coordinates": [
+        2.2176297,
+        41.4390698
+      ]
+    },
+    {
+      "type": "node",
+      "id": 11789599670,
+      "name": "Centro Cultural Claveles",
+      "coordinates": [
+        2.1046446,
+        41.3702125
+      ]
+    },
+    {
+      "type": "way",
+      "id": 386240288,
+      "name": "Centro Cultural de Jesús",
+      "coordinates": [
+        1.44813295,
+        38.93200615
+      ]
+    },
+    {
+      "type": "node",
+      "id": 6254166226,
+      "name": "Centro Cultural do Brasil em Barcelona",
+      "coordinates": [
+        2.1651352,
+        41.3915323
+      ]
+    },
+    {
+      "type": "node",
+      "id": 12011183528,
+      "name": "Centro cultural extremeño",
+      "coordinates": [
+        1.107432,
+        41.146326
+      ]
+    },
+    {
+      "type": "node",
+      "id": 7028408933,
+      "name": "Centro Cultural Gitano La Mina",
+      "coordinates": [
+        2.2229064,
+        41.4190711
+      ]
+    },
+    {
+      "type": "way",
+      "id": 1495708137,
+      "name": "Centro Cultural Los Califas",
+      "coordinates": [
+        1.599016068,
+        41.19145565
+      ]
+    },
+    {
+      "type": "node",
+      "id": 14183303501,
+      "name": "Centro cultural y deportivo Turó de la Peira",
+      "coordinates": [
+        2.1702194,
+        41.4326863
+      ]
+    },
+    {
+      "type": "node",
+      "id": 11020524407,
+      "name": "Centro de depilación láser Pelostop",
+      "coordinates": [
+        1.7263514,
+        41.2216368
+      ]
+    },
+    {
+      "type": "node",
+      "id": 12227909675,
+      "name": "Centro de Estética Ana Contreras",
+      "coordinates": [
+        1.2551265,
+        41.287387
+      ]
+    },
+    {
+      "type": "node",
+      "id": 7730526364,
+      "name": "Centro de estética DEVI ADVANCE",
+      "coordinates": [
+        2.1253669,
+        41.3760224
+      ]
+    },
+    {
+      "type": "node",
+      "id": 2796295473,
+      "name": "Centro de Estética Marmara",
+      "coordinates": [
+        2.1156146,
+        41.5083001
+      ]
+    },
+    {
+      "type": "node",
+      "id": 8584387353,
+      "name": "Centro de estética Mónica Rubia",
+      "coordinates": [
+        2.0166803,
+        41.3673091
+      ]
+    },
+    {
+      "type": "node",
+      "id": 3140188361,
+      "name": "Centro de idiomas Metropol language center",
+      "coordinates": [
+        2.1704947,
+        41.3900126
+      ]
+    },
+    {
+      "type": "node",
+      "id": 11134344346,
+      "name": "Centro de Impresión Digital La Fotocopia",
+      "coordinates": [
+        2.1541111,
+        41.4016528
+      ]
+    },
+    {
+      "type": "way",
+      "id": 1111523839,
+      "name": "Centro de Información y Educación Medioambiental",
+      "coordinates": [
+        2.675390774,
+        39.6345493
+      ]
+    },
+    {
+      "type": "way",
+      "id": 261540912,
+      "name": "Centro de Inserción Social Joaquín Ruiz-Giménez",
+      "coordinates": [
+        2.685893819,
+        39.56604095
+      ]
+    },
+    {
+      "type": "way",
+      "id": 779435251,
+      "name": "Centro de Internamiento de Extranjeros",
+      "coordinates": [
+        2.1246797,
+        41.3277936
+      ]
+    },
+    {
+      "type": "node",
+      "id": 11985154937,
+      "name": "Centro de masajes María Parrilla",
+      "coordinates": [
+        2.7970682,
+        39.7041714
+      ]
+    },
+    {
+      "type": "way",
+      "id": 1462854804,
+      "name": "Centro de Medicina de precisión",
+      "coordinates": [
+        2.098574826,
+        41.382683
+      ]
+    },
+    {
+      "type": "node",
+      "id": 5176073294,
+      "name": "Centro de Oftalmología Barraquer",
+      "coordinates": [
+        2.1461082,
+        41.3970116
+      ]
+    },
+    {
+      "type": "way",
+      "id": 615404391,
+      "name": "Centro de Oftalmología Bonafonte",
+      "coordinates": [
+        2.167860458,
+        41.393348
+      ]
+    },
+    {
+      "type": "node",
+      "id": 11037494903,
+      "name": "Centro de peluqueria y estética",
+      "coordinates": [
+        1.7225407,
+        41.2239454
+      ]
+    },
+    {
+      "type": "node",
+      "id": 11306848319,
+      "name": "Centro de podología",
+      "coordinates": [
+        2.1921139,
+        41.4418214
+      ]
+    },
+    {
+      "type": "node",
+      "id": 13271902271,
+      "name": "Centro de Podologia Rey",
+      "coordinates": [
+        2.03123,
+        41.3474051
+      ]
+    },
+    {
+      "type": "node",
+      "id": 13184404609,
+      "name": "Centro de Psicología Ana Mantecón",
+      "coordinates": [
+        2.6532239,
+        39.5746499
+      ]
+    },
+    {
+      "type": "node",
+      "id": 8341215074,
+      "name": "Centro de Reumatología Escarpenter",
+      "coordinates": [
+        2.1527141,
+        41.3971687
+      ]
+    },
+    {
+      "type": "node",
+      "id": 3071588166,
+      "name": "Centro de salud Casa del Mar",
+      "coordinates": [
+        2.6425323,
+        39.5652908
+      ]
+    },
+    {
+      "type": "node",
+      "id": 9866224404,
+      "name": "Centro de Salud y Estética",
+      "coordinates": [
+        2.1566801,
+        41.3765017
+      ]
+    },
+    {
+      "type": "node",
+      "id": 14234884468,
+      "name": "Centro Médico Lisboa S.L.",
+      "coordinates": [
+        2.1598038,
+        41.4284891
+      ]
+    },
+    {
+      "type": "node",
+      "id": 8356890099,
+      "name": "Iglesia Bíblica Valle Hebrón",
+      "coordinates": [
+        2.1431038,
+        41.4213036
+      ]
+    },
+    {
+      "type": "node",
+      "id": 7058306887,
+      "name": "Iglesia de Jesucristo de los últimos días",
+      "coordinates": [
+        2.1354486,
+        41.3853978
+      ]
+    },
+    {
+      "type": "node",
+      "id": 2406382156,
+      "name": "Iglesia Nueva Apostólica",
+      "coordinates": [
+        2.1667984,
+        41.4268087
       ]
     },
     {
@@ -308,30 +479,21 @@
       ]
     },
     {
-      "type": "way",
-      "id": 846900283,
-      "name": "Río Danube",
+      "type": "node",
+      "id": 10304557910,
+      "name": "Puerto Plata Dominican Restaurant",
       "coordinates": [
-        3.1533856,
-        42.278532
+        2.1783604,
+        41.3856059
       ]
     },
     {
-      "type": "way",
-      "id": 846900284,
-      "name": "Río Danube",
+      "type": "node",
+      "id": 5537450422,
+      "name": "Rio Azul Restaurant",
       "coordinates": [
-        3.1533959,
-        42.2783248
-      ]
-    },
-    {
-      "type": "way",
-      "id": 846900285,
-      "name": "Río Grande",
-      "coordinates": [
-        3.1534773,
-        42.2784595
+        2.1600868,
+        41.3914461
       ]
     },
     {
@@ -341,15 +503,6 @@
       "coordinates": [
         3.1536844,
         42.2784476
-      ]
-    },
-    {
-      "type": "way",
-      "id": 848846941,
-      "name": "Río Grande",
-      "coordinates": [
-        3.1535143,
-        42.2782993
       ]
     },
     {
@@ -372,11 +525,164 @@
     },
     {
       "type": "way",
+      "id": 846900283,
+      "name": "Río Danube",
+      "coordinates": [
+        3.1533856,
+        42.278532
+      ]
+    },
+    {
+      "type": "way",
+      "id": 846900284,
+      "name": "Río Danube",
+      "coordinates": [
+        3.1533959,
+        42.2783248
+      ]
+    },
+    {
+      "type": "node",
+      "id": 13764168041,
+      "name": "Rio Express",
+      "coordinates": [
+        1.1612472,
+        41.376685
+      ]
+    },
+    {
+      "type": "way",
+      "id": 361230338,
+      "name": "Río Grande",
+      "coordinates": [
+        2.1194905,
+        41.423591
+      ]
+    },
+    {
+      "type": "way",
+      "id": 361230339,
+      "name": "Río Grande",
+      "coordinates": [
+        2.1193862,
+        41.4235394
+      ]
+    },
+    {
+      "type": "way",
+      "id": 846900285,
+      "name": "Río Grande",
+      "coordinates": [
+        3.1534773,
+        42.2784595
+      ]
+    },
+    {
+      "type": "way",
+      "id": 848846941,
+      "name": "Río Grande",
+      "coordinates": [
+        3.1535143,
+        42.2782993
+      ]
+    },
+    {
+      "type": "way",
+      "id": 450795768,
+      "name": "Río Tranquilo",
+      "coordinates": [
+        3.1546766,
+        42.2768614
+      ]
+    },
+    {
+      "type": "node",
+      "id": 11843456961,
+      "name": "Ríos Running",
+      "coordinates": [
+        2.4244674,
+        41.5336059
+      ]
+    },
+    {
+      "type": "node",
+      "id": 11843576623,
+      "name": "Ríos Running Berga",
+      "coordinates": [
+        1.8456339,
+        42.1008128
+      ]
+    },
+    {
+      "type": "node",
+      "id": 7021744971,
+      "name": "Sierra",
+      "coordinates": [
+        3.1464774,
+        39.470163
+      ]
+    },
+    {
+      "type": "node",
+      "id": 3933603558,
+      "name": "Sierra de Segura",
+      "coordinates": [
+        2.6346703,
+        39.5847042
+      ]
+    },
+    {
+      "type": "way",
+      "id": 88364210,
+      "name": "Sierra de Segura",
+      "coordinates": [
+        2.648959594,
+        39.58534265
+      ]
+    },
+    {
+      "type": "way",
       "id": 948405187,
       "name": "Sierra House at La Sala de Camós",
       "coordinates": [
         2.761840748,
         42.0870744
+      ]
+    },
+    {
+      "type": "way",
+      "id": 570065189,
+      "name": "Sierra Morena esencia Iberica",
+      "coordinates": [
+        2.377566949,
+        41.5104975
+      ]
+    },
+    {
+      "type": "node",
+      "id": 4881181797,
+      "name": "Sierra Nevada",
+      "coordinates": [
+        2.1834715,
+        41.4420581
+      ]
+    },
+    {
+      "type": "node",
+      "id": 4196749016,
+      "name": "Torrente",
+      "coordinates": [
+        0.569513,
+        41.8310187
+      ]
+    },
+    {
+      "type": "node",
+      "id": 9916524317,
+      "name": "Torrente",
+      "coordinates": [
+        3.2703098,
+        39.4541056
       ]
     }
   ]
