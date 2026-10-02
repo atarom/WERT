@@ -12,6 +12,42 @@
     },
     {
       "type": "node",
+      "id": 3933603558,
+      "name": "Sierra de Segura",
+      "coordinates": [
+        2.6346703,
+        39.5847042
+      ]
+    },
+    {
+      "type": "node",
+      "id": 4196749016,
+      "name": "Torrente",
+      "coordinates": [
+        0.569513,
+        41.8310187
+      ]
+    },
+    {
+      "type": "node",
+      "id": 4881181797,
+      "name": "Sierra Nevada",
+      "coordinates": [
+        2.1834715,
+        41.4420581
+      ]
+    },
+    {
+      "type": "node",
+      "id": 7021744971,
+      "name": "Sierra",
+      "coordinates": [
+        3.1464774,
+        39.470163
+      ]
+    },
+    {
+      "type": "node",
       "id": 7058306887,
       "name": "Iglesia de Jesucristo de los últimos días",
       "coordinates": [
@@ -39,6 +75,33 @@
     },
     {
       "type": "node",
+      "id": 9916524317,
+      "name": "Torrente",
+      "coordinates": [
+        3.2703098,
+        39.4541056
+      ]
+    },
+    {
+      "type": "node",
+      "id": 11843456961,
+      "name": "Ríos Running",
+      "coordinates": [
+        2.4244674,
+        41.5336059
+      ]
+    },
+    {
+      "type": "node",
+      "id": 11843576623,
+      "name": "Ríos Running Berga",
+      "coordinates": [
+        1.8456339,
+        42.1008128
+      ]
+    },
+    {
+      "type": "node",
       "id": 14234884468,
       "name": "Centro Médico Lisboa S.L.",
       "coordinates": [
@@ -48,11 +111,110 @@
     },
     {
       "type": "way",
+      "id": 88364210,
+      "name": "Sierra de Segura",
+      "coordinates": [
+        2.648959594,
+        39.58534265
+      ]
+    },
+    {
+      "type": "way",
       "id": 361230338,
       "name": "Río Grande",
       "coordinates": [
         2.1194905,
         41.423591
+      ]
+    },
+    {
+      "type": "way",
+      "id": 450795768,
+      "name": "Río Tranquilo",
+      "coordinates": [
+        3.1546766,
+        42.2768614
+      ]
+    },
+    {
+      "type": "way",
+      "id": 570065189,
+      "name": "Sierra Morena esencia Iberica",
+      "coordinates": [
+        2.377566949,
+        41.5104975
+      ]
+    },
+    {
+      "type": "way",
+      "id": 846900283,
+      "name": "Río Danube",
+      "coordinates": [
+        3.1533856,
+        42.278532
+      ]
+    },
+    {
+      "type": "way",
+      "id": 846900284,
+      "name": "Río Danube",
+      "coordinates": [
+        3.1533959,
+        42.2783248
+      ]
+    },
+    {
+      "type": "way",
+      "id": 846900285,
+      "name": "Río Grande",
+      "coordinates": [
+        3.1534773,
+        42.2784595
+      ]
+    },
+    {
+      "type": "way",
+      "id": 846900311,
+      "name": "Río Bravo",
+      "coordinates": [
+        3.1536844,
+        42.2784476
+      ]
+    },
+    {
+      "type": "way",
+      "id": 848846941,
+      "name": "Río Grande",
+      "coordinates": [
+        3.1535143,
+        42.2782993
+      ]
+    },
+    {
+      "type": "way",
+      "id": 848846942,
+      "name": "Río Bravo",
+      "coordinates": [
+        3.1535677,
+        42.2782858
+      ]
+    },
+    {
+      "type": "way",
+      "id": 848846943,
+      "name": "Río Bravo",
+      "coordinates": [
+        3.1536083,
+        42.2783319
+      ]
+    },
+    {
+      "type": "way",
+      "id": 948405187,
+      "name": "Sierra House at La Sala de Camós",
+      "coordinates": [
+        2.761840748,
+        42.0870744
       ]
     }
   ]
