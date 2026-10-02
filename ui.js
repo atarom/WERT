@@ -48,8 +48,9 @@ function makeIssueCard(item){
   appendMeta(main,item,action||'issue');
   const note=document.createElement('div');
   note.className='issue-note';
-  const variants=item.candidates.map(candidate=>candidate.name).join(' · ');
-  note.textContent=`${item.message} ${item.duplicateCount} entrades${variants?` · ${variants}`:''}`;
+  const variants=(item.candidates||[]).map(candidate=>candidate.name).join(' · ');
+  const count=(item.sourceCount||item.duplicateCount||1)>1?`${item.sourceCount||item.duplicateCount} entrades`:'';
+  note.textContent=[item.message,count,variants].filter(Boolean).join(' · ');
   const select=document.createElement('select');
   select.className='issue-resolution';
   select.setAttribute('aria-label',`Resolució per a ${item.type} ${item.id}`);

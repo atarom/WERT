@@ -9,13 +9,14 @@ export function rebuildCollections(){
     return current?.coordinates?{...item,coordinates:current.coordinates}:item;
   });
   state.inconsistencies=state.inconsistencies.map(issue=>{
-    const current=rawByObject.get(issue.objectKey)||null;
-    const matching=current?issue.candidates.find(candidate=>keyFor(candidate)===keyFor(current)):null;
-    const coordinates=current?.coordinates||matching?.coordinates||issue.coordinates||issue.candidates.find(candidate=>candidate.coordinates)?.coordinates||null;
-    return{...issue,current,name:current?.name||issue.candidates[0]?.name||issue.name,coordinates};
+    const lookupKey=issue.lookupObjectKey||(!String(issue.objectKey).startsWith('invalid:')?issue.objectKey:null);
+    const current=lookupKey?rawByObject.get(lookupKey)||null:null;
+    const matching=current?(issue.candidates||[]).find(candidate=>keyFor(candidate)===keyFor(current)):null;
+    const coordinates=current?.coordinates||matching?.coordinates||issue.coordinates||(issue.candidates||[]).find(candidate=>candidate.coordinates)?.coordinates||null;
+    return{...issue,current,name:current?.name||(issue.candidates||[])[0]?.name||issue.name,coordinates};
   });
   const acceptedKeys=new Set(state.accepted.map(keyFor));
-  const inconsistentObjects=new Set(state.inconsistencies.map(issue=>issue.objectKey));
+  const inconsistentObjects=new Set(state.inconsistencies.map(issue=>issue.lookupObjectKey).filter(Boolean));
   state.pending=state.rawFeatures.filter(item=>!acceptedKeys.has(keyFor(item))&&!inconsistentObjects.has(objectKeyFor(item)));
   const pendingKeys=new Set(state.pending.map(keyFor));
   for(const key of[...state.addKeys])if(!pendingKeys.has(key))state.addKeys.delete(key);
@@ -46,14 +47,14 @@ export function getFilteredItems(){
   return getCurrentItems().filter(item=>{
     if(state.type!=='all'&&item.type!==state.type)return false;
     if(!q)return true;
-    const extra=item.issueId?`${item.message} ${item.candidates.map(candidate=>candidate.name).join(' ')} ${item.current?.name||''}`:'';
+    const extra=item.issueId?`${item.message} ${(item.candidates||[]).map(candidate=>candidate.name).join(' ')} ${item.current?.name||''}`:'';
     return`${item.name} ${item.type} ${item.id} ${extra}`.toLocaleLowerCase('ca').includes(q);
   }).sort(compareItemsByName);
 }
 export function getInconsistencyChoices(issue){
   const choices=[];
   const seen=new Set();
-  for(const item of issue.candidates){
+  for(const item of issue.candidates||[]){
     const value=`item:${keyFor(item)}`;
     if(seen.has(value))continue;
     seen.add(value);
@@ -74,7 +75,7 @@ export function setInconsistencyResolution(issue,value){
   if(value==='remove'){state.inconsistencyResolutions.set(issue.objectKey,{desired:null});return;}
   if(value.startsWith('item:')){
     const wanted=value.slice(5);
-    const item=[...issue.candidates,issue.current].filter(Boolean).find(candidate=>keyFor(candidate)===wanted);
+    const item=[...(issue.candidates||[]),issue.current].filter(Boolean).find(candidate=>keyFor(candidate)===wanted);
     if(item)state.inconsistencyResolutions.set(issue.objectKey,{desired:item});
   }
 }
@@ -105,7 +106,7 @@ export function buildResultPayload(){
   if(unresolved.length)throw new Error(`Cal resoldre ${unresolved.length} inconsistència${unresolved.length===1?'':'es'} abans de generar elementsOK.json.`);
   const byObject=new Map(state.accepted.map(item=>[objectKeyFor(item),item]));
   for(const{issue,resolution}of getResolvedInconsistencies()){
-    if(resolution.desired)byObject.set(issue.objectKey,resolution.desired);
+    if(resolution.desired)byObject.set(objectKeyFor(resolution.desired),resolution.desired);
     else byObject.delete(issue.objectKey);
   }
   for(const key of state.removeKeys){

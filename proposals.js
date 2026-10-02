@@ -1,9 +1,9 @@
 import {activity} from './activity.js';
 import {state} from './state.js';
-import {acceptedToItem,isValidItem,keyFor,objectKeyFor,normalizeType,elementForFile,payloadFromItems,sameState,issueSignature} from './elements.js';
+import {acceptedToItem,isValidItem,isCompleteItem,keyFor,objectKeyFor,normalizeType,elementForFile,payloadFromItems,sameState,issueSignature} from './elements.js';
 import {getAddedItems,getRemovedItems,getResolvedInconsistencies} from './changes.js';
 function baseRepresentation(){
-  return JSON.stringify({taskId:state.taskId,accepted:payloadFromItems(state.accepted).elements,inconsistencies:state.inconsistencies.map(issue=>({objectKey:issue.objectKey,duplicateCount:issue.duplicateCount,candidates:issue.candidates.map(elementForFile)})).sort((a,b)=>a.objectKey.localeCompare(b.objectKey))});
+  return JSON.stringify({taskId:state.taskId,accepted:payloadFromItems(state.accepted).elements,inconsistencies:state.inconsistencies.map(issue=>({objectKey:issue.objectKey,signature:issueSignature(issue)})).sort((a,b)=>a.objectKey.localeCompare(b.objectKey))});
 }
 export async function sha256Text(text){
   const data=new TextEncoder().encode(text);
@@ -35,27 +35,37 @@ export function buildProposalPayload(){
     const current=currentByObject.get(objectKey)||null;
     touched.set(objectKey,{type:item.type,id:typeof item.id==='number'?item.id:Number.isSafeInteger(Number(item.id))?Number(item.id):String(item.id),accepted:current?elementForFile(current):null});
   }
-  return{format:'WERT-proposal',version:2,id:randomProposalId(),createdAt:new Date().toISOString(),taskId:state.taskId,taskName:state.config.name,base:{sha256:state.baseHash,elementsCount:state.accepted.length+state.inconsistencies.reduce((sum,issue)=>sum+issue.duplicateCount,0),elementsFile:state.config.elementsFile},baseState:[...touched.values()],source:{postpassTimestamp:state.postpassTimestamp},changes:{add:added.map(elementForFile),remove:removed.map(elementForFile),resolve:resolved.map(({issue,resolution})=>({type:issue.type,id:issue.id,duplicateCount:issue.duplicateCount,baseline:issue.candidates.map(elementForFile),desired:resolution.desired?elementForFile(resolution.desired):null}))}};
+  return{format:'WERT-proposal',version:3,id:randomProposalId(),createdAt:new Date().toISOString(),taskId:state.taskId,taskName:state.config.name,base:{sha256:state.baseHash,elementsCount:state.accepted.length+state.inconsistencies.reduce((sum,issue)=>sum+(issue.sourceCount||issue.duplicateCount||1),0),elementsFile:state.config.elementsFile},baseState:[...touched.values()],source:{postpassTimestamp:state.postpassTimestamp},changes:{add:added.map(elementForFile),remove:removed.map(elementForFile),resolve:resolved.map(({issue,resolution})=>({issueKey:issue.objectKey,issueSignature:issueSignature(issue),desired:resolution.desired?elementForFile(resolution.desired):null}))}};
 }
-export function normalizeProposalItem(value){
+export function normalizeProposalItem(value,strict=true){
   const item=acceptedToItem(value);
-  if(!isValidItem(item))throw new Error('La proposta conté un element no vàlid.');
+  if(!(strict?isCompleteItem(item):isValidItem(item)))throw new Error(strict?'La proposta conté un element no vàlid o sense coordenades.':'La proposta conté un element no vàlid.');
   return item;
 }
-function normalizeResolution(value){
+function normalizeResolution(value,version){
+  if(version>=3){
+    const objectKey=String(value?.issueKey||'').trim();
+    const signature=String(value?.issueSignature||'').trim();
+    if(!objectKey||!signature)throw new Error('La proposta conté una resolució d’inconsistència no vàlida.');
+    const desired=value.desired===null?null:normalizeProposalItem(value.desired,true);
+    if(desired&&!objectKey.startsWith('invalid:')&&objectKeyFor(desired)!==objectKey)throw new Error('L’estat final de la resolució no correspon al mateix objecte.');
+    if(desired&&objectKey.startsWith('invalid:'))throw new Error('Una entrada sense identitat OSM vàlida només es pot eliminar.');
+    return{objectKey,issueSignature:signature,desired};
+  }
   const type=normalizeType(value?.type);
   const id=value?.id;
   if(!['node','way','relation'].includes(type)||id===undefined||id===null)throw new Error('La proposta conté una resolució d’inconsistència no vàlida.');
   if(!Array.isArray(value?.baseline)||!Number.isFinite(Number(value?.duplicateCount)))throw new Error('La resolució no conté un estat base vàlid.');
-  const baseline=value.baseline.map(normalizeProposalItem);
+  const baseline=value.baseline.map(item=>normalizeProposalItem(item,false));
   const objectKey=`${type}:${String(id)}`;
   if(baseline.some(item=>objectKeyFor(item)!==objectKey))throw new Error('L’estat base de la resolució no correspon al mateix objecte.');
-  const desired=value.desired===null?null:normalizeProposalItem(value.desired);
+  const desired=value.desired===null?null:normalizeProposalItem(value.desired,false);
   if(desired&&objectKeyFor(desired)!==objectKey)throw new Error('L’estat final de la resolució no correspon al mateix objecte.');
   return{objectKey,type,id,duplicateCount:Number(value.duplicateCount),baseline,desired};
 }
 export function normalizeProposal(payload,filename){
-  if(payload?.format!=='WERT-proposal'||Number(payload?.version)!==2)throw new Error('No és una proposta WERT versió 2.');
+  const version=Number(payload?.version);
+  if(payload?.format!=='WERT-proposal'||![2,3].includes(version))throw new Error('No és una proposta WERT compatible.');
   if(String(payload?.taskId||'')!==state.taskId)throw new Error(`La proposta pertany a la tasca "${payload?.taskId||'desconeguda'}", no a "${state.taskId}".`);
   const add=payload?.changes?.add;
   const remove=payload?.changes?.remove;
@@ -64,9 +74,9 @@ export function normalizeProposal(payload,filename){
   if(!Array.isArray(add)||!Array.isArray(remove)||!Array.isArray(resolve)||!Array.isArray(baseState))throw new Error('La proposta no conté canvis o estat base vàlids.');
   const id=String(payload.id||'').trim();
   if(!id)throw new Error('La proposta no té identificador.');
-  const normalizedAdd=add.map(normalizeProposalItem);
-  const normalizedRemove=remove.map(normalizeProposalItem);
-  const normalizedResolve=resolve.map(normalizeResolution);
+  const normalizedAdd=add.map(item=>normalizeProposalItem(item,version>=3));
+  const normalizedRemove=remove.map(item=>normalizeProposalItem(item,version>=3));
+  const normalizedResolve=resolve.map(value=>normalizeResolution(value,version));
   const addByObject=new Map();
   for(const item of normalizedAdd){
     const objectKey=objectKeyFor(item);
@@ -86,13 +96,13 @@ export function normalizeProposal(payload,filename){
     const idValue=entry?.id;
     if(!['node','way','relation'].includes(type)||idValue===undefined||idValue===null)throw new Error('La proposta conté un estat base no vàlid.');
     const objectKey=`${type}:${String(idValue)}`;
-    const accepted=entry.accepted===null?null:normalizeProposalItem(entry.accepted);
+    const accepted=entry.accepted===null?null:normalizeProposalItem(entry.accepted,version>=3);
     if(accepted&&objectKeyFor(accepted)!==objectKey)throw new Error('L’estat base no coincideix amb l’objecte indicat.');
     normalizedBase.set(objectKey,accepted);
   }
   const touched=new Set([...normalizedAdd,...normalizedRemove].map(objectKeyFor));
   for(const objectKey of touched)if(!normalizedBase.has(objectKey))throw new Error(`Falta l’estat base de ${objectKey}.`);
-  return{id,filename,createdAt:payload.createdAt||null,baseHash:String(payload?.base?.sha256||''),baseCount:Number(payload?.base?.elementsCount),baseState:normalizedBase,add:normalizedAdd,remove:normalizedRemove,resolve:normalizedResolve};
+  return{version,id,filename,createdAt:payload.createdAt||null,baseHash:String(payload?.base?.sha256||''),baseCount:Number(payload?.base?.elementsCount),baseState:normalizedBase,add:normalizedAdd,remove:normalizedRemove,resolve:normalizedResolve};
 }
 export async function importProposalFiles(files){
   const messages=[];
@@ -115,9 +125,11 @@ export async function importProposalFiles(files){
   return messages;
 }
 function baselineIssueMatches(issue,resolution){
-  if(!issue||issue.duplicateCount!==resolution.duplicateCount)return false;
-  const current=issue.candidates.map(keyFor).sort();
-  const baseline=resolution.baseline.map(keyFor).sort();
+  if(!issue)return false;
+  if(resolution.issueSignature)return issueSignature(issue)===resolution.issueSignature;
+  if(issue.duplicateCount!==resolution.duplicateCount)return false;
+  const current=(issue.candidates||[]).map(keyFor).sort();
+  const baseline=(resolution.baseline||[]).map(keyFor).sort();
   return current.length===baseline.length&&current.every((value,index)=>value===baseline[index]);
 }
 function candidateKey(item){
@@ -137,7 +149,7 @@ export function mergePlan(){
   }
   for(const[objectKey,resolution]of state.inconsistencyResolutions){
     const issue=currentIssues.get(objectKey);
-    if(issue)push(objectKey,{source:'Sessió actual',kind:'issue-local',baseline:{duplicateCount:issue.duplicateCount,baseline:issue.candidates},desired:resolution.desired});
+    if(issue)push(objectKey,{source:'Sessió actual',kind:'issue-local',baseline:{issueSignature:issueSignature(issue)},desired:resolution.desired});
   }
   const changes=new Map();
   const conflicts=[];
