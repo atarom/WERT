@@ -1,6 +1,6 @@
 import {activity} from './activity.js';
 import {state} from './state.js';
-import {acceptedToItem,isValidItem,isCompleteItem,keyFor,objectKeyFor,normalizeType,elementForFile,payloadFromItems,sameState,issueSignature} from './elements.js';
+import {acceptedToItem,isCompleteItem,keyFor,objectKeyFor,normalizeType,elementForFile,payloadFromItems,sameState,issueSignature} from './elements.js';
 import {getAddedItems,getRemovedItems,getResolvedInconsistencies} from './changes.js';
 function baseRepresentation(){
   return JSON.stringify({taskId:state.taskId,accepted:payloadFromItems(state.accepted).elements,inconsistencies:state.inconsistencies.map(issue=>({objectKey:issue.objectKey,signature:issueSignature(issue)})).sort((a,b)=>a.objectKey.localeCompare(b.objectKey))});
@@ -35,37 +35,25 @@ export function buildProposalPayload(){
     const current=currentByObject.get(objectKey)||null;
     touched.set(objectKey,{type:item.type,id:typeof item.id==='number'?item.id:Number.isSafeInteger(Number(item.id))?Number(item.id):String(item.id),accepted:current?elementForFile(current):null});
   }
-  return{format:'WERT-proposal',version:3,id:randomProposalId(),createdAt:new Date().toISOString(),taskId:state.taskId,taskName:state.config.name,base:{sha256:state.baseHash,elementsCount:state.accepted.length+state.inconsistencies.reduce((sum,issue)=>sum+(issue.sourceCount||issue.duplicateCount||1),0),elementsFile:state.config.elementsFile},baseState:[...touched.values()],source:{postpassTimestamp:state.postpassTimestamp},changes:{add:added.map(elementForFile),remove:removed.map(elementForFile),resolve:resolved.map(({issue,resolution})=>({issueKey:issue.objectKey,issueSignature:issueSignature(issue),desired:resolution.desired?elementForFile(resolution.desired):null}))}};
+  return{format:'WERT-proposal',version:1,id:randomProposalId(),createdAt:new Date().toISOString(),taskId:state.taskId,taskName:state.config.name,base:{sha256:state.baseHash,elementsCount:state.accepted.length+state.inconsistencies.reduce((sum,issue)=>sum+(issue.sourceCount||issue.duplicateCount||1),0),elementsFile:state.config.elementsFile},baseState:[...touched.values()],source:{postpassTimestamp:state.postpassTimestamp},changes:{add:added.map(elementForFile),remove:removed.map(elementForFile),resolve:resolved.map(({issue,resolution})=>({issueKey:issue.objectKey,issueSignature:issueSignature(issue),desired:resolution.desired?elementForFile(resolution.desired):null}))}};
 }
-export function normalizeProposalItem(value,strict=true){
+export function normalizeProposalItem(value){
   const item=acceptedToItem(value);
-  if(!(strict?isCompleteItem(item):isValidItem(item)))throw new Error(strict?'La proposta conté un element no vàlid o sense coordenades.':'La proposta conté un element no vàlid.');
+  if(!isCompleteItem(item))throw new Error('La proposta conté un element no vàlid o sense coordenades.');
   return item;
 }
-function normalizeResolution(value,version){
-  if(version>=3){
-    const objectKey=String(value?.issueKey||'').trim();
-    const signature=String(value?.issueSignature||'').trim();
-    if(!objectKey||!signature)throw new Error('La proposta conté una resolució d’inconsistència no vàlida.');
-    const desired=value.desired===null?null:normalizeProposalItem(value.desired,true);
-    if(desired&&!objectKey.startsWith('invalid:')&&objectKeyFor(desired)!==objectKey)throw new Error('L’estat final de la resolució no correspon al mateix objecte.');
-    if(desired&&objectKey.startsWith('invalid:'))throw new Error('Una entrada sense identitat OSM vàlida només es pot eliminar.');
-    return{objectKey,issueSignature:signature,desired};
-  }
-  const type=normalizeType(value?.type);
-  const id=value?.id;
-  if(!['node','way','relation'].includes(type)||id===undefined||id===null)throw new Error('La proposta conté una resolució d’inconsistència no vàlida.');
-  if(!Array.isArray(value?.baseline)||!Number.isFinite(Number(value?.duplicateCount)))throw new Error('La resolució no conté un estat base vàlid.');
-  const baseline=value.baseline.map(item=>normalizeProposalItem(item,false));
-  const objectKey=`${type}:${String(id)}`;
-  if(baseline.some(item=>objectKeyFor(item)!==objectKey))throw new Error('L’estat base de la resolució no correspon al mateix objecte.');
-  const desired=value.desired===null?null:normalizeProposalItem(value.desired,false);
-  if(desired&&objectKeyFor(desired)!==objectKey)throw new Error('L’estat final de la resolució no correspon al mateix objecte.');
-  return{objectKey,type,id,duplicateCount:Number(value.duplicateCount),baseline,desired};
+function normalizeResolution(value){
+  const objectKey=String(value?.issueKey||'').trim();
+  const signature=String(value?.issueSignature||'').trim();
+  if(!objectKey||!signature)throw new Error('La proposta conté una resolució d’inconsistència no vàlida.');
+  const desired=value.desired===null?null:normalizeProposalItem(value.desired);
+  if(desired&&!objectKey.startsWith('invalid:')&&objectKeyFor(desired)!==objectKey)throw new Error('L’estat final de la resolució no correspon al mateix objecte.');
+  if(desired&&objectKey.startsWith('invalid:'))throw new Error('Una entrada sense identitat OSM vàlida només es pot eliminar.');
+  return{objectKey,issueSignature:signature,desired};
 }
 export function normalizeProposal(payload,filename){
   const version=Number(payload?.version);
-  if(payload?.format!=='WERT-proposal'||![2,3].includes(version))throw new Error('No és una proposta WERT compatible.');
+  if(payload?.format!=='WERT-proposal'||version!==1)throw new Error('No és una proposta WERT compatible.');
   if(String(payload?.taskId||'')!==state.taskId)throw new Error(`La proposta pertany a la tasca "${payload?.taskId||'desconeguda'}", no a "${state.taskId}".`);
   const add=payload?.changes?.add;
   const remove=payload?.changes?.remove;
@@ -74,9 +62,9 @@ export function normalizeProposal(payload,filename){
   if(!Array.isArray(add)||!Array.isArray(remove)||!Array.isArray(resolve)||!Array.isArray(baseState))throw new Error('La proposta no conté canvis o estat base vàlids.');
   const id=String(payload.id||'').trim();
   if(!id)throw new Error('La proposta no té identificador.');
-  const normalizedAdd=add.map(item=>normalizeProposalItem(item,version>=3));
-  const normalizedRemove=remove.map(item=>normalizeProposalItem(item,version>=3));
-  const normalizedResolve=resolve.map(value=>normalizeResolution(value,version));
+  const normalizedAdd=add.map(normalizeProposalItem);
+  const normalizedRemove=remove.map(normalizeProposalItem);
+  const normalizedResolve=resolve.map(normalizeResolution);
   const addByObject=new Map();
   for(const item of normalizedAdd){
     const objectKey=objectKeyFor(item);
@@ -96,7 +84,7 @@ export function normalizeProposal(payload,filename){
     const idValue=entry?.id;
     if(!['node','way','relation'].includes(type)||idValue===undefined||idValue===null)throw new Error('La proposta conté un estat base no vàlid.');
     const objectKey=`${type}:${String(idValue)}`;
-    const accepted=entry.accepted===null?null:normalizeProposalItem(entry.accepted,version>=3);
+    const accepted=entry.accepted===null?null:normalizeProposalItem(entry.accepted);
     if(accepted&&objectKeyFor(accepted)!==objectKey)throw new Error('L’estat base no coincideix amb l’objecte indicat.');
     normalizedBase.set(objectKey,accepted);
   }
@@ -125,12 +113,7 @@ export async function importProposalFiles(files){
   return messages;
 }
 function baselineIssueMatches(issue,resolution){
-  if(!issue)return false;
-  if(resolution.issueSignature)return issueSignature(issue)===resolution.issueSignature;
-  if(issue.duplicateCount!==resolution.duplicateCount)return false;
-  const current=(issue.candidates||[]).map(keyFor).sort();
-  const baseline=(resolution.baseline||[]).map(keyFor).sort();
-  return current.length===baseline.length&&current.every((value,index)=>value===baseline[index]);
+  return!!issue&&issueSignature(issue)===resolution.issueSignature;
 }
 function candidateKey(item){
   return item?`item:${keyFor(item)}`:'remove';

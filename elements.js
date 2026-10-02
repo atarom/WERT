@@ -113,7 +113,7 @@ export function sortElements(items){
 export function payloadFromItems(items){
   const byObject=new Map();
   for(const item of items)byObject.set(objectKeyFor(item),elementForFile(item));
-  return{version:1,elements:sortElements([...byObject.values()])};
+  return{elements:sortElements([...byObject.values()])};
 }
 export function sameState(a,b){
   if(a===null&&b===null)return true;
