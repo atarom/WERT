@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "elements": [
+    {
+      "type": "node",
+      "id": 2406382156,
+      "name": "Iglesia Nueva Apostólica",
+      "coordinates": [
+        2.1667984,
+        41.4268087
+      ]
+    },
+    {
+      "type": "node",
+      "id": 7058306887,
+      "name": "Iglesia de Jesucristo de los últimos días",
+      "coordinates": [
+        2.1354486,
+        41.3853978
+      ]
+    },
+    {
+      "type": "node",
+      "id": 8356890099,
+      "name": "Iglesia Bíblica Valle Hebrón",
+      "coordinates": [
+        2.1431038,
+        41.4213036
+      ]
+    },
+    {
+      "type": "node",
+      "id": 8544879041,
+      "name": "Camino al Bienestar",
+      "coordinates": [
+        2.1671289,
+        41.4380588
+      ]
+    },
+    {
+      "type": "node",
+      "id": 14234884468,
+      "name": "Centro Médico Lisboa S.L.",
+      "coordinates": [
+        2.1598038,
+        41.4284891
+      ]
+    },
+    {
+      "type": "way",
+      "id": 361230338,
+      "name": "Río Grande",
+      "coordinates": [
+        2.1194905,
+        41.423591
+      ]
+    }
+  ]
+}

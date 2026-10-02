@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="ca">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>WERT</title>
+  <link rel="preconnect" href="https://unpkg.com">
+  <link rel="preconnect" href="https://tiles.openfreemap.org">
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">W</div>
+        <div>
+          <div class="brand-name">WERT</div>
+          <label class="task-picker">
+            <span class="sr-only">Tasca activa</span>
+            <select id="task-select" class="task-select" aria-label="Tasca activa"></select>
+          </label>
+        </div>
+      </div>
+      <nav class="top-actions" aria-label="Accions principals">
+        <button id="reload-btn" class="button button-ghost" type="button">Actualitza</button>
+        <button id="info-btn" class="button button-ghost" type="button">Informació</button>
+        <button id="proposals-btn" class="button button-ghost" type="button">Propostes <span id="proposals-count" class="button-count">0</span></button>
+        <button id="changes-btn" class="button button-accent" type="button">Canvis <span id="changes-count" class="button-count">0</span></button>
+      </nav>
+    </header>
+    <main class="workspace">
+      <aside class="sidebar">
+        <div class="mode-switch" role="tablist" aria-label="Mode de revisió">
+          <button id="pending-tab" class="mode-button active" type="button" role="tab" aria-selected="true">Pendents <span id="pending-count" class="mode-count">0</span></button>
+          <button id="accepted-tab" class="mode-button" type="button" role="tab" aria-selected="false">Acceptats <span id="accepted-count" class="mode-count">0</span></button>
+          <button id="inconsistencies-tab" class="mode-button mode-button-warning" type="button" role="tab" aria-selected="false">Inconsistències <span id="inconsistencies-count" class="mode-count">0</span></button>
+        </div>
+        <div class="filters">
+          <label class="search-box">
+            <span class="sr-only">Cerca per nom o ID</span>
+            <input id="search-input" type="search" autocomplete="off" placeholder="Cerca nom o ID">
+          </label>
+          <select id="type-filter" class="select" aria-label="Filtra per tipus">
+            <option value="all">Tots</option>
+            <option value="node">Nodes</option>
+            <option value="way">Vies</option>
+            <option value="relation">Relacions</option>
+          </select>
+        </div>
+        <div id="status-line" class="status-line" aria-live="polite"></div>
+        <div id="item-list" class="item-list" aria-label="Elements"></div>
+      </aside>
+      <section class="map-panel">
+        <div id="map" class="map" aria-label="Mapa"></div>
+        <div id="loading-overlay" class="loading-overlay">
+          <div class="loading-card">
+            <div class="loading-head">
+              <div id="loading-spinner" class="loader"></div>
+              <div class="loading-heading">
+                <strong id="loading-title">Iniciant WERT</strong>
+                <span id="loading-elapsed">00:00</span>
+              </div>
+            </div>
+            <div id="loading-text" class="loading-text">Preparant carregador…</div>
+            <div id="loading-log" class="loading-log" aria-live="polite"></div>
+            <pre id="loading-error" class="loading-error hidden"></pre>
+            <div id="loading-actions" class="loading-actions hidden">
+              <button id="loading-close" class="button button-ghost" type="button">Tanca</button>
+              <button id="loading-reload" class="button button-primary" type="button">Recarrega</button>
+            </div>
+          </div>
+        </div>
+        <div id="error-banner" class="error-banner hidden"></div>
+      </section>
+    </main>
+  </div>
+  <dialog id="info-dialog" class="dialog">
+    <div class="dialog-card">
+      <div class="dialog-header">
+        <div>
+          <h2>Informació</h2>
+          <p>Consulta i criteris de la tasca actual.</p>
+        </div>
+        <button class="icon-button" data-close-dialog="info-dialog" type="button" aria-label="Tanca">×</button>
+      </div>
+      <div class="dialog-body">
+        <section id="regex-tester-box" class="regex-tester" data-state="neutral">
+          <div class="regex-tester-head">
+            <div>
+              <h3>Prova un nom</h3>
+              <p class="section-note">Comprova localment si un text coincideix amb la regex actual, sense consultar Postpass.</p>
+            </div>
+          </div>
+          <input id="regex-tester-input" class="regex-tester-input" type="text" autocomplete="off" spellcheck="false" placeholder="Escriu un nom, per exemple: Iglesia de Sant Pere">
+          <div id="regex-tester-status" class="regex-tester-status" aria-live="polite">Escriu un text per provar-lo.</div>
+        </section>
+        <details class="info-details">
+          <summary><strong>Expressió regular</strong><span>Mostra el patró tècnic</span></summary>
+          <div class="info-details-body"><pre id="regex-text" class="code-block"></pre></div>
+        </details>
+        <details class="info-details">
+          <summary><strong>Consulta Postpass</strong><span>Mostra l’SQL complet</span></summary>
+          <div class="info-details-body">
+            <div class="details-actions"><button id="copy-query-btn" class="button button-ghost button-small" type="button">Copia la consulta</button></div>
+            <pre id="query-text" class="code-block code-block-large"></pre>
+          </div>
+        </details>
+        <section class="info-meta">
+          <div><span>Endpoint</span><strong id="endpoint-text"></strong></div>
+          <div><span>Dades Postpass</span><strong id="timestamp-text">Sense carregar</strong></div>
+        </section>
+      </div>
+    </div>
+  </dialog>
+  <dialog id="changes-dialog" class="dialog">
+    <div class="dialog-card dialog-card-wide">
+      <div class="dialog-header">
+        <div>
+          <h2>Prepara canvis</h2>
+          <p>La proposta WERT és el format recomanat per treballar simultàniament.</p>
+        </div>
+        <button class="icon-button" data-close-dialog="changes-dialog" type="button" aria-label="Tanca">×</button>
+      </div>
+      <div class="dialog-body">
+        <div class="change-summary change-summary-four">
+          <div class="summary-card"><span>Afegir a OK</span><strong id="add-count">0</strong></div>
+          <div class="summary-card"><span>Retirar d’OK</span><strong id="remove-count">0</strong></div>
+          <div class="summary-card"><span>Inconsistències resoltes</span><strong id="resolved-issues-count">0</strong></div>
+          <div class="summary-card"><span>Total resultant</span><strong id="result-count">0</strong></div>
+        </div>
+        <div class="change-columns change-columns-three">
+          <section><h3>Altes</h3><div id="add-list" class="change-list"></div></section>
+          <section><h3>Baixes</h3><div id="remove-list" class="change-list"></div></section>
+          <section><h3>Resolucions</h3><div id="issue-change-list" class="change-list"></div></section>
+        </div>
+        <section class="export-section">
+          <h3>Per a col·laboradors</h3>
+          <p class="hint">Cada proposta té un nom únic i només conté els canvis seleccionats, de manera que diversos usuaris poden treballar alhora sense sobreescriure’s.</p>
+          <div class="export-actions">
+            <button id="download-proposal-btn" class="button button-primary" type="button">Descarrega proposta WERT</button>
+            <button id="copy-proposal-btn" class="button button-ghost" type="button">Copia proposta</button>
+          </div>
+        </section>
+        <section class="export-section">
+          <h3>Per al mantenidor</h3>
+          <p id="changes-hint" class="hint"></p>
+          <div class="export-actions">
+            <button id="download-ok-btn" class="button button-ghost" type="button">Descarrega elementsOK.json</button>
+            <button id="copy-ok-btn" class="button button-ghost" type="button">Copia elementsOK.json</button>
+            <button id="discard-btn" class="button button-danger" type="button">Descarta canvis</button>
+          </div>
+        </section>
+      </div>
+    </div>
+  </dialog>
+  <dialog id="proposals-dialog" class="dialog">
+    <div class="dialog-card dialog-card-wide">
+      <div class="dialog-header">
+        <div>
+          <h2>Gestiona propostes</h2>
+          <p>Importa un o diversos fitxers WERT i consolida’ls sobre l’elementsOK.json actual.</p>
+        </div>
+        <button class="icon-button" data-close-dialog="proposals-dialog" type="button" aria-label="Tanca">×</button>
+      </div>
+      <div class="dialog-body">
+        <input id="proposal-file-input" class="sr-only" type="file" accept=".json,application/json" multiple>
+        <button id="proposal-dropzone" class="proposal-dropzone" type="button"><strong>Importa propostes WERT</strong><span>Selecciona o arrossega un o diversos .json</span></button>
+        <div class="proposal-toolbar">
+          <span id="proposal-status" class="hint">Sense propostes importades.</span>
+          <button id="clear-proposals-btn" class="button button-danger button-small" type="button">Treu-les totes</button>
+        </div>
+        <div id="proposal-list" class="proposal-list"></div>
+        <div class="change-summary proposal-summary">
+          <div class="summary-card"><span>Propostes</span><strong id="proposal-summary-count">0</strong></div>
+          <div class="summary-card"><span>Desactualitzades</span><strong id="proposal-stale-count">0</strong></div>
+          <div class="summary-card"><span>Conflictes</span><strong id="proposal-conflict-count">0</strong></div>
+          <div class="summary-card"><span>Total consolidat</span><strong id="proposal-result-count">0</strong></div>
+        </div>
+        <section id="conflicts-section" class="export-section hidden">
+          <h3>Conflictes que requereixen una decisió</h3>
+          <p class="hint">Un conflicte apareix quan diferents propostes demanen estats incompatibles per al mateix objecte OSM o parteixen d’un estat que ha canviat.</p>
+          <div id="conflict-list" class="conflict-list"></div>
+        </section>
+        <section class="export-section">
+          <h3>Resultat consolidat</h3>
+          <div class="export-actions">
+            <button id="download-merged-btn" class="button button-primary" type="button">Descarrega elementsOK.json consolidat</button>
+            <button id="copy-merged-btn" class="button button-ghost" type="button">Copia consolidat</button>
+          </div>
+          <div id="merge-hint" class="hint"></div>
+        </section>
+      </div>
+    </div>
+  </dialog>
+  <script src="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.js"></script>
+  <script>(()=>{const q=id=>document.getElementById(id),o=q('loading-overlay'),t=q('loading-title'),x=q('loading-text'),l=q('loading-log'),e=q('loading-error'),s=q('loading-spinner'),a=q('loading-actions'),c=q('loading-close'),r=q('loading-reload'),z=q('loading-elapsed');let start=Date.now(),timer=null,hideTimer=null;const elapsed=()=>{const n=Math.max(0,Math.floor((Date.now()-start)/1000));return`${String(Math.floor(n/60)).padStart(2,'0')}:${String(n%60).padStart(2,'0')}`},tick=()=>{z.textContent=elapsed()},line=(m,k='')=>{const d=document.createElement('div');d.className=`loading-log-row${k?` ${k}`:''}`;const tm=document.createElement('span');tm.textContent=elapsed();const tx=document.createElement('strong');tx.textContent=String(m);d.append(tm,tx);l.append(d);l.scrollTop=l.scrollHeight},detail=v=>{x.textContent=String(v||'')},begin=(title,message)=>{clearInterval(timer);clearTimeout(hideTimer);hideTimer=null;start=Date.now();tick();timer=setInterval(tick,1000);o.classList.remove('hidden');s.classList.remove('hidden');a.classList.add('hidden');e.classList.add('hidden');e.textContent='';l.replaceChildren();t.textContent=title||'Processant';detail(message||'');line(message||title||'Processant')},step=(message,extra)=>{detail(extra||message);line(message)},done=(message='Fet')=>{detail(message);line(message,'ok');clearInterval(timer);timer=null;clearTimeout(hideTimer);hideTimer=setTimeout(()=>o.classList.add('hidden'),700)},fail=(title,error)=>{clearInterval(timer);clearTimeout(hideTimer);hideTimer=null;timer=null;o.classList.remove('hidden');s.classList.add('hidden');a.classList.remove('hidden');t.textContent=title||'Error';detail('La tasca no s’ha pogut completar.');const msg=error instanceof Error?`${error.name}: ${error.message}${error.stack?`\n${error.stack}`:''}`:String(error||'Error desconegut');e.textContent=msg;e.classList.remove('hidden');line(error&&error.message?error.message:String(error||'Error'),'error')},hide=()=>{clearInterval(timer);clearTimeout(hideTimer);hideTimer=null;timer=null;o.classList.add('hidden')};window.WERTActivity={begin,step,done,fail,hide,detail};c.addEventListener('click',hide);r.addEventListener('click',()=>location.reload());window.addEventListener('error',event=>{if(event.error||event.message)fail('Error de JavaScript',event.error||`${event.message}\n${event.filename||''}:${event.lineno||0}:${event.colno||0}`)});window.addEventListener('unhandledrejection',event=>fail('Error no controlat',event.reason));const boot=async()=>{begin('Iniciant WERT','Comprovant MapLibre');if(!window.maplibregl)throw new Error('MapLibre no s’ha pogut carregar des d’UNPKG');step('MapLibre carregat','Comprovant mòduls locals');const modules=['state.js','dom.js','elements.js','osm.js','io.js','activity.js','postpass.js','changes.js','map.js','proposals.js','ui.js'];for(const name of modules){step(`Carregant ${name}`);try{await import(`./${name}`)}catch(error){const detail=error&&error.stack?error.stack:error&&error.message?error.message:String(error);throw new Error(`Error en carregar ${name}: ${detail}`)}}step('Mòduls auxiliars carregats','Iniciant app.js');await import('./app.js')};boot().catch(error=>fail('No s’ha pogut carregar WERT',error));})();</script>
+</body>
+</html>
