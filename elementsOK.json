@@ -1,5 +1,4 @@
 {
-  "version": 1,
   "elements": [
     {
       "type": "node",
@@ -116,6 +115,15 @@
       "coordinates": [
         2.712562754,
         39.7664514
+      ]
+    },
+    {
+      "type": "node",
+      "id": 13109128328,
+      "name": "Barranco",
+      "coordinates": [
+        0.6198051,
+        41.6184446
       ]
     },
     {
