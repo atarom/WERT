@@ -3,11 +3,38 @@
   "elements": [
     {
       "type": "node",
+      "id": 2392501856,
+      "name": "Avenida",
+      "coordinates": [
+        3.021514,
+        41.7927813
+      ]
+    },
+    {
+      "type": "node",
       "id": 2406382156,
       "name": "Iglesia Nueva Apostólica",
       "coordinates": [
         2.1667984,
         41.4268087
+      ]
+    },
+    {
+      "type": "node",
+      "id": 2629194259,
+      "name": "Avenida",
+      "coordinates": [
+        1.8035957,
+        41.7458867
+      ]
+    },
+    {
+      "type": "node",
+      "id": 3100194703,
+      "name": "Avenida",
+      "coordinates": [
+        3.4509379,
+        39.6852079
       ]
     },
     {
@@ -30,11 +57,56 @@
     },
     {
       "type": "node",
+      "id": 4362324696,
+      "name": "Avenida",
+      "coordinates": [
+        2.1169088,
+        41.3771308
+      ]
+    },
+    {
+      "type": "node",
+      "id": 4764979084,
+      "name": "Avenida",
+      "coordinates": [
+        3.019233,
+        39.8769774
+      ]
+    },
+    {
+      "type": "node",
       "id": 4881181797,
       "name": "Sierra Nevada",
       "coordinates": [
         2.1834715,
         41.4420581
+      ]
+    },
+    {
+      "type": "node",
+      "id": 4884880913,
+      "name": "Avenida",
+      "coordinates": [
+        3.0152763,
+        39.4286409
+      ]
+    },
+    {
+      "type": "node",
+      "id": 5537450422,
+      "name": "Rio Azul Restaurant",
+      "coordinates": [
+        2.1600868,
+        41.3914461
+      ]
+    },
+    {
+      "type": "node",
+      "id": 6023597631,
+      "name": "Avenida",
+      "coordinates": [
+        2.4850968,
+        39.5161796
       ]
     },
     {
@@ -57,6 +129,15 @@
     },
     {
       "type": "node",
+      "id": 7247490784,
+      "name": "Avenida",
+      "coordinates": [
+        2.7161898,
+        39.5785131
+      ]
+    },
+    {
+      "type": "node",
       "id": 8356890099,
       "name": "Iglesia Bíblica Valle Hebrón",
       "coordinates": [
@@ -75,11 +156,38 @@
     },
     {
       "type": "node",
+      "id": 9908919203,
+      "name": "Arroyo Cervera",
+      "coordinates": [
+        1.9758768,
+        41.4467161
+      ]
+    },
+    {
+      "type": "node",
       "id": 9916524317,
       "name": "Torrente",
       "coordinates": [
         3.2703098,
         39.4541056
+      ]
+    },
+    {
+      "type": "node",
+      "id": 10304557910,
+      "name": "Puerto Plata Dominican Restaurant",
+      "coordinates": [
+        2.1783604,
+        41.3856059
+      ]
+    },
+    {
+      "type": "node",
+      "id": 11817955336,
+      "name": "Avenida",
+      "coordinates": [
+        1.6000592,
+        41.1942078
       ]
     },
     {
@@ -98,6 +206,24 @@
       "coordinates": [
         1.8456339,
         42.1008128
+      ]
+    },
+    {
+      "type": "node",
+      "id": 13764168041,
+      "name": "Rio Express",
+      "coordinates": [
+        1.1612472,
+        41.376685
+      ]
+    },
+    {
+      "type": "node",
+      "id": 13959296401,
+      "name": "Avenida",
+      "coordinates": [
+        3.1816014,
+        42.260282
       ]
     },
     {
@@ -129,6 +255,24 @@
     },
     {
       "type": "way",
+      "id": 361230339,
+      "name": "Río Grande",
+      "coordinates": [
+        2.1193862,
+        41.4235394
+      ]
+    },
+    {
+      "type": "way",
+      "id": 394292915,
+      "name": "Avenida",
+      "coordinates": [
+        1.459091086,
+        42.35831545
+      ]
+    },
+    {
+      "type": "way",
       "id": 450795768,
       "name": "Río Tranquilo",
       "coordinates": [
@@ -143,6 +287,24 @@
       "coordinates": [
         2.377566949,
         41.5104975
+      ]
+    },
+    {
+      "type": "way",
+      "id": 604329456,
+      "name": "Avenida",
+      "coordinates": [
+        2.712562754,
+        39.7664514
+      ]
+    },
+    {
+      "type": "way",
+      "id": 609017278,
+      "name": "Monte Esmeralda",
+      "coordinates": [
+        2.442872821,
+        39.54363655
       ]
     },
     {
