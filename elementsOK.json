@@ -155,6 +155,150 @@
     },
     {
       "type": "node",
+      "id": 12875223109,
+      "name": "Camino Barcelona",
+      "coordinates": [
+        2.1579755,
+        41.3827989
+      ]
+    },
+    {
+      "type": "node",
+      "id": 12504493501,
+      "name": "CAMPO",
+      "coordinates": [
+        0.5998291,
+        40.7550553
+      ]
+    },
+    {
+      "type": "node",
+      "id": 4422546490,
+      "name": "Centro",
+      "coordinates": [
+        2.5398258,
+        39.5296565
+      ]
+    },
+    {
+      "type": "way",
+      "id": 909619557,
+      "name": "Centro",
+      "coordinates": [
+        2.858803604,
+        39.64245755
+      ]
+    },
+    {
+      "type": "node",
+      "id": 5040584737,
+      "name": "Centro 2000",
+      "coordinates": [
+        2.9082026,
+        41.7121867
+      ]
+    },
+    {
+      "type": "way",
+      "id": 507425103,
+      "name": "Centro Agrícola",
+      "coordinates": [
+        2.6788708,
+        39.5681193
+      ]
+    },
+    {
+      "type": "node",
+      "id": 845731179,
+      "name": "Centro Andaluz",
+      "coordinates": [
+        2.0860527,
+        41.4759041
+      ]
+    },
+    {
+      "type": "node",
+      "id": 5448091278,
+      "name": "Centro Aragonés",
+      "coordinates": [
+        2.211724,
+        41.450251
+      ]
+    },
+    {
+      "type": "node",
+      "id": 5902488085,
+      "name": "Centro Aragonés",
+      "coordinates": [
+        2.1643408,
+        41.3840117
+      ]
+    },
+    {
+      "type": "way",
+      "id": 304188137,
+      "name": "Centro Aragonés",
+      "coordinates": [
+        2.625261094,
+        39.56604815
+      ]
+    },
+    {
+      "type": "way",
+      "id": 249404150,
+      "name": "Centro Aragonés de Barcelona",
+      "coordinates": [
+        2.164586423,
+        41.3841522
+      ]
+    },
+    {
+      "type": "way",
+      "id": 206969338,
+      "name": "centro aragonés de Mollet y comarca",
+      "coordinates": [
+        2.210334961,
+        41.5406878
+      ]
+    },
+    {
+      "type": "node",
+      "id": 7063767207,
+      "name": "Centro Aragonés de Ripollet",
+      "coordinates": [
+        2.1564203,
+        41.4976466
+      ]
+    },
+    {
+      "type": "node",
+      "id": 12441929558,
+      "name": "Centro Aragonés de Valls",
+      "coordinates": [
+        1.2500078,
+        41.2850763
+      ]
+    },
+    {
+      "type": "node",
+      "id": 10994190620,
+      "name": "Centro asistencial Mutua Universal",
+      "coordinates": [
+        1.7200953,
+        41.220244
+      ]
+    },
+    {
+      "type": "node",
+      "id": 5546040621,
+      "name": "Centro Budista Nagarjuna",
+      "coordinates": [
+        2.1993104,
+        41.4049827
+      ]
+    },
+    {
+      "type": "node",
       "id": 8831354116,
       "name": "Centro Budista Tara",
       "coordinates": [
@@ -479,6 +623,33 @@
     },
     {
       "type": "node",
+      "id": 13917355701,
+      "name": "Centro Galego de Barcelona",
+      "coordinates": [
+        2.174715,
+        41.3791043
+      ]
+    },
+    {
+      "type": "node",
+      "id": 13059374902,
+      "name": "Centro Galego Nós",
+      "coordinates": [
+        2.0863554,
+        41.5468035
+      ]
+    },
+    {
+      "type": "node",
+      "id": 11848503250,
+      "name": "Centro Hypatia",
+      "coordinates": [
+        1.2536276,
+        41.1176219
+      ]
+    },
+    {
+      "type": "node",
       "id": 11078343805,
       "name": "Centro médico AXA",
       "coordinates": [
@@ -569,6 +740,60 @@
     },
     {
       "type": "node",
+      "id": 12080697449,
+      "name": "Centro Veterinario Tarragona",
+      "coordinates": [
+        1.2438221,
+        41.1154432
+      ]
+    },
+    {
+      "type": "node",
+      "id": 9913409040,
+      "name": "Centros de Lavado Bravo. Hospitalet",
+      "coordinates": [
+        2.1195969,
+        41.3633124
+      ]
+    },
+    {
+      "type": "node",
+      "id": 6953005899,
+      "name": "Centros H2O",
+      "coordinates": [
+        2.1109701,
+        41.5417794
+      ]
+    },
+    {
+      "type": "node",
+      "id": 10598376473,
+      "name": "Centros Mendir",
+      "coordinates": [
+        1.1094602,
+        41.151869
+      ]
+    },
+    {
+      "type": "node",
+      "id": 9806237217,
+      "name": "Centros SBC",
+      "coordinates": [
+        2.1428603,
+        41.3833315
+      ]
+    },
+    {
+      "type": "node",
+      "id": 9372227210,
+      "name": "Colegio de Geógrafos",
+      "coordinates": [
+        2.1791741,
+        41.3953311
+      ]
+    },
+    {
+      "type": "node",
       "id": 9128938895,
       "name": "Colegio de Ingenieros de Minas del Nordeste",
       "coordinates": [
@@ -649,12 +874,39 @@
       ]
     },
     {
+      "type": "way",
+      "id": 609462548,
+      "name": "Plaza",
+      "coordinates": [
+        3.257825122,
+        39.4088903
+      ]
+    },
+    {
+      "type": "way",
+      "id": 609462551,
+      "name": "Plaza",
+      "coordinates": [
+        3.25802955,
+        39.4088541
+      ]
+    },
+    {
       "type": "node",
       "id": 5167311821,
       "name": "Plaza Café",
       "coordinates": [
         2.154258,
         41.3872522
+      ]
+    },
+    {
+      "type": "node",
+      "id": 6424929699,
+      "name": "Plazas",
+      "coordinates": [
+        2.1322517,
+        41.3666645
       ]
     },
     {
@@ -767,11 +1019,29 @@
     },
     {
       "type": "node",
+      "id": 11895560620,
+      "name": "Rio Ibiza",
+      "coordinates": [
+        1.3014909,
+        38.97887
+      ]
+    },
+    {
+      "type": "node",
       "id": 4520349214,
       "name": "RIO Okonomiyaki",
       "coordinates": [
         2.1564721,
         41.3965073
+      ]
+    },
+    {
+      "type": "node",
+      "id": 12779743825,
+      "name": "Río Park",
+      "coordinates": [
+        2.5685048,
+        41.7746923
       ]
     },
     {
