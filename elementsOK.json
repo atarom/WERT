@@ -2,6 +2,15 @@
   "elements": [
     {
       "type": "node",
+      "id": 9590318241,
+      "name": "Alto Senso",
+      "coordinates": [
+        2.1500527,
+        41.3996458
+      ]
+    },
+    {
+      "type": "node",
       "id": 9908919203,
       "name": "Arroyo Cervera",
       "coordinates": [
@@ -34,6 +43,15 @@
       "coordinates": [
         3.4509379,
         39.6852079
+      ]
+    },
+    {
+      "type": "node",
+      "id": 3807147383,
+      "name": "Avenida",
+      "coordinates": [
+        2.4240843,
+        39.5684349
       ]
     },
     {
@@ -133,6 +151,15 @@
       "coordinates": [
         2.1671289,
         41.4380588
+      ]
+    },
+    {
+      "type": "node",
+      "id": 8831354116,
+      "name": "Centro Budista Tara",
+      "coordinates": [
+        2.1534127,
+        41.3991993
       ]
     },
     {
@@ -443,11 +470,119 @@
     },
     {
       "type": "node",
+      "id": 8452406791,
+      "name": "Centro Dermatológico Amparo Rodriguez",
+      "coordinates": [
+        2.1521448,
+        41.3967992
+      ]
+    },
+    {
+      "type": "node",
+      "id": 11078343805,
+      "name": "Centro médico AXA",
+      "coordinates": [
+        2.1729678,
+        41.3937684
+      ]
+    },
+    {
+      "type": "node",
+      "id": 11078349605,
+      "name": "Centro médico AXA",
+      "coordinates": [
+        2.1728044,
+        41.3936889
+      ]
+    },
+    {
+      "type": "node",
       "id": 14234884468,
       "name": "Centro Médico Lisboa S.L.",
       "coordinates": [
         2.1598038,
         41.4284891
+      ]
+    },
+    {
+      "type": "node",
+      "id": 10757732104,
+      "name": "Centro Médico Plaza Molina",
+      "coordinates": [
+        2.1478229,
+        41.4008285
+      ]
+    },
+    {
+      "type": "node",
+      "id": 9209536844,
+      "name": "Centro Médico Psicológico Calvet",
+      "coordinates": [
+        2.1489999,
+        41.3955146
+      ]
+    },
+    {
+      "type": "node",
+      "id": 12036046469,
+      "name": "Centro Médico Quironsalud Aribau",
+      "coordinates": [
+        2.1523622,
+        41.3939005
+      ]
+    },
+    {
+      "type": "node",
+      "id": 13299743001,
+      "name": "Centro Medico Sanitas Boreal",
+      "coordinates": [
+        2.1680382,
+        41.3995166
+      ]
+    },
+    {
+      "type": "node",
+      "id": 4456766991,
+      "name": "Centro Odontológico Drs. Mirave",
+      "coordinates": [
+        2.1643807,
+        41.4022623
+      ]
+    },
+    {
+      "type": "node",
+      "id": 10048756197,
+      "name": "Centro Salvat",
+      "coordinates": [
+        2.1533076,
+        41.396806
+      ]
+    },
+    {
+      "type": "node",
+      "id": 11951924445,
+      "name": "Centro Terapéutico Rosmeri",
+      "coordinates": [
+        2.1575926,
+        41.3993109
+      ]
+    },
+    {
+      "type": "node",
+      "id": 9128938895,
+      "name": "Colegio de Ingenieros de Minas del Nordeste",
+      "coordinates": [
+        2.1544829,
+        41.396649
+      ]
+    },
+    {
+      "type": "node",
+      "id": 8153817821,
+      "name": "Escaleras Enesca",
+      "coordinates": [
+        2.1516066,
+        41.3976926
       ]
     },
     {
@@ -470,6 +605,33 @@
     },
     {
       "type": "node",
+      "id": 10921226462,
+      "name": "Iglesia de Scientology de Barcelona",
+      "coordinates": [
+        2.1770224,
+        41.4110047
+      ]
+    },
+    {
+      "type": "node",
+      "id": 3011224821,
+      "name": "Iglesia Evangelica Ejercito De Salvacion",
+      "coordinates": [
+        2.1559922,
+        41.4049834
+      ]
+    },
+    {
+      "type": "node",
+      "id": 10743385199,
+      "name": "Iglesia Evangélica Filadelfia",
+      "coordinates": [
+        2.1605695,
+        41.4013122
+      ]
+    },
+    {
+      "type": "node",
       "id": 2406382156,
       "name": "Iglesia Nueva Apostólica",
       "coordinates": [
@@ -484,6 +646,15 @@
       "coordinates": [
         2.442872821,
         39.54363655
+      ]
+    },
+    {
+      "type": "node",
+      "id": 5167311821,
+      "name": "Plaza Café",
+      "coordinates": [
+        2.154258,
+        41.3872522
       ]
     },
     {
@@ -592,6 +763,15 @@
       "coordinates": [
         3.1535143,
         42.2782993
+      ]
+    },
+    {
+      "type": "node",
+      "id": 4520349214,
+      "name": "RIO Okonomiyaki",
+      "coordinates": [
+        2.1564721,
+        41.3965073
       ]
     },
     {
