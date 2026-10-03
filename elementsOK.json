@@ -11,6 +11,15 @@
     },
     {
       "type": "node",
+      "id": 14098484127,
+      "name": "Arroyo",
+      "coordinates": [
+        0.6195606,
+        41.6180372
+      ]
+    },
+    {
+      "type": "node",
       "id": 9908919203,
       "name": "Arroyo Cervera",
       "coordinates": [
@@ -128,11 +137,29 @@
     },
     {
       "type": "way",
+      "id": 460046639,
+      "name": "Avenida",
+      "coordinates": [
+        2.532578896,
+        39.5051371
+      ]
+    },
+    {
+      "type": "way",
       "id": 604329456,
       "name": "Avenida",
       "coordinates": [
         2.712562754,
         39.7664514
+      ]
+    },
+    {
+      "type": "way",
+      "id": 1432573308,
+      "name": "Ayuntamiento (reproduction)",
+      "coordinates": [
+        2.627212566,
+        39.5724094
       ]
     },
     {
@@ -142,6 +169,132 @@
       "coordinates": [
         0.6198051,
         41.6184446
+      ]
+    },
+    {
+      "type": "way",
+      "id": 1432573358,
+      "name": "Barrio Andaluz (reproduction)",
+      "coordinates": [
+        2.626590726,
+        39.5721552
+      ]
+    },
+    {
+      "type": "node",
+      "id": 6772635739,
+      "name": "Barrios & Bennasar",
+      "coordinates": [
+        2.1632511,
+        41.6822248
+      ]
+    },
+    {
+      "type": "node",
+      "id": 11032902105,
+      "name": "Barrios Assegurinver SLU - Catalana Occident",
+      "coordinates": [
+        1.7292867,
+        41.2229452
+      ]
+    },
+    {
+      "type": "way",
+      "id": 295468232,
+      "name": "Calle Adelfa",
+      "coordinates": [
+        2.8381801,
+        39.4777333
+      ]
+    },
+    {
+      "type": "way",
+      "id": 53814521,
+      "name": "Calle Cactus",
+      "coordinates": [
+        2.8310429,
+        39.4764116
+      ]
+    },
+    {
+      "type": "way",
+      "id": 28625937,
+      "name": "Calle Grenado",
+      "coordinates": [
+        2.8252275,
+        39.4725994
+      ]
+    },
+    {
+      "type": "way",
+      "id": 1148794741,
+      "name": "Calle Grenado",
+      "coordinates": [
+        2.8269877,
+        39.4750912
+      ]
+    },
+    {
+      "type": "way",
+      "id": 28625905,
+      "name": "Calle Higuera",
+      "coordinates": [
+        2.8367778,
+        39.4763726
+      ]
+    },
+    {
+      "type": "way",
+      "id": 1432573311,
+      "name": "Calle Mayor (reproduction)",
+      "coordinates": [
+        2.627036169,
+        39.5723448
+      ]
+    },
+    {
+      "type": "way",
+      "id": 28625890,
+      "name": "Calle Olivo",
+      "coordinates": [
+        2.8335633,
+        39.4755044
+      ]
+    },
+    {
+      "type": "way",
+      "id": 28625824,
+      "name": "Calle Palmera",
+      "coordinates": [
+        2.8313931,
+        39.4737687
+      ]
+    },
+    {
+      "type": "way",
+      "id": 295470929,
+      "name": "Calle Palmera",
+      "coordinates": [
+        2.8318808,
+        39.4762419
+      ]
+    },
+    {
+      "type": "way",
+      "id": 1148794740,
+      "name": "Calle Palmera",
+      "coordinates": [
+        2.8277414,
+        39.4753393
+      ]
+    },
+    {
+      "type": "way",
+      "id": 53814778,
+      "name": "Calle Pino",
+      "coordinates": [
+        2.8285762,
+        39.4720867
       ]
     },
     {
@@ -866,6 +1019,15 @@
     },
     {
       "type": "way",
+      "id": 1432573273,
+      "name": "Iglesia S. Félix de Torralba de Ribota (reproduction)",
+      "coordinates": [
+        2.627518928,
+        39.5724459
+      ]
+    },
+    {
+      "type": "way",
       "id": 609017278,
       "name": "Monte Esmeralda",
       "coordinates": [
@@ -898,6 +1060,33 @@
       "coordinates": [
         2.154258,
         41.3872522
+      ]
+    },
+    {
+      "type": "way",
+      "id": 1432573355,
+      "name": "Plaza de Luis Vives (reproduction)",
+      "coordinates": [
+        2.626946009,
+        39.57215085
+      ]
+    },
+    {
+      "type": "way",
+      "id": 1432573354,
+      "name": "Plaza de Santa María (reproduction)",
+      "coordinates": [
+        2.627393254,
+        39.5725496
+      ]
+    },
+    {
+      "type": "way",
+      "id": 1432573325,
+      "name": "Plaza Mayor (reproduction)",
+      "coordinates": [
+        2.627402508,
+        39.57237865
       ]
     },
     {
