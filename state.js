@@ -20,5 +20,7 @@ export const state={
   conflictResolutions:new Map(),
   search:'',
   type:'all',
+  tagKey:'',
+  tagValue:'',
   mapReady:false
 };

@@ -46,32 +46,29 @@ function itemTags(item){
   const tags=item?.tags||item?.current?.tags;
   return tags&&typeof tags==='object'&&!Array.isArray(tags)?tags:{};
 }
-function tagExpression(query){
-  const index=query.indexOf('=');
-  if(index<1)return null;
-  const key=query.slice(0,index).trim();
-  const value=query.slice(index+1).trim();
-  return key?{key,value}:null;
-}
-function matchesTagExpression(item,expression){
-  const tags=itemTags(item);
-  if(!Object.prototype.hasOwnProperty.call(tags,expression.key))return false;
-  if(expression.value==='*')return true;
-  return String(tags[expression.key]??'')===expression.value;
-}
-function searchableTags(item){
-  return Object.entries(itemTags(item)).map(([key,value])=>`${key}=${String(value)}`).join(' ');
+let tagFilterMode=state.mode;
+function syncTagFilterMode(){
+  if(tagFilterMode===state.mode)return;
+  tagFilterMode=state.mode;
+  state.tagKey='';
+  state.tagValue='';
 }
 export function getFilteredItems(){
-  const rawQuery=state.search.trim();
-  const q=rawQuery.toLocaleLowerCase('ca');
-  const expression=tagExpression(rawQuery);
+  syncTagFilterMode();
+  const q=state.search.trim().toLocaleLowerCase('ca');
+  const tagKey=String(state.tagKey||'');
+  const tagValue=String(state.tagValue||'');
   return getCurrentItems().filter(item=>{
     if(state.type!=='all'&&item.type!==state.type)return false;
-    if(expression)return matchesTagExpression(item,expression);
-    if(!q)return true;
-    const extra=item.issueId?`${item.message} ${(item.candidates||[]).map(candidate=>candidate.name).join(' ')} ${item.current?.name||''}`:'';
-    return`${item.name} ${item.type} ${item.id} ${extra} ${searchableTags(item)}`.toLocaleLowerCase('ca').includes(q);
+    if(q){
+      const extra=item.issueId?`${item.message} ${(item.candidates||[]).map(candidate=>candidate.name).join(' ')} ${item.current?.name||''}`:'';
+      if(!`${item.name} ${item.id} ${extra}`.toLocaleLowerCase('ca').includes(q))return false;
+    }
+    if(!tagKey)return true;
+    const tags=itemTags(item);
+    if(!Object.prototype.hasOwnProperty.call(tags,tagKey))return false;
+    if(!tagValue)return true;
+    return String(tags[tagKey]??'')===tagValue;
   }).sort(compareItemsByName);
 }
 export function getInconsistencyChoices(issue){

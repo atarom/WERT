@@ -1,5 +1,6 @@
 const maplibregl=window.maplibregl;
 import {state} from './state.js';
+import './tagfilters.js';
 import {els} from './dom.js';
 import {keyFor,uiKeyFor} from './elements.js';
 import {currentAction,getCurrentItems,getFilteredItems,getInconsistencyChoices,getInconsistencyResolutionValue,setInconsistencyResolution} from './changes.js';
