@@ -1037,6 +1037,51 @@
     },
     {
       "type": "way",
+      "id": 115656564,
+      "name": "Parque público Sa Sivina",
+      "coordinates": [
+        4.283831,
+        39.8159382
+      ]
+    },
+    {
+      "type": "way",
+      "id": 147082787,
+      "name": "Parque Publico San Sivina",
+      "coordinates": [
+        4.2844653,
+        39.815948
+      ]
+    },
+    {
+      "type": "way",
+      "id": 147082789,
+      "name": "Parque Publico San Sivina",
+      "coordinates": [
+        4.2845836,
+        39.8160852
+      ]
+    },
+    {
+      "type": "way",
+      "id": 708836410,
+      "name": "Parque Publico San Sivina",
+      "coordinates": [
+        4.2842924,
+        39.8172615
+      ]
+    },
+    {
+      "type": "node",
+      "id": 807794866,
+      "name": "Paseo Galan",
+      "coordinates": [
+        2.9597953,
+        42.2662136
+      ]
+    },
+    {
+      "type": "way",
       "id": 609462548,
       "name": "Plaza",
       "coordinates": [
