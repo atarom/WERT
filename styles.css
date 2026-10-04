@@ -950,3 +950,5 @@ button {
 .change-summary-four{grid-template-columns:repeat(4,1fr)}
 .change-columns-three{grid-template-columns:repeat(3,minmax(0,1fr))}
 @media (max-width:760px){.task-select{max-width:135px}.mode-switch{gap:4px}.mode-button{font-size:.7rem;padding:0 2px}.mode-count{min-width:19px;height:19px;padding:0 4px;margin-left:2px;font-size:.68rem}.change-summary-four,.change-columns-three{grid-template-columns:1fr}}
+@media (max-width:520px){.topbar{flex-wrap:wrap;gap:6px}.top-actions{flex:1 0 100%;width:100%;min-width:0;justify-content:space-between}.top-actions .button{flex:1 1 0;min-width:0;padding:7px 5px;font-size:.74rem;white-space:nowrap}.top-actions .button-count{min-width:19px;height:19px;padding:0 4px;margin-left:3px}.task-select{max-width:180px}}
+@media (max-width:360px){.top-actions{gap:3px}.top-actions .button{padding:6px 3px;font-size:.68rem}.top-actions .button-count{min-width:17px;height:17px;padding:0 3px;margin-left:2px;font-size:.64rem}}

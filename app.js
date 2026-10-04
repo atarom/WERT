@@ -126,8 +126,9 @@ function setOkCheckBase(parsed){
 function makeOkCheckIssue(item,row,kind){
   const objectKey=objectKeyFor(item);
   const currentName=row?.name===null||row?.name===undefined?'':String(row.name);
+  const current=currentName?{...item,name:currentName}:null;
   const message=kind==='osm-missing'?`L’objecte ${item.type} ${item.id} no apareix a la base actual de Postpass i s’ha marcat per eliminar d’OK.`:`El nom actual a OSM és "${currentName||'(sense name)'}" i elementsOK.json conté "${item.name}". S’ha marcat per eliminar d’OK.`;
-  return{issueId:`issue:okcheck:${objectKey}`,objectKey,lookupObjectKey:objectKey,type:item.type,id:item.id,name:item.name,coordinates:item.coordinates,candidates:[item],duplicateCount:1,sourceCount:1,kind,message,rawEntries:[],tags:item.tags||{},signature:JSON.stringify({objectKey,kind,currentName})};
+  return{issueId:`issue:okcheck:${objectKey}`,objectKey,lookupObjectKey:objectKey,type:item.type,id:item.id,name:item.name,coordinates:item.coordinates,candidates:[item],current,duplicateCount:1,sourceCount:1,kind,message,rawEntries:[],tags:item.tags||{},signature:JSON.stringify({objectKey,kind,expectedName:item.name,currentName})};
 }
 function applyOkCheckPayload(payload){
   if(!Array.isArray(payload?.result))throw new Error('La resposta de comprovació no conté un array result vàlid.');
@@ -256,8 +257,14 @@ async function refreshData(resetActivity=true){
     activity.step(`${state.config.elementsFile} carregat: ${state.accepted.length} acceptats i ${state.inconsistencies.length} inconsistència${state.inconsistencies.length===1?'':'es'}`,'Calculant empremta SHA-256 de la base');
     await refreshBaseHash();
     activity.step(`Base identificada: ${state.baseHash.slice(0,10)}…`,'Comprovant elements OK per type + id');
-    try{await performOkCheck(false);}catch(error){activity.step(`Comprovació OK no disponible: ${error?.message||error}`,'Continuant amb la consulta Postpass principal');}
-    activity.step('Comprovació OK finalitzada','Comprovant memòria cau Postpass principal');
+    try{
+      const summary=await performOkCheck(false);
+      activity.step(`Comprovació OK correcta: ${summary.ok} correctes i ${summary.issues} incidències`,'Comprovant memòria cau Postpass principal');
+    }catch(error){
+      const detail=error?.message||String(error);
+      showError(`La comprovació automàtica dels elements OK ha fallat. ${detail} La consulta Postpass principal ha continuat; torna a provar amb Comprova OK.`);
+      activity.step(`Comprovació OK fallida: ${detail}`,'Continuant amb la consulta Postpass principal');
+    }
     const postpassResult=await getPostpassData();
     activity.step(postpassResult.source==='cache'?'Dades Postpass recuperades de la memòria cau':'Nova resposta Postpass rebuda','Validant GeoJSON i extraient elements');
     const parsed=parsePostpass(postpassResult.payload);

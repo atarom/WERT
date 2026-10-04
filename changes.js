@@ -10,7 +10,7 @@ export function rebuildCollections(){
   });
   state.inconsistencies=state.inconsistencies.map(issue=>{
     const lookupKey=issue.lookupObjectKey||(!String(issue.objectKey).startsWith('invalid:')?issue.objectKey:null);
-    const current=lookupKey?rawByObject.get(lookupKey)||null:null;
+    const current=lookupKey?rawByObject.get(lookupKey)||issue.current||null:issue.current||null;
     const matching=current?(issue.candidates||[]).find(candidate=>keyFor(candidate)===keyFor(current)):null;
     const coordinates=current?.coordinates||matching?.coordinates||issue.coordinates||(issue.candidates||[]).find(candidate=>candidate.coordinates)?.coordinates||null;
     return{...issue,current,name:current?.name||(issue.candidates||[])[0]?.name||issue.name,coordinates,tags:current?.tags||issue.tags||{}};
