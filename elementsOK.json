@@ -920,6 +920,15 @@
     },
     {
       "type": "node",
+      "id": 8050083939,
+      "name": "Centro Especificos Pueblo Nuevo",
+      "coordinates": [
+        2.2015402,
+        41.4024159
+      ]
+    },
+    {
+      "type": "node",
       "id": 10167559165,
       "name": "Centro Estética Dental",
       "coordinates": [
