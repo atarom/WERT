@@ -172,6 +172,15 @@
       ]
     },
     {
+      "type": "node",
+      "id": 12299613201,
+      "name": "Barrio",
+      "coordinates": [
+        1.9603659,
+        41.4551652
+      ]
+    },
+    {
       "type": "way",
       "id": 1432573358,
       "name": "Barrio Andaluz (reproduction)",
@@ -322,6 +331,33 @@
       "coordinates": [
         0.5998291,
         40.7550553
+      ]
+    },
+    {
+      "type": "way",
+      "id": 661519599,
+      "name": "Campo de Tiro",
+      "coordinates": [
+        2.25694308,
+        41.4714955
+      ]
+    },
+    {
+      "type": "way",
+      "id": 416878224,
+      "name": "Campo Sol",
+      "coordinates": [
+        2.691529675,
+        39.7885282
+      ]
+    },
+    {
+      "type": "node",
+      "id": 9565592344,
+      "name": "Campo y Playa Restaurant",
+      "coordinates": [
+        2.044752,
+        41.2712143
       ]
     },
     {
@@ -578,6 +614,15 @@
     },
     {
       "type": "node",
+      "id": 13772296566,
+      "name": "Centro de danza",
+      "coordinates": [
+        1.4241277,
+        38.9077199
+      ]
+    },
+    {
+      "type": "node",
       "id": 11020524407,
       "name": "Centro de depilación láser Pelostop",
       "coordinates": [
@@ -758,6 +803,15 @@
     },
     {
       "type": "node",
+      "id": 4771134292,
+      "name": "Centro de Salud Es viver",
+      "coordinates": [
+        1.4167691,
+        38.9046141
+      ]
+    },
+    {
+      "type": "node",
       "id": 9866224404,
       "name": "Centro de Salud y Estética",
       "coordinates": [
@@ -767,11 +821,47 @@
     },
     {
       "type": "node",
+      "id": 12413894605,
+      "name": "Centro de Yoga Om Shanti",
+      "coordinates": [
+        2.1422207,
+        41.4904707
+      ]
+    },
+    {
+      "type": "way",
+      "id": 1283998313,
+      "name": "Centro Deportivo Teo Blázquez",
+      "coordinates": [
+        1.397899095,
+        38.90283835
+      ]
+    },
+    {
+      "type": "node",
       "id": 8452406791,
       "name": "Centro Dermatológico Amparo Rodriguez",
       "coordinates": [
         2.1521448,
         41.3967992
+      ]
+    },
+    {
+      "type": "node",
+      "id": 10167559165,
+      "name": "Centro Estética Dental",
+      "coordinates": [
+        2.6494998,
+        39.5840506
+      ]
+    },
+    {
+      "type": "node",
+      "id": 4528606090,
+      "name": "Centro formacion CAP de FPC",
+      "coordinates": [
+        2.8239378,
+        42.0156304
       ]
     },
     {
@@ -803,6 +893,42 @@
     },
     {
       "type": "node",
+      "id": 5223084599,
+      "name": "Centro Islámico Baitul Mukarram",
+      "coordinates": [
+        2.2185413,
+        41.4471498
+      ]
+    },
+    {
+      "type": "way",
+      "id": 767358902,
+      "name": "Centro Islámico l'Escala",
+      "coordinates": [
+        3.131160959,
+        42.1255312
+      ]
+    },
+    {
+      "type": "node",
+      "id": 771839565,
+      "name": "Centro Médico",
+      "coordinates": [
+        3.3135676,
+        39.5190128
+      ]
+    },
+    {
+      "type": "node",
+      "id": 5633330855,
+      "name": "Centro Médico Adeslas",
+      "coordinates": [
+        2.1908637,
+        41.4389109
+      ]
+    },
+    {
+      "type": "node",
       "id": 11078343805,
       "name": "Centro médico AXA",
       "coordinates": [
@@ -821,11 +947,38 @@
     },
     {
       "type": "node",
+      "id": 14232397175,
+      "name": "Centro Médico Doctor Escobedo",
+      "coordinates": [
+        1.6151116,
+        41.1936378
+      ]
+    },
+    {
+      "type": "node",
       "id": 14234884468,
       "name": "Centro Médico Lisboa S.L.",
       "coordinates": [
         2.1598038,
         41.4284891
+      ]
+    },
+    {
+      "type": "node",
+      "id": 4582752180,
+      "name": "Centro Médico Menorca",
+      "coordinates": [
+        4.0737921,
+        39.9024128
+      ]
+    },
+    {
+      "type": "node",
+      "id": 12347898569,
+      "name": "Centro Médico Pizá",
+      "coordinates": [
+        1.4307071,
+        38.7073911
       ]
     },
     {
@@ -839,11 +992,29 @@
     },
     {
       "type": "node",
+      "id": 8829411291,
+      "name": "Centro Medico Policlinic",
+      "coordinates": [
+        3.1155293,
+        39.810572
+      ]
+    },
+    {
+      "type": "node",
       "id": 9209536844,
       "name": "Centro Médico Psicológico Calvet",
       "coordinates": [
         2.1489999,
         41.3955146
+      ]
+    },
+    {
+      "type": "node",
+      "id": 7886422674,
+      "name": "Centro Médico Quironsalud",
+      "coordinates": [
+        2.9149172,
+        39.71669
       ]
     },
     {
@@ -857,6 +1028,24 @@
     },
     {
       "type": "node",
+      "id": 7972715219,
+      "name": "Centro Médico Quirosalud",
+      "coordinates": [
+        3.2157386,
+        39.5645994
+      ]
+    },
+    {
+      "type": "node",
+      "id": 11549995472,
+      "name": "Centro Medico Renueva",
+      "coordinates": [
+        2.1358074,
+        41.4912584
+      ]
+    },
+    {
+      "type": "node",
       "id": 13299743001,
       "name": "Centro Medico Sanitas Boreal",
       "coordinates": [
@@ -866,11 +1055,47 @@
     },
     {
       "type": "node",
+      "id": 6072855261,
+      "name": "Centro Medico Santa Eulalia",
+      "coordinates": [
+        1.5331748,
+        38.9829204
+      ]
+    },
+    {
+      "type": "node",
+      "id": 9848234359,
+      "name": "Centro Medico Santo Tomas",
+      "coordinates": [
+        4.044189,
+        39.9142674
+      ]
+    },
+    {
+      "type": "node",
       "id": 4456766991,
       "name": "Centro Odontológico Drs. Mirave",
       "coordinates": [
         2.1643807,
         41.4022623
+      ]
+    },
+    {
+      "type": "node",
+      "id": 13167105106,
+      "name": "Centro Oftalmológico Palomar",
+      "coordinates": [
+        2.0263421,
+        41.3484417
+      ]
+    },
+    {
+      "type": "node",
+      "id": 5521367224,
+      "name": "Centro Pilates Tiana",
+      "coordinates": [
+        2.2686962,
+        41.4826422
       ]
     },
     {
@@ -889,6 +1114,24 @@
       "coordinates": [
         2.1575926,
         41.3993109
+      ]
+    },
+    {
+      "type": "node",
+      "id": 2294747922,
+      "name": "Centro Veterinario Alex",
+      "coordinates": [
+        1.7035099,
+        41.4529142
+      ]
+    },
+    {
+      "type": "node",
+      "id": 5462634665,
+      "name": "Centro veterinario pitiuso",
+      "coordinates": [
+        1.5356356,
+        38.9845746
       ]
     },
     {
@@ -956,11 +1199,47 @@
     },
     {
       "type": "node",
+      "id": 9565524318,
+      "name": "Escalera del Mayorazgo",
+      "coordinates": [
+        2.043019,
+        41.2746537
+      ]
+    },
+    {
+      "type": "node",
       "id": 8153817821,
       "name": "Escaleras Enesca",
       "coordinates": [
         2.1516066,
         41.3976926
+      ]
+    },
+    {
+      "type": "node",
+      "id": 11876564872,
+      "name": "Estación Poblenou",
+      "coordinates": [
+        2.2014547,
+        41.4007745
+      ]
+    },
+    {
+      "type": "node",
+      "id": 4919346670,
+      "name": "Fuente de soda",
+      "coordinates": [
+        0.6280091,
+        41.6157375
+      ]
+    },
+    {
+      "type": "node",
+      "id": 6780934185,
+      "name": "Fuente de trevi",
+      "coordinates": [
+        3.9616788,
+        39.9408291
       ]
     },
     {
@@ -1208,11 +1487,38 @@
     },
     {
       "type": "way",
+      "id": 440201922,
+      "name": "Monte",
+      "coordinates": [
+        2.991292872,
+        39.31920215
+      ]
+    },
+    {
+      "type": "way",
       "id": 609017278,
       "name": "Monte Esmeralda",
       "coordinates": [
         2.442872821,
         39.54363655
+      ]
+    },
+    {
+      "type": "way",
+      "id": 117456197,
+      "name": "Parque Acuático Aguamar",
+      "coordinates": [
+        1.402849898,
+        38.88704965
+      ]
+    },
+    {
+      "type": "way",
+      "id": 690870613,
+      "name": "Parque Acuático Marina Parc",
+      "coordinates": [
+        4.190239338,
+        40.01820385
       ]
     },
     {
@@ -1280,11 +1586,227 @@
     },
     {
       "type": "node",
+      "id": 2822471374,
+      "name": "Playa",
+      "coordinates": [
+        3.2774485,
+        39.7388456
+      ]
+    },
+    {
+      "type": "node",
+      "id": 5809125918,
+      "name": "Playa",
+      "coordinates": [
+        2.9321624,
+        41.7179965
+      ]
+    },
+    {
+      "type": "node",
+      "id": 11061385565,
+      "name": "Playa",
+      "coordinates": [
+        3.1501156,
+        39.7692313
+      ]
+    },
+    {
+      "type": "way",
+      "id": 158199569,
+      "name": "Playa",
+      "coordinates": [
+        2.9942598,
+        39.31501635
+      ]
+    },
+    {
+      "type": "way",
+      "id": 679602587,
+      "name": "Playa",
+      "coordinates": [
+        3.27649345,
+        39.4516398
+      ]
+    },
+    {
+      "type": "node",
+      "id": 2414364545,
+      "name": "Playa - Beach Bar",
+      "coordinates": [
+        3.4037799,
+        39.6358913
+      ]
+    },
+    {
+      "type": "node",
+      "id": 11039347718,
+      "name": "Playa Bella",
+      "coordinates": [
+        1.2869861,
+        38.9704638
+      ]
+    },
+    {
+      "type": "node",
+      "id": 11813649518,
+      "name": "Playa Bella",
+      "coordinates": [
+        1.2865021,
+        38.9712366
+      ]
+    },
+    {
+      "type": "way",
+      "id": 589968090,
+      "name": "Playa Blanca II",
+      "coordinates": [
+        3.372156726,
+        39.5695188
+      ]
+    },
+    {
+      "type": "way",
+      "id": 285204234,
+      "name": "Playa de Cala Domingos",
+      "coordinates": [
+        3.278356893,
+        39.45861015
+      ]
+    },
+    {
+      "type": "way",
+      "id": 617009746,
+      "name": "Playa Esperanza Resort",
+      "coordinates": [
+        3.119231815,
+        39.80281195
+      ]
+    },
+    {
+      "type": "way",
+      "id": 427993019,
+      "name": "Playa Garden Selection Hotel & Spa",
+      "coordinates": [
+        3.125639015,
+        39.7904477
+      ]
+    },
+    {
+      "type": "node",
       "id": 9553863382,
       "name": "Playa Grande Tropical",
       "coordinates": [
         2.0303313,
         41.2682922
+      ]
+    },
+    {
+      "type": "way",
+      "id": 384653073,
+      "name": "Playa Soleil Palmarama",
+      "coordinates": [
+        1.407654025,
+        38.8876714
+      ]
+    },
+    {
+      "type": "node",
+      "id": 4425573151,
+      "name": "Playa Viva",
+      "coordinates": [
+        1.3457042,
+        41.128299
+      ]
+    },
+    {
+      "type": "node",
+      "id": 1481273136,
+      "name": "Playa5",
+      "coordinates": [
+        2.4550281,
+        39.5357328
+      ]
+    },
+    {
+      "type": "node",
+      "id": 7553005730,
+      "name": "Playa5",
+      "coordinates": [
+        2.4552233,
+        39.5359476
+      ]
+    },
+    {
+      "type": "way",
+      "id": 239579657,
+      "name": "Playa5",
+      "coordinates": [
+        2.455075475,
+        39.5358244
+      ]
+    },
+    {
+      "type": "node",
+      "id": 279382974,
+      "name": "Plaza",
+      "coordinates": [
+        1.4288948,
+        38.7056409
+      ]
+    },
+    {
+      "type": "node",
+      "id": 1999484879,
+      "name": "Plaza",
+      "coordinates": [
+        3.278651,
+        42.2893026
+      ]
+    },
+    {
+      "type": "node",
+      "id": 3546717736,
+      "name": "Plaza",
+      "coordinates": [
+        3.2286285,
+        39.3737381
+      ]
+    },
+    {
+      "type": "node",
+      "id": 4212136991,
+      "name": "Plaza",
+      "coordinates": [
+        2.8460713,
+        41.7019506
+      ]
+    },
+    {
+      "type": "node",
+      "id": 5164895523,
+      "name": "Plaza",
+      "coordinates": [
+        2.0789297,
+        41.4679774
+      ]
+    },
+    {
+      "type": "node",
+      "id": 7004587287,
+      "name": "Plaza",
+      "coordinates": [
+        2.1678593,
+        41.3745883
+      ]
+    },
+    {
+      "type": "node",
+      "id": 8124072277,
+      "name": "Plaza",
+      "coordinates": [
+        2.6928567,
+        39.5548018
       ]
     },
     {
@@ -1303,6 +1825,15 @@
       "coordinates": [
         3.25802955,
         39.4088541
+      ]
+    },
+    {
+      "type": "way",
+      "id": 1306727069,
+      "name": "Plaza",
+      "coordinates": [
+        1.558664497,
+        38.99730245
       ]
     },
     {
@@ -1333,12 +1864,30 @@
       ]
     },
     {
+      "type": "node",
+      "id": 11768879625,
+      "name": "Plaza Del Sol",
+      "coordinates": [
+        1.4339981,
+        38.9080447
+      ]
+    },
+    {
       "type": "way",
       "id": 1432573325,
       "name": "Plaza Mayor (reproduction)",
       "coordinates": [
         2.627402508,
         39.57237865
+      ]
+    },
+    {
+      "type": "node",
+      "id": 5512151857,
+      "name": "Plaza Uno",
+      "coordinates": [
+        3.0823146,
+        39.9074392
       ]
     },
     {
@@ -1352,11 +1901,74 @@
     },
     {
       "type": "node",
+      "id": 12020623836,
+      "name": "Puerto Bahía",
+      "coordinates": [
+        2.2405214,
+        41.4322796
+      ]
+    },
+    {
+      "type": "node",
+      "id": 8049731601,
+      "name": "Puerto Escondido",
+      "coordinates": [
+        2.2000071,
+        41.4032433
+      ]
+    },
+    {
+      "type": "node",
+      "id": 1636663559,
+      "name": "Puerto Hurrako",
+      "coordinates": [
+        2.20645,
+        41.4000046
+      ]
+    },
+    {
+      "type": "node",
+      "id": 6043990991,
+      "name": "Puerto Limón",
+      "coordinates": [
+        3.1866014,
+        41.8887342
+      ]
+    },
+    {
+      "type": "node",
+      "id": 12165311086,
+      "name": "Puerto Perú",
+      "coordinates": [
+        1.2520587,
+        41.1095893
+      ]
+    },
+    {
+      "type": "node",
       "id": 10304557910,
       "name": "Puerto Plata Dominican Restaurant",
       "coordinates": [
         2.1783604,
         41.3856059
+      ]
+    },
+    {
+      "type": "node",
+      "id": 4762864131,
+      "name": "Puerto Príncipe",
+      "coordinates": [
+        2.1818107,
+        41.4240333
+      ]
+    },
+    {
+      "type": "node",
+      "id": 3671735997,
+      "name": "Puerto Viejo",
+      "coordinates": [
+        1.1454866,
+        41.0830815
       ]
     },
     {
@@ -1411,6 +2023,15 @@
       "coordinates": [
         3.1533959,
         42.2783248
+      ]
+    },
+    {
+      "type": "node",
+      "id": 3774310374,
+      "name": "Río Dragón",
+      "coordinates": [
+        2.1793795,
+        41.4204726
       ]
     },
     {
