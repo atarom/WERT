@@ -362,6 +362,24 @@
     },
     {
       "type": "node",
+      "id": 26475934,
+      "name": "Campos",
+      "coordinates": [
+        3.0197912,
+        39.4313098
+      ]
+    },
+    {
+      "type": "relation",
+      "id": 342919,
+      "name": "Campos",
+      "coordinates": [
+        2.9675317,
+        39.4351942
+      ]
+    },
+    {
+      "type": "node",
       "id": 4422546490,
       "name": "Centro",
       "coordinates": [
@@ -1555,6 +1573,15 @@
       "coordinates": [
         4.2842924,
         39.8172615
+      ]
+    },
+    {
+      "type": "way",
+      "id": 504200670,
+      "name": "Parque solar de Binisafúller",
+      "coordinates": [
+        4.217790053,
+        39.8376939
       ]
     },
     {
