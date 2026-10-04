@@ -965,11 +965,74 @@
     },
     {
       "type": "node",
+      "id": 7570266277,
+      "name": "Iglesia Adventista del Séptimo Día",
+      "coordinates": [
+        2.675769,
+        39.5850769
+      ]
+    },
+    {
+      "type": "node",
+      "id": 7525526985,
+      "name": "Iglesia Avivamiento",
+      "coordinates": [
+        2.1899624,
+        41.4203288
+      ]
+    },
+    {
+      "type": "node",
+      "id": 12599012143,
+      "name": "Iglesia Bautista Bona Nova",
+      "coordinates": [
+        1.2480443,
+        41.1186343
+      ]
+    },
+    {
+      "type": "node",
       "id": 8356890099,
       "name": "Iglesia Bíblica Valle Hebrón",
       "coordinates": [
         2.1431038,
         41.4213036
+      ]
+    },
+    {
+      "type": "node",
+      "id": 14101639358,
+      "name": "Iglesia Cristiana China en Mallorca",
+      "coordinates": [
+        2.6637105,
+        39.5703327
+      ]
+    },
+    {
+      "type": "node",
+      "id": 3301220906,
+      "name": "Iglesia Cristiana Evangelica",
+      "coordinates": [
+        1.4318197,
+        38.9076343
+      ]
+    },
+    {
+      "type": "node",
+      "id": 10693058105,
+      "name": "Iglesia Cristiana Pentecostés - Movimiento Misionero Mundial",
+      "coordinates": [
+        2.2021055,
+        41.4368952
+      ]
+    },
+    {
+      "type": "relation",
+      "id": 1005213,
+      "name": "Iglesia de Cristo la salvación del hombre",
+      "coordinates": [
+        2.802112748,
+        41.9768022
       ]
     },
     {
@@ -992,11 +1055,56 @@
     },
     {
       "type": "node",
+      "id": 6468049842,
+      "name": "Iglesia Evangelica",
+      "coordinates": [
+        3.3619705,
+        39.6216176
+      ]
+    },
+    {
+      "type": "node",
+      "id": 5046554255,
+      "name": "Iglesia Evangélica Asamblea de Dios Belen",
+      "coordinates": [
+        2.9606498,
+        42.2624215
+      ]
+    },
+    {
+      "type": "node",
+      "id": 3877416472,
+      "name": "Iglesia Evangélica Bautista",
+      "coordinates": [
+        2.0775007,
+        41.360936
+      ]
+    },
+    {
+      "type": "node",
+      "id": 5411117025,
+      "name": "Iglesia Evangélica Centro Familiar Cristiano Sabadell",
+      "coordinates": [
+        2.0984155,
+        41.5409948
+      ]
+    },
+    {
+      "type": "node",
       "id": 3011224821,
       "name": "Iglesia Evangelica Ejercito De Salvacion",
       "coordinates": [
         2.1559922,
         41.4049834
+      ]
+    },
+    {
+      "type": "node",
+      "id": 10601320260,
+      "name": "Iglesia Evangélica Filadelfia",
+      "coordinates": [
+        0.8951437,
+        41.6290229
       ]
     },
     {
@@ -1010,11 +1118,83 @@
     },
     {
       "type": "node",
+      "id": 10752405994,
+      "name": "Iglesia Evangelica Filadelfia",
+      "coordinates": [
+        1.1155686,
+        41.1578499
+      ]
+    },
+    {
+      "type": "way",
+      "id": 286220467,
+      "name": "Iglesia Evangelica Filadelfia",
+      "coordinates": [
+        1.106819788,
+        41.1417996
+      ]
+    },
+    {
+      "type": "way",
+      "id": 1076648883,
+      "name": "Iglesia Evangélica Filadelfia",
+      "coordinates": [
+        2.114860286,
+        41.3564548
+      ]
+    },
+    {
+      "type": "node",
+      "id": 12244684800,
+      "name": "Iglesia La Luz del Mundo",
+      "coordinates": [
+        2.1875953,
+        41.3954651
+      ]
+    },
+    {
+      "type": "way",
+      "id": 1156360615,
+      "name": "Iglesia Misionera",
+      "coordinates": [
+        2.728432904,
+        41.69332955
+      ]
+    },
+    {
+      "type": "node",
       "id": 2406382156,
       "name": "Iglesia Nueva Apostólica",
       "coordinates": [
         2.1667984,
         41.4268087
+      ]
+    },
+    {
+      "type": "node",
+      "id": 2406425892,
+      "name": "Iglesia Nueva Apostólica",
+      "coordinates": [
+        2.8258262,
+        41.9902309
+      ]
+    },
+    {
+      "type": "node",
+      "id": 12277111233,
+      "name": "Iglesia Nueva Apostólica",
+      "coordinates": [
+        2.2204607,
+        41.7944099
+      ]
+    },
+    {
+      "type": "way",
+      "id": 254115406,
+      "name": "Iglesia Protestante Salou",
+      "coordinates": [
+        1.133479921,
+        41.08349615
       ]
     },
     {
