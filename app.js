@@ -1,7 +1,7 @@
 import {state} from './state.js';
 import {$,els} from './dom.js';
-import {parseAccepted,parsePostpass} from './elements.js';
-import {compileQuery,loadJson,getPostpassData,getPostpassCacheStatus} from './postpass.js';
+import {parseAccepted,parsePostpass,objectKeyFor} from './elements.js';
+import {compileQuery,loadJson,getPostpassData,getPostpassCacheStatus,getOkCheckData,getOkCheckCacheStatus} from './postpass.js';
 import {rebuildCollections,hasUnsavedChanges,buildResultPayload,markCurrentChangesSaved,clearSessionChanges} from './changes.js';
 import {createMap,renderMap,setMapHooks} from './map.js';
 import {showError,clearError,renderList,renderCounters,renderTabs,renderChangesDialog,renderProposalManager,renderInfo,renderRegexTest} from './ui.js';
@@ -17,6 +17,11 @@ function renderAll(){
 setMapHooks({renderAll,renderList});
 let reloadTimer=null;
 let refreshBusy=false;
+let okCheckTimer=null;
+let okCheckBusy=false;
+let okCheckButton=null;
+let okBaseItems=[];
+let okBaseInconsistencies=[];
 function updateReloadButton(){
   if(!state.config?.postpass)return;
   if(refreshBusy){
@@ -50,6 +55,140 @@ function startReloadClock(){
   updateReloadButton();
   if(refreshBusy||!getPostpassCacheStatus().fresh)return;
   reloadTimer=setInterval(()=>{updateReloadButton();if(!getPostpassCacheStatus().fresh){clearInterval(reloadTimer);reloadTimer=null;}},250);
+}
+function ensureOkCheckButton(){
+  if(okCheckButton)return okCheckButton;
+  okCheckButton=document.createElement('button');
+  okCheckButton.id='verify-ok-btn';
+  okCheckButton.className='button button-ghost';
+  okCheckButton.type='button';
+  okCheckButton.textContent='Comprova OK';
+  els.reloadBtn.insertAdjacentElement('afterend',okCheckButton);
+  okCheckButton.addEventListener('click',async()=>{
+    if(okCheckBusy||!okBaseItems.length||getOkCheckCacheStatus(okBaseItems).fresh)return;
+    clearError();
+    activity.begin('Comprovant elements OK',`Verificant ${okBaseItems.length} elements per type + id`);
+    try{
+      const summary=await performOkCheck(true);
+      activity.done(formatOkCheckSummary(summary));
+    }catch(error){
+      showError(`No s’han pogut comprovar els elements OK. ${error?.message||error}`);
+      activity.fail('No s’han pogut comprovar els elements OK',error);
+    }
+  });
+  updateOkCheckButton();
+  return okCheckButton;
+}
+function updateOkCheckButton(){
+  if(!okCheckButton)return;
+  const compact=window.matchMedia('(max-width:760px)').matches;
+  if(okCheckBusy){
+    okCheckButton.disabled=true;
+    okCheckButton.textContent=compact?'OK…':'Comprovant OK…';
+    okCheckButton.title='Comprovació dels elements OK en curs';
+    return;
+  }
+  if(!okBaseItems.length){
+    okCheckButton.disabled=true;
+    okCheckButton.textContent=compact?'OK':'Comprova OK';
+    okCheckButton.title='No hi ha elements OK vàlids per comprovar';
+    return;
+  }
+  const status=getOkCheckCacheStatus(okBaseItems);
+  if(status.fresh){
+    const seconds=Math.max(1,Math.ceil(status.remainingMs/1000));
+    okCheckButton.disabled=true;
+    okCheckButton.textContent=compact?`OK ${seconds}s`:`Comprova OK ${seconds}s`;
+    okCheckButton.title=`Comprovació recent. Nova consulta disponible en ${seconds} s`;
+    return;
+  }
+  okCheckButton.disabled=false;
+  okCheckButton.textContent=compact?'OK':'Comprova OK';
+  okCheckButton.title='Comprova que els elements d’elementsOK.json existeixen i mantenen el mateix nom';
+}
+function startOkCheckClock(){
+  clearInterval(okCheckTimer);
+  okCheckTimer=null;
+  updateOkCheckButton();
+  if(okCheckBusy||!okBaseItems.length||!getOkCheckCacheStatus(okBaseItems).fresh)return;
+  okCheckTimer=setInterval(()=>{updateOkCheckButton();if(!getOkCheckCacheStatus(okBaseItems).fresh){clearInterval(okCheckTimer);okCheckTimer=null;}},250);
+}
+function cloneBaseIssue(issue){
+  return{...issue,candidates:[...(issue.candidates||[])]};
+}
+function setOkCheckBase(parsed){
+  okBaseItems=parsed.items.map(item=>({...item}));
+  okBaseInconsistencies=parsed.inconsistencies.map(cloneBaseIssue);
+  state.accepted=okBaseItems.map(item=>({...item}));
+  state.inconsistencies=okBaseInconsistencies.map(cloneBaseIssue);
+  startOkCheckClock();
+}
+function makeOkCheckIssue(item,row,kind){
+  const objectKey=objectKeyFor(item);
+  const currentName=row?.name===null||row?.name===undefined?'':String(row.name);
+  const message=kind==='osm-missing'?`L’objecte ${item.type} ${item.id} no apareix a la base actual de Postpass i s’ha marcat per eliminar d’OK.`:`El nom actual a OSM és "${currentName||'(sense name)'}" i elementsOK.json conté "${item.name}". S’ha marcat per eliminar d’OK.`;
+  return{issueId:`issue:okcheck:${objectKey}`,objectKey,lookupObjectKey:objectKey,type:item.type,id:item.id,name:item.name,coordinates:item.coordinates,candidates:[item],duplicateCount:1,sourceCount:1,kind,message,rawEntries:[],tags:item.tags||{},signature:JSON.stringify({objectKey,kind,currentName})};
+}
+function applyOkCheckPayload(payload){
+  if(!Array.isArray(payload?.result))throw new Error('La resposta de comprovació no conté un array result vàlid.');
+  const previousIssues=new Map(state.inconsistencies.map(issue=>[issue.objectKey,issue]));
+  const byObject=new Map();
+  for(const row of payload.result){
+    const type=String(row?.type||'').toLowerCase();
+    const id=Number(row?.id);
+    if(!['node','way','relation'].includes(type)||!Number.isSafeInteger(id)||id<=0)continue;
+    byObject.set(`${type}:${id}`,row);
+  }
+  const accepted=[];
+  const issues=[];
+  let missing=0;
+  let renamed=0;
+  for(const item of okBaseItems){
+    const objectKey=objectKeyFor(item);
+    const row=byObject.get(objectKey);
+    if(!row){
+      missing++;
+      issues.push(makeOkCheckIssue(item,null,'osm-missing'));
+      continue;
+    }
+    const currentName=row.name===null||row.name===undefined?'':String(row.name);
+    if(currentName!==item.name){
+      renamed++;
+      issues.push(makeOkCheckIssue(item,row,'osm-name-changed'));
+      continue;
+    }
+    accepted.push({...item});
+  }
+  state.accepted=accepted;
+  state.inconsistencies=[...okBaseInconsistencies.map(cloneBaseIssue),...issues];
+  const validIssueKeys=new Set(state.inconsistencies.map(issue=>issue.objectKey));
+  for(const key of[...state.inconsistencyResolutions.keys()])if(!validIssueKeys.has(key))state.inconsistencyResolutions.delete(key);
+  for(const issue of issues){
+    const previous=previousIssues.get(issue.objectKey);
+    if(!previous||previous.signature!==issue.signature||!state.inconsistencyResolutions.has(issue.objectKey))state.inconsistencyResolutions.set(issue.objectKey,{desired:null});
+  }
+  return{checked:okBaseItems.length,ok:accepted.length,missing,renamed,issues:issues.length};
+}
+function formatOkCheckSummary(summary){
+  return`Comprovació OK: ${summary.checked} comprovats · ${summary.ok} correctes · ${summary.missing} inexistents · ${summary.renamed} noms canviats`;
+}
+async function performOkCheck(rebuildNow){
+  okCheckBusy=true;
+  updateOkCheckButton();
+  try{
+    const result=await getOkCheckData(okBaseItems);
+    activity.step(result.source==='cache'?'Comprovació OK recuperada de la memòria cau':result.source==='empty'?'No hi ha elements OK per comprovar':'Nova comprovació OK rebuda','Comparant type, id i name amb elementsOK.json');
+    const summary=applyOkCheckPayload(result.payload);
+    activity.step(formatOkCheckSummary(summary),summary.issues?'Classificant incidències com a eliminar d’OK':'Tots els elements OK continuen vigents');
+    if(rebuildNow){
+      rebuildCollections();
+      renderAll();
+    }
+    return summary;
+  }finally{
+    okCheckBusy=false;
+    startOkCheckClock();
+  }
 }
 function setMode(mode){
   if(state.mode===mode)return;
@@ -113,11 +252,12 @@ async function refreshData(resetActivity=true){
   try{
     const acceptedPayload=await loadJson(state.config.elementsFile);
     const acceptedParsed=parseAccepted(acceptedPayload);
-    state.accepted=acceptedParsed.items;
-    state.inconsistencies=acceptedParsed.inconsistencies;
+    setOkCheckBase(acceptedParsed);
     activity.step(`${state.config.elementsFile} carregat: ${state.accepted.length} acceptats i ${state.inconsistencies.length} inconsistència${state.inconsistencies.length===1?'':'es'}`,'Calculant empremta SHA-256 de la base');
     await refreshBaseHash();
-    activity.step(`Base identificada: ${state.baseHash.slice(0,10)}…`,'Comprovant memòria cau Postpass');
+    activity.step(`Base identificada: ${state.baseHash.slice(0,10)}…`,'Comprovant elements OK per type + id');
+    try{await performOkCheck(false);}catch(error){activity.step(`Comprovació OK no disponible: ${error?.message||error}`,'Continuant amb la consulta Postpass principal');}
+    activity.step('Comprovació OK finalitzada','Comprovant memòria cau Postpass principal');
     const postpassResult=await getPostpassData();
     activity.step(postpassResult.source==='cache'?'Dades Postpass recuperades de la memòria cau':'Nova resposta Postpass rebuda','Validant GeoJSON i extraient elements');
     const parsed=parsePostpass(postpassResult.payload);
@@ -137,9 +277,11 @@ async function refreshData(resetActivity=true){
   }finally{
     refreshBusy=false;
     startReloadClock();
+    startOkCheckClock();
   }
 }
 function wireEvents(){
+  ensureOkCheckButton();
   els.pendingTab.addEventListener('click',()=>setMode('pending'));
   els.acceptedTab.addEventListener('click',()=>setMode('accepted'));
   els.inconsistenciesTab.addEventListener('click',()=>setMode('inconsistency'));
@@ -242,9 +384,10 @@ function wireEvents(){
   });
   els.discardBtn.addEventListener('click',discardChanges);
   window.addEventListener('beforeunload',event=>{if(!hasUnsavedChanges())return;event.preventDefault();event.returnValue='';});
-  window.addEventListener('storage',event=>{if(event.key?.startsWith('wert:postpass-cache:v2:'))startReloadClock();});
-  window.addEventListener('focus',startReloadClock);
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden)startReloadClock();});
+  window.addEventListener('storage',event=>{if(event.key?.startsWith('wert:postpass-cache:v2:'))startReloadClock();if(event.key?.startsWith('wert:okcheck-cache:v1:'))startOkCheckClock();});
+  window.addEventListener('focus',()=>{startReloadClock();startOkCheckClock();});
+  window.addEventListener('resize',updateOkCheckButton);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden){startReloadClock();startOkCheckClock();}});
 }
 async function start(){
   activity.step('Mòduls JavaScript carregats','Carregant config.json');
