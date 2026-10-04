@@ -1,18 +1,29 @@
 import {state} from './state.js';
+import {getCurrentItems} from './changes.js';
 let keySelect=null;
 let valueSelect=null;
 function itemTags(item){
-  const tags=item?.tags;
+  const tags=item?.tags||item?.current?.tags;
   return tags&&typeof tags==='object'&&!Array.isArray(tags)?tags:{};
 }
-function allKeys(){
+function matchesBaseFilters(item){
+  if(state.type!=='all'&&item.type!==state.type)return false;
+  const q=state.search.trim().toLocaleLowerCase('ca');
+  if(!q)return true;
+  const extra=item.issueId?`${item.message} ${(item.candidates||[]).map(candidate=>candidate.name).join(' ')} ${item.current?.name||''}`:'';
+  return`${item.name} ${item.id} ${extra}`.toLocaleLowerCase('ca').includes(q);
+}
+function contextualItems(){
+  return getCurrentItems().filter(matchesBaseFilters);
+}
+function allKeys(items){
   const keys=new Set();
-  for(const item of state.rawFeatures)for(const key of Object.keys(itemTags(item)))keys.add(key);
+  for(const item of items)for(const key of Object.keys(itemTags(item)))keys.add(key);
   return[...keys].sort((a,b)=>a.localeCompare(b,'ca',{sensitivity:'base',numeric:true}));
 }
-function allValues(key){
+function allValues(items,key){
   const values=new Set();
-  for(const item of state.rawFeatures){
+  for(const item of items){
     const tags=itemTags(item);
     if(Object.prototype.hasOwnProperty.call(tags,key))values.add(String(tags[key]??''));
   }
@@ -67,7 +78,8 @@ function ensureControls(){
 function refreshTagFilters(){
   if(!ensureControls())return;
   let changed=false;
-  const keys=allKeys();
+  const items=contextualItems();
+  const keys=allKeys(items);
   if(state.tagKey&&!keys.includes(state.tagKey)){
     state.tagKey='';
     state.tagValue='';
@@ -84,7 +96,7 @@ function refreshTagFilters(){
     if(changed)queueMicrotask(triggerRender);
     return;
   }
-  const values=allValues(state.tagKey);
+  const values=allValues(items,state.tagKey);
   if(state.tagValue&&!values.includes(state.tagValue)){state.tagValue='';changed=true;}
   addOption(valueSelect,'','Qualsevol valor');
   for(const value of values)addOption(valueSelect,value,value||'(buit)');
