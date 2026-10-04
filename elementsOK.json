@@ -1261,6 +1261,33 @@
       ]
     },
     {
+      "type": "node",
+      "id": 3898700498,
+      "name": "Pico Fred",
+      "coordinates": [
+        1.0560468,
+        42.2121598
+      ]
+    },
+    {
+      "type": "node",
+      "id": 3927288963,
+      "name": "Pico-xic",
+      "coordinates": [
+        0.8141463,
+        42.2321218
+      ]
+    },
+    {
+      "type": "node",
+      "id": 9553863382,
+      "name": "Playa Grande Tropical",
+      "coordinates": [
+        2.0303313,
+        41.2682922
+      ]
+    },
+    {
       "type": "way",
       "id": 609462548,
       "name": "Plaza",
