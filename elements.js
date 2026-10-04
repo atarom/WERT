@@ -21,12 +21,20 @@ export function normalizeCoordinates(value){
   if(!Number.isFinite(lon)||!Number.isFinite(lat)||lon<-180||lon>180||lat<-90||lat>90)return null;
   return[lon,lat];
 }
+export function normalizeTags(value){
+  if(value&&typeof value==='object'&&!Array.isArray(value))return value;
+  if(typeof value!=='string'||!value)return{};
+  try{
+    const parsed=JSON.parse(value);
+    return parsed&&typeof parsed==='object'&&!Array.isArray(parsed)?parsed:{};
+  }catch{return{};}
+}
 export function featureToItem(feature){
   const properties=feature?.properties||{};
-  return{type:normalizeType(properties.type),id:properties.id,name:String(properties.name??''),coordinates:normalizeCoordinates(feature?.geometry?.coordinates)};
+  return{type:normalizeType(properties.type),id:properties.id,name:String(properties.name??''),coordinates:normalizeCoordinates(feature?.geometry?.coordinates),tags:normalizeTags(properties.tags)};
 }
 export function acceptedToItem(value){
-  return{type:normalizeType(value?.type),id:value?.id,name:String(value?.name??''),coordinates:normalizeCoordinates(value?.coordinates)};
+  return{type:normalizeType(value?.type),id:value?.id,name:String(value?.name??''),coordinates:normalizeCoordinates(value?.coordinates),tags:normalizeTags(value?.tags)};
 }
 export function hasValidIdentity(item){
   const id=Number(item?.id);

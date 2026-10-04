@@ -6,14 +6,14 @@ export function rebuildCollections(){
   for(const item of state.rawFeatures)if(!rawByObject.has(objectKeyFor(item)))rawByObject.set(objectKeyFor(item),item);
   state.accepted=state.accepted.map(item=>{
     const current=rawByKey.get(keyFor(item));
-    return current?.coordinates?{...item,coordinates:current.coordinates}:item;
+    return current?{...item,coordinates:current.coordinates||item.coordinates,tags:current.tags||item.tags}:item;
   });
   state.inconsistencies=state.inconsistencies.map(issue=>{
     const lookupKey=issue.lookupObjectKey||(!String(issue.objectKey).startsWith('invalid:')?issue.objectKey:null);
     const current=lookupKey?rawByObject.get(lookupKey)||null:null;
     const matching=current?(issue.candidates||[]).find(candidate=>keyFor(candidate)===keyFor(current)):null;
     const coordinates=current?.coordinates||matching?.coordinates||issue.coordinates||(issue.candidates||[]).find(candidate=>candidate.coordinates)?.coordinates||null;
-    return{...issue,current,name:current?.name||(issue.candidates||[])[0]?.name||issue.name,coordinates};
+    return{...issue,current,name:current?.name||(issue.candidates||[])[0]?.name||issue.name,coordinates,tags:current?.tags||issue.tags||{}};
   });
   const acceptedKeys=new Set(state.accepted.map(keyFor));
   const inconsistentObjects=new Set(state.inconsistencies.map(issue=>issue.lookupObjectKey).filter(Boolean));
@@ -42,13 +42,36 @@ export function getCurrentItems(){
   if(state.mode==='accepted')return state.accepted;
   return state.inconsistencies;
 }
+function itemTags(item){
+  const tags=item?.tags||item?.current?.tags;
+  return tags&&typeof tags==='object'&&!Array.isArray(tags)?tags:{};
+}
+function tagExpression(query){
+  const index=query.indexOf('=');
+  if(index<1)return null;
+  const key=query.slice(0,index).trim();
+  const value=query.slice(index+1).trim();
+  return key?{key,value}:null;
+}
+function matchesTagExpression(item,expression){
+  const tags=itemTags(item);
+  if(!Object.prototype.hasOwnProperty.call(tags,expression.key))return false;
+  if(expression.value==='*')return true;
+  return String(tags[expression.key]??'')===expression.value;
+}
+function searchableTags(item){
+  return Object.entries(itemTags(item)).map(([key,value])=>`${key}=${String(value)}`).join(' ');
+}
 export function getFilteredItems(){
-  const q=state.search.trim().toLocaleLowerCase('ca');
+  const rawQuery=state.search.trim();
+  const q=rawQuery.toLocaleLowerCase('ca');
+  const expression=tagExpression(rawQuery);
   return getCurrentItems().filter(item=>{
     if(state.type!=='all'&&item.type!==state.type)return false;
+    if(expression)return matchesTagExpression(item,expression);
     if(!q)return true;
     const extra=item.issueId?`${item.message} ${(item.candidates||[]).map(candidate=>candidate.name).join(' ')} ${item.current?.name||''}`:'';
-    return`${item.name} ${item.type} ${item.id} ${extra}`.toLocaleLowerCase('ca').includes(q);
+    return`${item.name} ${item.type} ${item.id} ${extra} ${searchableTags(item)}`.toLocaleLowerCase('ca').includes(q);
   }).sort(compareItemsByName);
 }
 export function getInconsistencyChoices(issue){

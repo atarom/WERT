@@ -32,10 +32,26 @@ export function renderMap(){
   const features=getFilteredItems().filter(item=>item.coordinates).map(itemToGeoJSON);
   state.map.getSource('wert-points').setData({type:'FeatureCollection',features});
 }
+function fitVisibleItems(){
+  if(!state.mapReady)return;
+  const coordinates=getFilteredItems().map(item=>item.coordinates).filter(Boolean);
+  if(!coordinates.length)return;
+  const bounds=new maplibregl.LngLatBounds();
+  for(const coordinate of coordinates)bounds.extend(coordinate);
+  state.map.fitBounds(bounds,{padding:48,maxZoom:Number(state.config.map.focusZoom)||17,duration:Number(state.config.map.focusDurationMs)||180,essential:true});
+}
 export function selectItem(key,options){
   options=options||{};
   const item=getCurrentItems().find(candidate=>uiKeyFor(candidate)===key);
   if(!item)return;
+  if(state.selectedKey===key){
+    state.selectedKey=null;
+    state.popup?.remove();
+    hooks.renderList();
+    renderMap();
+    fitVisibleItems();
+    return;
+  }
   state.selectedKey=key;
   hooks.renderList();
   renderMap();
