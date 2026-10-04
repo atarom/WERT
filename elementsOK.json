@@ -343,6 +343,15 @@
       ]
     },
     {
+      "type": "node",
+      "id": 5298405360,
+      "name": "Campo Frescos",
+      "coordinates": [
+        2.2236865,
+        41.4382215
+      ]
+    },
+    {
       "type": "way",
       "id": 416878224,
       "name": "Campo Sol",
@@ -385,6 +394,15 @@
       "coordinates": [
         2.9675317,
         39.4351942
+      ]
+    },
+    {
+      "type": "node",
+      "id": 11349063348,
+      "name": "Campos 2007",
+      "coordinates": [
+        2.1481668,
+        41.3723212
       ]
     },
     {
@@ -533,6 +551,15 @@
     },
     {
       "type": "node",
+      "id": 5452355410,
+      "name": "Centro comercial Art",
+      "coordinates": [
+        1.5346325,
+        38.9850313
+      ]
+    },
+    {
+      "type": "node",
       "id": 9122762515,
       "name": "Centro Cristiano el Buen Sembrador. Ministerio Asamblea de Dios",
       "coordinates": [
@@ -637,6 +664,24 @@
       "coordinates": [
         2.1702194,
         41.4326863
+      ]
+    },
+    {
+      "type": "node",
+      "id": 13068347382,
+      "name": "Centro de Belleza MQ",
+      "coordinates": [
+        2.0319032,
+        41.356887
+      ]
+    },
+    {
+      "type": "node",
+      "id": 6709332575,
+      "name": "Centro de Buceo",
+      "coordinates": [
+        3.8395053,
+        39.9782633
       ]
     },
     {
@@ -893,6 +938,24 @@
     },
     {
       "type": "node",
+      "id": 1653460318,
+      "name": "Centro Fuji",
+      "coordinates": [
+        2.2113122,
+        41.4508969
+      ]
+    },
+    {
+      "type": "node",
+      "id": 12719107778,
+      "name": "Centro Fuji Tarragona",
+      "coordinates": [
+        1.250561,
+        41.1186351
+      ]
+    },
+    {
+      "type": "node",
       "id": 13917355701,
       "name": "Centro Galego de Barcelona",
       "coordinates": [
@@ -1126,6 +1189,15 @@
       ]
     },
     {
+      "type": "way",
+      "id": 1517222261,
+      "name": "Centro Procolor",
+      "coordinates": [
+        2.076785351,
+        41.36944035
+      ]
+    },
+    {
       "type": "node",
       "id": 10048756197,
       "name": "Centro Salvat",
@@ -1141,6 +1213,15 @@
       "coordinates": [
         2.1575926,
         41.3993109
+      ]
+    },
+    {
+      "type": "node",
+      "id": 11020532217,
+      "name": "Centro Unico",
+      "coordinates": [
+        1.7254457,
+        41.2225733
       ]
     },
     {
@@ -1208,6 +1289,42 @@
     },
     {
       "type": "node",
+      "id": 7925586102,
+      "name": "centros único",
+      "coordinates": [
+        2.2286825,
+        41.4566187
+      ]
+    },
+    {
+      "type": "node",
+      "id": 11445375769,
+      "name": "Centros Único",
+      "coordinates": [
+        2.1493663,
+        41.3764508
+      ]
+    },
+    {
+      "type": "node",
+      "id": 11930165314,
+      "name": "centros unico",
+      "coordinates": [
+        2.171873,
+        41.388451
+      ]
+    },
+    {
+      "type": "way",
+      "id": 651584421,
+      "name": "Centros Unico",
+      "coordinates": [
+        2.098812507,
+        41.37703855
+      ]
+    },
+    {
+      "type": "node",
       "id": 9372227210,
       "name": "Colegio de Geógrafos",
       "coordinates": [
@@ -1226,6 +1343,15 @@
     },
     {
       "type": "node",
+      "id": 10845000471,
+      "name": "Cruz Motor - Grupauto - Isuzu - SsangYong",
+      "coordinates": [
+        1.3786343,
+        38.8827569
+      ]
+    },
+    {
+      "type": "node",
       "id": 9565524318,
       "name": "Escalera del Mayorazgo",
       "coordinates": [
@@ -1240,6 +1366,24 @@
       "coordinates": [
         2.1516066,
         41.3976926
+      ]
+    },
+    {
+      "type": "node",
+      "id": 7417703227,
+      "name": "Estación",
+      "coordinates": [
+        2.9069586,
+        39.7179967
+      ]
+    },
+    {
+      "type": "node",
+      "id": 7417703228,
+      "name": "Estación",
+      "coordinates": [
+        2.9069076,
+        39.7182112
       ]
     },
     {
@@ -1312,6 +1456,15 @@
       "coordinates": [
         1.1603977,
         41.0887768
+      ]
+    },
+    {
+      "type": "node",
+      "id": 10707807152,
+      "name": "Gasolinera Carrefour",
+      "coordinates": [
+        1.2049057,
+        41.127684
       ]
     },
     {
@@ -1567,12 +1720,30 @@
       ]
     },
     {
+      "type": "node",
+      "id": 9598590243,
+      "name": "Monte Cash 1929",
+      "coordinates": [
+        2.2858158,
+        41.6067263
+      ]
+    },
+    {
       "type": "way",
       "id": 609017278,
       "name": "Monte Esmeralda",
       "coordinates": [
         2.442872821,
         39.54363655
+      ]
+    },
+    {
+      "type": "node",
+      "id": 13997216296,
+      "name": "Monte Trucks",
+      "coordinates": [
+        0.8160632,
+        41.5522861
       ]
     },
     {
@@ -1667,6 +1838,15 @@
     },
     {
       "type": "node",
+      "id": 12944948184,
+      "name": "Paseo Isla Blanca",
+      "coordinates": [
+        1.4398212,
+        38.9170154
+      ]
+    },
+    {
+      "type": "node",
       "id": 3898700498,
       "name": "Pico Fred",
       "coordinates": [
@@ -1690,6 +1870,15 @@
       "coordinates": [
         3.2774485,
         39.7388456
+      ]
+    },
+    {
+      "type": "node",
+      "id": 4955283823,
+      "name": "Playa",
+      "coordinates": [
+        3.1526554,
+        39.7672388
       ]
     },
     {
@@ -1798,6 +1987,15 @@
       "coordinates": [
         2.75456235,
         39.51409705
+      ]
+    },
+    {
+      "type": "node",
+      "id": 5633633588,
+      "name": "Playa de Sa Coma",
+      "coordinates": [
+        3.3747322,
+        39.5716713
       ]
     },
     {
@@ -2098,6 +2296,15 @@
       ]
     },
     {
+      "type": "way",
+      "id": 311644176,
+      "name": "Plaza Bendinat",
+      "coordinates": [
+        2.583509749,
+        39.54016095
+      ]
+    },
+    {
       "type": "node",
       "id": 5167311821,
       "name": "Plaza Café",
@@ -2342,6 +2549,15 @@
     },
     {
       "type": "node",
+      "id": 1643395953,
+      "name": "Río de Oro",
+      "coordinates": [
+        3.0590647,
+        41.8748176
+      ]
+    },
+    {
+      "type": "node",
       "id": 3774310374,
       "name": "Río Dragón",
       "coordinates": [
@@ -2392,6 +2608,15 @@
       "coordinates": [
         3.1535143,
         42.2782993
+      ]
+    },
+    {
+      "type": "relation",
+      "id": 15458286,
+      "name": "Rio Iberica",
+      "coordinates": [
+        3.106226126,
+        42.2585093
       ]
     },
     {
