@@ -352,6 +352,15 @@
       ]
     },
     {
+      "type": "way",
+      "id": 911551459,
+      "name": "Campo Sol",
+      "coordinates": [
+        2.691925996,
+        39.7885365
+      ]
+    },
+    {
       "type": "node",
       "id": 9565592344,
       "name": "Campo y Playa Restaurant",
@@ -1235,6 +1244,42 @@
     },
     {
       "type": "node",
+      "id": 3523985470,
+      "name": "Estación Marítima Ibiza-Botafoc",
+      "coordinates": [
+        1.4517217,
+        38.9077831
+      ]
+    },
+    {
+      "type": "node",
+      "id": 3523985472,
+      "name": "Estación Marítima Ibiza-Botafoc",
+      "coordinates": [
+        1.4521886,
+        38.9043136
+      ]
+    },
+    {
+      "type": "node",
+      "id": 3793943322,
+      "name": "Estación Marítima Ibiza-Botafoc",
+      "coordinates": [
+        1.4520595,
+        38.9063993
+      ]
+    },
+    {
+      "type": "node",
+      "id": 3793988364,
+      "name": "Estación Marítima Ibiza-Botafoc",
+      "coordinates": [
+        1.4516863,
+        38.9087377
+      ]
+    },
+    {
+      "type": "node",
       "id": 11876564872,
       "name": "Estación Poblenou",
       "coordinates": [
@@ -1258,6 +1303,15 @@
       "coordinates": [
         3.9616788,
         39.9408291
+      ]
+    },
+    {
+      "type": "node",
+      "id": 1977882933,
+      "name": "Fuente del Dragón",
+      "coordinates": [
+        1.1603977,
+        41.0887768
       ]
     },
     {
@@ -1541,6 +1595,24 @@
     },
     {
       "type": "way",
+      "id": 278419476,
+      "name": "Parque Mar",
+      "coordinates": [
+        3.229322651,
+        39.36127665
+      ]
+    },
+    {
+      "type": "way",
+      "id": 27211888,
+      "name": "Parque Nereida",
+      "coordinates": [
+        3.462088641,
+        39.71904645
+      ]
+    },
+    {
+      "type": "way",
       "id": 115656564,
       "name": "Parque público Sa Sivina",
       "coordinates": [
@@ -1685,6 +1757,15 @@
     },
     {
       "type": "way",
+      "id": 368475512,
+      "name": "Playa Blanca",
+      "coordinates": [
+        3.37303051,
+        39.56977575
+      ]
+    },
+    {
+      "type": "way",
       "id": 589968090,
       "name": "Playa Blanca II",
       "coordinates": [
@@ -1694,11 +1775,56 @@
     },
     {
       "type": "way",
+      "id": 519620617,
+      "name": "Playa Camp de Mar",
+      "coordinates": [
+        2.422638757,
+        39.538506
+      ]
+    },
+    {
+      "type": "way",
       "id": 285204234,
       "name": "Playa de Cala Domingos",
       "coordinates": [
         3.278356893,
         39.45861015
+      ]
+    },
+    {
+      "type": "way",
+      "id": 431908829,
+      "name": "Playa de Palma suites & spa",
+      "coordinates": [
+        2.75456235,
+        39.51409705
+      ]
+    },
+    {
+      "type": "way",
+      "id": 450270343,
+      "name": "Playa del Moro",
+      "coordinates": [
+        3.383626071,
+        39.5980556
+      ]
+    },
+    {
+      "type": "way",
+      "id": 1086540970,
+      "name": "Playa Dorada",
+      "coordinates": [
+        3.373946256,
+        39.5694893
+      ]
+    },
+    {
+      "type": "way",
+      "id": 1059865189,
+      "name": "Playa Esperanza",
+      "coordinates": [
+        3.118732029,
+        39.8043451
       ]
     },
     {
@@ -1726,6 +1852,96 @@
       "coordinates": [
         2.0303313,
         41.2682922
+      ]
+    },
+    {
+      "type": "way",
+      "id": 460046635,
+      "name": "Playa Mar",
+      "coordinates": [
+        2.532852833,
+        39.50540075
+      ]
+    },
+    {
+      "type": "way",
+      "id": 707113096,
+      "name": "Playa Mar",
+      "coordinates": [
+        3.37164059,
+        39.5677972
+      ]
+    },
+    {
+      "type": "node",
+      "id": 1349599791,
+      "name": "Playa Margarita",
+      "coordinates": [
+        1.1496807,
+        41.070295
+      ]
+    },
+    {
+      "type": "way",
+      "id": 945755598,
+      "name": "Playa Mondragó",
+      "coordinates": [
+        3.189527524,
+        39.35296675
+      ]
+    },
+    {
+      "type": "relation",
+      "id": 14486301,
+      "name": "Playa Montroig Camping Resort \"Sports Centre\"",
+      "coordinates": [
+        0.968366835,
+        41.03472565
+      ]
+    },
+    {
+      "type": "way",
+      "id": 431825685,
+      "name": "Playa Moreia",
+      "coordinates": [
+        3.3717286,
+        39.5664618
+      ]
+    },
+    {
+      "type": "node",
+      "id": 3531442751,
+      "name": "Playa Santo Tomás",
+      "coordinates": [
+        4.038911,
+        39.9155937
+      ]
+    },
+    {
+      "type": "node",
+      "id": 1263890720,
+      "name": "Playa Sol",
+      "coordinates": [
+        2.7539376,
+        39.5069885
+      ]
+    },
+    {
+      "type": "node",
+      "id": 1999484878,
+      "name": "Playa Sol",
+      "coordinates": [
+        3.2820109,
+        42.2877571
+      ]
+    },
+    {
+      "type": "way",
+      "id": 1408122535,
+      "name": "Playa Sol",
+      "coordinates": [
+        1.578511451,
+        38.9998126
       ]
     },
     {
@@ -1771,6 +1987,24 @@
       "coordinates": [
         2.455075475,
         39.5358244
+      ]
+    },
+    {
+      "type": "way",
+      "id": 684018729,
+      "name": "Playas de Peguera",
+      "coordinates": [
+        2.454697683,
+        39.5365958
+      ]
+    },
+    {
+      "type": "way",
+      "id": 795376739,
+      "name": "Playas del Rey",
+      "coordinates": [
+        2.477832035,
+        39.51277835
       ]
     },
     {
@@ -1901,11 +2135,38 @@
     },
     {
       "type": "way",
+      "id": 1153240101,
+      "name": "Plaza Inn",
+      "coordinates": [
+        2.959547904,
+        42.2671493
+      ]
+    },
+    {
+      "type": "way",
       "id": 1432573325,
       "name": "Plaza Mayor (reproduction)",
       "coordinates": [
         2.627402508,
         39.57237865
+      ]
+    },
+    {
+      "type": "way",
+      "id": 342139553,
+      "name": "Plaza Santa Ponsa",
+      "coordinates": [
+        2.48341652,
+        39.5150524
+      ]
+    },
+    {
+      "type": "way",
+      "id": 1121207208,
+      "name": "plaza Son Rigo",
+      "coordinates": [
+        2.741361305,
+        39.5221107
       ]
     },
     {
@@ -1927,12 +2188,39 @@
       ]
     },
     {
+      "type": "way",
+      "id": 441129270,
+      "name": "Puerto Azul",
+      "coordinates": [
+        3.084267649,
+        39.91094445
+      ]
+    },
+    {
       "type": "node",
       "id": 12020623836,
       "name": "Puerto Bahía",
       "coordinates": [
         2.2405214,
         41.4322796
+      ]
+    },
+    {
+      "type": "node",
+      "id": 2201362011,
+      "name": "Puerto Cala Vadella",
+      "coordinates": [
+        1.2254045,
+        38.9143769
+      ]
+    },
+    {
+      "type": "way",
+      "id": 1077377601,
+      "name": "Puerto del Sol",
+      "coordinates": [
+        3.221782143,
+        39.37008165
       ]
     },
     {
