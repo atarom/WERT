@@ -407,6 +407,15 @@
     },
     {
       "type": "node",
+      "id": 8496512272,
+      "name": "Campos de Coll",
+      "coordinates": [
+        0.7720521,
+        42.4717028
+      ]
+    },
+    {
+      "type": "node",
       "id": 4422546490,
       "name": "Centro",
       "coordinates": [
@@ -682,6 +691,15 @@
       "coordinates": [
         3.8395053,
         39.9782633
+      ]
+    },
+    {
+      "type": "way",
+      "id": 1312967059,
+      "name": "Centro de Conservación y Carreteras",
+      "coordinates": [
+        2.943329757,
+        42.22594105
       ]
     },
     {
@@ -1019,6 +1037,15 @@
     },
     {
       "type": "node",
+      "id": 11331589723,
+      "name": "Centro Médico",
+      "coordinates": [
+        0.8697713,
+        42.4777686
+      ]
+    },
+    {
+      "type": "node",
       "id": 5633330855,
       "name": "Centro Médico Adeslas",
       "coordinates": [
@@ -1051,6 +1078,15 @@
       "coordinates": [
         1.6151116,
         41.1936378
+      ]
+    },
+    {
+      "type": "node",
+      "id": 8488677115,
+      "name": "Centro médico Illa de Salut",
+      "coordinates": [
+        2.742676,
+        41.8105471
       ]
     },
     {
@@ -2806,6 +2842,15 @@
       "coordinates": [
         1.2254045,
         38.9143769
+      ]
+    },
+    {
+      "type": "way",
+      "id": 311800397,
+      "name": "Puerto Canal",
+      "coordinates": [
+        3.149172989,
+        42.26080255
       ]
     },
     {
