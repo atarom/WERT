@@ -6,7 +6,7 @@ import {rebuildCollections,hasUnsavedChanges,buildResultPayload,markCurrentChang
 import {createMap,renderMap,setMapHooks} from './map.js';
 import {showError,clearError,renderList,renderCounters,renderTabs,renderChangesDialog,renderProposalManager,renderInfo,renderRegexTest} from './ui.js';
 import {activity} from './activity.js';
-import {downloadText,copyText} from './io.js';
+import {downloadText,copyText,stringifyJson} from './io.js';
 import {refreshBaseHash,proposalFilename,buildProposalPayload,importProposalFiles,buildMergedPayload} from './proposals.js';
 import {compareMonitorPayload} from './monitor.js';
 function renderAll(){
@@ -450,7 +450,7 @@ function wireEvents(){
     if(!snapshotPreview)return;
     const message=`Es descarregarà un ${state.config.elementsFile} complet amb l’estat actual d’OSM. Això farà que tots els noms actuals passin a ser la nova referència del monitor. Vols continuar?`;
     if(!window.confirm(message))return;
-    downloadText(state.config.elementsFile,JSON.stringify(snapshotPreview.payload,null,2)+'\n','application/json;charset=utf-8');
+    downloadText(state.config.elementsFile,stringifyJson(snapshotPreview.payload),'application/json;charset=utf-8');
     els.snapshotStatus.textContent=`${state.config.elementsFile} descarregat. Substitueix el fitxer del repositori només si vols adoptar aquest snapshot com a nova referència.`;
   });
   els.downloadProposalBtn.addEventListener('click',()=>{
@@ -458,7 +458,7 @@ function wireEvents(){
     try{
       const proposal=buildProposalPayload();
       activity.step(`Proposta ${proposal.id} preparada`,'Generant fitxer JSON');
-      downloadText(proposalFilename(proposal),JSON.stringify(proposal,null,2)+'\n','application/json;charset=utf-8');
+      downloadText(proposalFilename(proposal),stringifyJson(proposal),'application/json;charset=utf-8');
       markCurrentChangesSaved();
       activity.done(`Proposta descarregada: ${proposal.changes.add.length} altes, ${proposal.changes.remove.length} baixes i ${proposal.changes.resolve.length} resolucions`);
     }catch(error){activity.fail('No s’ha pogut generar la proposta',error);}
@@ -468,7 +468,7 @@ function wireEvents(){
     try{
       const proposal=buildProposalPayload();
       activity.step(`Proposta ${proposal.id} preparada`,'Demanant accés al porta-retalls');
-      await copyText(JSON.stringify(proposal,null,2)+'\n',els.copyProposalBtn,'Copiada');
+      await copyText(stringifyJson(proposal),els.copyProposalBtn,'Copiada');
       markCurrentChangesSaved();
       activity.done('Proposta copiada al porta-retalls');
     }catch(error){
@@ -481,7 +481,7 @@ function wireEvents(){
     try{
       const result=buildResultPayload();
       activity.step(`Fitxer resultant: ${result.elements.length} elements`,'Preparant descàrrega');
-      downloadText(state.config.elementsFile,JSON.stringify(result,null,2)+'\n','application/json;charset=utf-8');
+      downloadText(state.config.elementsFile,stringifyJson(result),'application/json;charset=utf-8');
       markCurrentChangesSaved();
       activity.done(`${state.config.elementsFile} descarregat`);
     }catch(error){activity.fail(`No s’ha pogut generar ${state.config.elementsFile}`,error);}
@@ -491,7 +491,7 @@ function wireEvents(){
     try{
       const result=buildResultPayload();
       activity.step(`Fitxer resultant: ${result.elements.length} elements`,'Demanant accés al porta-retalls');
-      await copyText(JSON.stringify(result,null,2)+'\n',els.copyOkBtn,'Copiat');
+      await copyText(stringifyJson(result),els.copyOkBtn,'Copiat');
       markCurrentChangesSaved();
       activity.done(`${state.config.elementsFile} copiat`);
     }catch(error){
@@ -512,7 +512,7 @@ function wireEvents(){
       activity.step(`Fusió calculada: ${merged.payload.elements.length} elements`);
       if(merged.unresolved.length){activity.fail('Hi ha decisions pendents',`${merged.unresolved.length} decisió${merged.unresolved.length===1?'':'s'} pendent${merged.unresolved.length===1?'':'s'}`);return;}
       activity.step('Sense decisions pendents',`Preparant ${state.config.elementsFile} consolidat`);
-      downloadText(state.config.elementsFile,JSON.stringify(merged.payload,null,2)+'\n','application/json;charset=utf-8');
+      downloadText(state.config.elementsFile,stringifyJson(merged.payload),'application/json;charset=utf-8');
       activity.done(`${state.config.elementsFile} consolidat descarregat`);
     }catch(error){activity.fail('No s’ha pogut consolidar',error);}
   });
@@ -523,7 +523,7 @@ function wireEvents(){
       activity.step(`Fusió calculada: ${merged.payload.elements.length} elements`);
       if(merged.unresolved.length){activity.fail('Hi ha decisions pendents',`${merged.unresolved.length} decisió${merged.unresolved.length===1?'':'s'} pendent${merged.unresolved.length===1?'':'s'}`);return;}
       activity.step('Sense decisions pendents','Demanant accés al porta-retalls');
-      await copyText(JSON.stringify(merged.payload,null,2)+'\n',els.copyMergedBtn,'Copiat');
+      await copyText(stringifyJson(merged.payload),els.copyMergedBtn,'Copiat');
       activity.done('Consolidat copiat al porta-retalls');
     }catch(error){
       showError('El navegador no ha permès copiar el consolidat al porta-retalls.');
