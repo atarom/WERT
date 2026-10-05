@@ -31,9 +31,7 @@
 - Els fitxers de tasca són JSON estàndard amb una arrel `{"elements":[...]}`.
 - WERT genera cada element en una sola línia per reduir mida i facilitar els diffs.
 - `type` usa exclusivament `N`, `W` o `R` per a node, via o relació.
-- `coordinates` manté l’ordre `[lon, lat]`.
 - `tags` només desa els tags controlats per la tasca.
-- No hi ha compatibilitat amb l’antic `type: "node"`, `"way"` o `"relation"` als fitxers persistits ni a les propostes noves.
 
 ## Tecnologies i dades
 
