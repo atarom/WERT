@@ -1505,6 +1505,96 @@
     },
     {
       "type": "node",
+      "id": 12685187809,
+      "name": "Estación de servicio Discar Val d'Aran",
+      "coordinates": [
+        0.8025351,
+        42.698631
+      ]
+    },
+    {
+      "type": "node",
+      "id": 839474997,
+      "name": "Estación de Servicio Ferreries",
+      "coordinates": [
+        4.020917,
+        39.98775
+      ]
+    },
+    {
+      "type": "way",
+      "id": 1417160209,
+      "name": "Estación de Servicio Moeve Vía Ronda",
+      "coordinates": [
+        4.25934683,
+        39.8819174
+      ]
+    },
+    {
+      "type": "way",
+      "id": 1417171994,
+      "name": "Estación de Servicio Repsol Cred Cala-Ratjada",
+      "coordinates": [
+        3.451585736,
+        39.70534125
+      ]
+    },
+    {
+      "type": "way",
+      "id": 1264232951,
+      "name": "Estación de Servicio Repsol Cred Menorca",
+      "coordinates": [
+        4.248929007,
+        39.89116795
+      ]
+    },
+    {
+      "type": "way",
+      "id": 1417176731,
+      "name": "Estación de Servicio Repsol Febrer 15",
+      "coordinates": [
+        2.713899588,
+        39.57155385
+      ]
+    },
+    {
+      "type": "way",
+      "id": 816754730,
+      "name": "Estación de Servicio Repsol Gasauto Palma 2",
+      "coordinates": [
+        2.720973396,
+        39.56572705
+      ]
+    },
+    {
+      "type": "way",
+      "id": 392140467,
+      "name": "Estación de Servicio Repsol San Juan",
+      "coordinates": [
+        1.49614015,
+        39.0703122
+      ]
+    },
+    {
+      "type": "way",
+      "id": 732183875,
+      "name": "Estación de Servicio Shell Jena",
+      "coordinates": [
+        1.42922945,
+        38.9144404
+      ]
+    },
+    {
+      "type": "way",
+      "id": 151626756,
+      "name": "Estación de Servicio Shell Son Ferriol",
+      "coordinates": [
+        2.735952701,
+        39.57065775
+      ]
+    },
+    {
+      "type": "node",
       "id": 3523985470,
       "name": "Estación Marítima Ibiza-Botafoc",
       "coordinates": [
@@ -1550,6 +1640,15 @@
     },
     {
       "type": "node",
+      "id": 492728922,
+      "name": "Estacion Servicio y Gasolinera Sant Lluis",
+      "coordinates": [
+        4.2591164,
+        39.8526878
+      ]
+    },
+    {
+      "type": "node",
       "id": 4919346670,
       "name": "Fuente de soda",
       "coordinates": [
@@ -1577,11 +1676,182 @@
     },
     {
       "type": "node",
+      "id": 287007931,
+      "name": "Gasolinera Alcampo",
+      "coordinates": [
+        2.4297735,
+        41.55328
+      ]
+    },
+    {
+      "type": "node",
+      "id": 2607721813,
+      "name": "Gasolinera Alcampo",
+      "coordinates": [
+        2.0910235,
+        41.5287623
+      ]
+    },
+    {
+      "type": "node",
+      "id": 3215097026,
+      "name": "Gasolinera Alcampo",
+      "coordinates": [
+        1.0987698,
+        41.1455784
+      ]
+    },
+    {
+      "type": "node",
+      "id": 5241532904,
+      "name": "Gasolinera Alcampo",
+      "coordinates": [
+        1.7369632,
+        41.2218014
+      ]
+    },
+    {
+      "type": "node",
+      "id": 5987322309,
+      "name": "Gasolinera Alcampo",
+      "coordinates": [
+        0.514852,
+        40.818279
+      ]
+    },
+    {
+      "type": "way",
+      "id": 456169188,
+      "name": "Gasolinera Alcampo Sant Boi",
+      "coordinates": [
+        2.054376746,
+        41.33156665
+      ]
+    },
+    {
+      "type": "node",
+      "id": 287005048,
+      "name": "Gasolinera Boya",
+      "coordinates": [
+        0.714372,
+        42.820447
+      ]
+    },
+    {
+      "type": "node",
+      "id": 140277169,
+      "name": "Gasolinera Carrefour",
+      "coordinates": [
+        1.8495169,
+        42.0952807
+      ]
+    },
+    {
+      "type": "node",
+      "id": 5327558996,
+      "name": "Gasolinera Carrefour",
+      "coordinates": [
+        2.0904219,
+        41.3342337
+      ]
+    },
+    {
+      "type": "node",
+      "id": 7780217030,
+      "name": "Gasolinera Carrefour",
+      "coordinates": [
+        2.3737558,
+        41.6377324
+      ]
+    },
+    {
+      "type": "node",
       "id": 10707807152,
       "name": "Gasolinera Carrefour",
       "coordinates": [
         1.2049057,
         41.127684
+      ]
+    },
+    {
+      "type": "way",
+      "id": 386874875,
+      "name": "Gasolinera Carrefour",
+      "coordinates": [
+        2.227749903,
+        41.45725105
+      ]
+    },
+    {
+      "type": "way",
+      "id": 1020575103,
+      "name": "Gasolinera Carrefour",
+      "coordinates": [
+        1.616940047,
+        41.5899458
+      ]
+    },
+    {
+      "type": "way",
+      "id": 1417160207,
+      "name": "Gasolinera de Servicios Logísticos de Combustibles de Aviación",
+      "coordinates": [
+        4.2264253,
+        39.8702277
+      ]
+    },
+    {
+      "type": "way",
+      "id": 1417160208,
+      "name": "Gasolinera Eroski",
+      "coordinates": [
+        4.2591574,
+        39.8588824
+      ]
+    },
+    {
+      "type": "way",
+      "id": 1505290994,
+      "name": "Gasolinera EROSKI",
+      "coordinates": [
+        1.321759786,
+        38.97584515
+      ]
+    },
+    {
+      "type": "node",
+      "id": 4430971091,
+      "name": "Gasolinera Low Cost La Sagrera",
+      "coordinates": [
+        2.2025886,
+        41.4275882
+      ]
+    },
+    {
+      "type": "way",
+      "id": 599416261,
+      "name": "Gasolinera Prats - Repsol",
+      "coordinates": [
+        1.096914282,
+        41.1566986
+      ]
+    },
+    {
+      "type": "way",
+      "id": 710892996,
+      "name": "Gasolinera Punta Solera",
+      "coordinates": [
+        2.023835471,
+        41.48287785
+      ]
+    },
+    {
+      "type": "node",
+      "id": 3709460528,
+      "name": "Gasolinera Sorli Cabrils",
+      "coordinates": [
+        2.3713442,
+        41.521932
       ]
     },
     {
