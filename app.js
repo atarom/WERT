@@ -1,14 +1,14 @@
 import {state} from './state.js';
 import {$,els} from './dom.js';
-import {parseAccepted,parsePostpass,objectKeyFor,acceptedToItem,isCompleteItem,trackedDifferences,sameState,trackedState,payloadFromItems} from './elements.js';
-import {compileQuery,loadJson,getPostpassData,getPostpassCacheStatus,getOkCheckData,getOkCheckCacheStatus,getMonitorData,getMonitorCacheStatus,getMonitorDetailData,getMonitorSnapshotData,isMonitorTask} from './postpass.js';
+import {parseAccepted,parsePostpass} from './elements.js';
+import {compileQuery,loadJson,getPostpassData,getPostpassCacheStatus,getMonitorCacheStatus,isMonitorTask} from './postpass.js';
 import {rebuildCollections,hasUnsavedChanges,buildResultPayload,markCurrentChangesSaved,clearSessionChanges} from './changes.js';
 import {createMap,renderMap,setMapHooks} from './map.js';
 import {showError,clearError,renderList,renderCounters,renderTabs,renderChangesDialog,renderProposalManager,renderInfo,renderRegexTest} from './ui.js';
 import {activity} from './activity.js';
 import {downloadText,copyText,stringifyJson} from './io.js';
 import {refreshBaseHash,proposalFilename,buildProposalPayload,importProposalFiles,buildMergedPayload} from './proposals.js';
-import {compareMonitorPayload} from './monitor.js';
+import {getOkBaseItems,setOkCheckBase,performOkCheck,startOkCheckClock,wireOkCheck,performMonitorCheck,renderSnapshotAdmin,resetSnapshotAdmin,wireMonitorSnapshot} from './monitor.js';
 function renderAll(){
   renderTabs();
   renderCounters();
@@ -18,16 +18,8 @@ function renderAll(){
 setMapHooks({renderAll,renderList});
 let reloadTimer=null;
 let refreshBusy=false;
-let okCheckTimer=null;
-let okCheckBusy=false;
-let okCheckButton=null;
-let okBaseItems=[];
-let okBaseInconsistencies=[];
-let okBaseRawCount=0;
-let snapshotPreview=null;
-let snapshotBusy=false;
 function reloadCacheStatus(){
-  return isMonitorTask()?getMonitorCacheStatus(okBaseItems):getPostpassCacheStatus();
+  return isMonitorTask()?getMonitorCacheStatus(getOkBaseItems()):getPostpassCacheStatus();
 }
 function updateReloadButton(){
   if(!state.config?.postpass)return;
@@ -63,251 +55,6 @@ function startReloadClock(){
   updateReloadButton();
   if(refreshBusy||!reloadCacheStatus().fresh)return;
   reloadTimer=setInterval(()=>{updateReloadButton();if(!reloadCacheStatus().fresh){clearInterval(reloadTimer);reloadTimer=null;}},250);
-}
-function ensureOkCheckButton(){
-  if(okCheckButton)return okCheckButton;
-  okCheckButton=document.createElement('button');
-  okCheckButton.id='verify-ok-btn';
-  okCheckButton.className='button button-ghost';
-  okCheckButton.type='button';
-  okCheckButton.textContent='Comprova OK';
-  els.reloadBtn.insertAdjacentElement('afterend',okCheckButton);
-  okCheckButton.addEventListener('click',async()=>{
-    if(okCheckBusy||!okBaseItems.length||getOkCheckCacheStatus(okBaseItems).fresh)return;
-    clearError();
-    activity.begin('Comprovant elements OK',`Verificant ${okBaseItems.length} elements per type + id`);
-    try{
-      const summary=await performOkCheck(true);
-      activity.done(formatOkCheckSummary(summary));
-    }catch(error){
-      showError(`No s’han pogut comprovar els elements OK. ${error?.message||error}`);
-      activity.fail('No s’han pogut comprovar els elements OK',error);
-    }
-  });
-  updateOkCheckButton();
-  return okCheckButton;
-}
-function updateOkCheckButton(){
-  if(!okCheckButton)return;
-  okCheckButton.classList.toggle('hidden',isMonitorTask());
-  if(isMonitorTask())return;
-  const compact=window.matchMedia('(max-width:760px)').matches;
-  if(okCheckBusy){
-    okCheckButton.disabled=true;
-    okCheckButton.textContent=compact?'OK…':'Comprovant OK…';
-    okCheckButton.title='Comprovació dels elements OK en curs';
-    return;
-  }
-  if(!okBaseItems.length){
-    okCheckButton.disabled=true;
-    okCheckButton.textContent=compact?'OK':'Comprova OK';
-    okCheckButton.title='No hi ha elements OK vàlids per comprovar';
-    return;
-  }
-  const status=getOkCheckCacheStatus(okBaseItems);
-  if(status.fresh){
-    const seconds=Math.max(1,Math.ceil(status.remainingMs/1000));
-    okCheckButton.disabled=true;
-    okCheckButton.textContent=compact?`OK ${seconds}s`:`Comprova OK ${seconds}s`;
-    okCheckButton.title=`Comprovació recent. Nova consulta disponible en ${seconds} s`;
-    return;
-  }
-  okCheckButton.disabled=false;
-  okCheckButton.textContent=compact?'OK':'Comprova OK';
-  okCheckButton.title=`Comprova que els elements de ${state.config?.elementsFile||'la base OK'} existeixen i mantenen els tags controlats`;
-}
-function startOkCheckClock(){
-  clearInterval(okCheckTimer);
-  okCheckTimer=null;
-  updateOkCheckButton();
-  if(isMonitorTask())return;
-  if(okCheckBusy||!okBaseItems.length||!getOkCheckCacheStatus(okBaseItems).fresh)return;
-  okCheckTimer=setInterval(()=>{updateOkCheckButton();if(!getOkCheckCacheStatus(okBaseItems).fresh){clearInterval(okCheckTimer);okCheckTimer=null;}},250);
-}
-function cloneBaseIssue(issue){
-  return{...issue,candidates:[...(issue.candidates||[])]};
-}
-function setOkCheckBase(parsed){
-  okBaseItems=parsed.items.map(item=>({...item,tags:{...(item.tags||{})}}));
-  okBaseInconsistencies=parsed.inconsistencies.map(cloneBaseIssue);
-  okBaseRawCount=Number(parsed.rawCount)||okBaseItems.length+okBaseInconsistencies.length;
-  state.accepted=okBaseItems.map(item=>({...item,tags:{...(item.tags||{})}}));
-  state.inconsistencies=okBaseInconsistencies.map(cloneBaseIssue);
-  snapshotPreview=null;
-  renderSnapshotAdmin();
-  startOkCheckClock();
-}
-function makeOkCheckIssue(item,row,kind){
-  const objectKey=objectKeyFor(item);
-  const currentCandidate=row?acceptedToItem({type:item.type,id:item.id,coordinates:item.coordinates,tags:row.tags}):null;
-  const current=currentCandidate&&isCompleteItem(currentCandidate)?currentCandidate:null;
-  const differences=currentCandidate?trackedDifferences(item,currentCandidate):[];
-  const detail=differences.map(change=>`${change.key}: ${JSON.stringify(change.before)} → ${JSON.stringify(change.after)}`).join(' · ');
-  const message=kind==='osm-missing'?`L’objecte ${item.type} ${item.id} no apareix a la base actual de Postpass i s’ha marcat per eliminar d’OK.`:`Han canviat els tags controlats${detail?`: ${detail}`:''}. S’ha marcat per eliminar d’OK.`;
-  return{issueId:`issue:okcheck:${objectKey}`,objectKey,lookupObjectKey:objectKey,type:item.type,id:item.id,name:item.name,coordinates:item.coordinates,candidates:[item],current,duplicateCount:1,sourceCount:1,kind,message,rawEntries:[],tags:item.tags||{},signature:JSON.stringify({objectKey,kind,expected:trackedState(item),current:currentCandidate?trackedState(currentCandidate):null})};
-}
-function applyOkCheckPayload(payload){
-  if(!Array.isArray(payload?.result))throw new Error('La resposta de comprovació no conté un array result vàlid.');
-  const previousIssues=new Map(state.inconsistencies.map(issue=>[issue.objectKey,issue]));
-  const byObject=new Map();
-  for(const row of payload.result){
-    const type=String(row?.type||'').toLowerCase();
-    const id=Number(row?.id);
-    if(!['node','way','relation'].includes(type)||!Number.isSafeInteger(id)||id<=0)continue;
-    byObject.set(`${type}:${id}`,row);
-  }
-  const accepted=[];
-  const issues=[];
-  let missing=0;
-  let changed=0;
-  for(const item of okBaseItems){
-    const objectKey=objectKeyFor(item);
-    const row=byObject.get(objectKey);
-    if(!row){
-      missing++;
-      issues.push(makeOkCheckIssue(item,null,'osm-missing'));
-      continue;
-    }
-    const current=acceptedToItem({type:item.type,id:item.id,coordinates:item.coordinates,tags:row.tags});
-    if(!sameState(item,current)){
-      changed++;
-      issues.push(makeOkCheckIssue(item,row,'osm-state-changed'));
-      continue;
-    }
-    accepted.push({...item,tags:{...item.tags}});
-  }
-  state.accepted=accepted;
-  state.inconsistencies=[...okBaseInconsistencies.map(cloneBaseIssue),...issues];
-  const validIssueKeys=new Set(state.inconsistencies.map(issue=>issue.objectKey));
-  for(const key of[...state.inconsistencyResolutions.keys()])if(!validIssueKeys.has(key))state.inconsistencyResolutions.delete(key);
-  for(const issue of issues){
-    const previous=previousIssues.get(issue.objectKey);
-    if(!previous||previous.signature!==issue.signature||!state.inconsistencyResolutions.has(issue.objectKey))state.inconsistencyResolutions.set(issue.objectKey,{desired:null});
-  }
-  return{checked:okBaseItems.length,ok:accepted.length,missing,changed,issues:issues.length};
-}
-function formatOkCheckSummary(summary){
-  return`Comprovació OK: ${summary.checked} comprovats · ${summary.ok} correctes · ${summary.missing} inexistents · ${summary.changed} estats canviats`;
-}
-async function performOkCheck(rebuildNow){
-  okCheckBusy=true;
-  updateOkCheckButton();
-  try{
-    const result=await getOkCheckData(okBaseItems);
-    activity.step(result.source==='cache'?'Comprovació OK recuperada de la memòria cau':result.source==='empty'?'No hi ha elements OK per comprovar':'Nova comprovació OK rebuda',`Comparant type, id i tags controlats amb ${state.config.elementsFile}`);
-    const summary=applyOkCheckPayload(result.payload);
-    activity.step(formatOkCheckSummary(summary),summary.issues?'Classificant incidències com a eliminar d’OK':'Tots els elements OK continuen vigents');
-    if(rebuildNow){
-      rebuildCollections();
-      renderAll();
-    }
-    return summary;
-  }finally{
-    okCheckBusy=false;
-    startOkCheckClock();
-  }
-}
-async function performMonitorCheck(){
-  const result=await getMonitorData(okBaseItems);
-  activity.step(result.source==='cache'?'Monitor recuperat de la memòria cau':result.source==='empty'?'No hi ha objectes per monitoritzar':'Nova comprovació monitor rebuda',`Comparant ${okBaseItems.length} objectes per type + id i tags controlats`);
-  const comparison=compareMonitorPayload(okBaseItems,okBaseInconsistencies,result.payload);
-  state.accepted=okBaseItems.map(item=>({...item,tags:{...(item.tags||{})}}));
-  state.inconsistencies=comparison.issues;
-  state.rawFeatures=comparison.changed;
-  state.postpassTimestamp=comparison.timestamp;
-  if(comparison.changed.length){
-    activity.step(`${comparison.changed.length} canvis detectats`,'Carregant geometria i tags complets només dels objectes modificats');
-    try{
-      const detailPayload=await getMonitorDetailData(comparison.changed);
-      const detail=parsePostpass(detailPayload);
-      const detailByObject=new Map(detail.items.map(item=>[objectKeyFor(item),item]));
-      state.rawFeatures=comparison.changed.map(item=>detailByObject.get(objectKeyFor(item))||item);
-      state.postpassTimestamp=detail.timestamp||comparison.timestamp;
-      activity.step(`Detall carregat per ${detail.items.length} objectes modificats`,'Preparant la revisió');
-    }catch(error){
-      activity.step(`No s’ha pogut carregar el detall dels canvis: ${error?.message||error}`,'Es mostraran amb els tags controlats i les coordenades guardades');
-    }
-  }
-  rebuildCollections();
-  return comparison.summary;
-}
-function snapshotSourceAvailable(){
-  const relationId=Number(state.config?.monitor?.sourceRelationId);
-  return isMonitorTask()&&Number.isSafeInteger(relationId)&&relationId>0;
-}
-function renderSnapshotAdmin(){
-  if(!els.snapshotAdminSection)return;
-  const available=snapshotSourceAvailable();
-  els.snapshotAdminSection.classList.toggle('hidden',!available);
-  if(!available)return;
-  const relationId=Number(state.config.monitor.sourceRelationId);
-  const required=Array.isArray(state.config.monitor.sourceRequireTags)&&state.config.monitor.sourceRequireTags.length?state.config.monitor.sourceRequireTags:state.config.trackedTags||[];
-  els.snapshotSourceText.textContent=`Font: relació OSM ${relationId} · tags obligatoris: ${required.join(', ')||'—'}.`;
-  els.snapshotCurrentCount.textContent=String(okBaseRawCount||okBaseItems.length);
-  els.snapshotCompareBtn.disabled=snapshotBusy;
-  els.snapshotCompareBtn.textContent=snapshotBusy?'Preparant…':'Compara i prepara snapshot';
-  els.snapshotDownloadBtn.disabled=snapshotBusy||!snapshotPreview;
-  if(!snapshotPreview){
-    for(const element of[els.snapshotNewCount,els.snapshotAddedCount,els.snapshotRemovedCount,els.snapshotChangedCount,els.snapshotUnchangedCount])element.textContent='—';
-    els.snapshotStatus.textContent=okBaseInconsistencies.length?`El snapshot actual conté ${okBaseInconsistencies.length} inconsistència${okBaseInconsistencies.length===1?'':'es'}. La regeneració partirà directament de l’estat actual d’OSM.`:'Encara no s’ha generat cap previsualització.';
-    return;
-  }
-  const summary=snapshotPreview.summary;
-  els.snapshotNewCount.textContent=String(summary.next);
-  els.snapshotAddedCount.textContent=String(summary.added);
-  els.snapshotRemovedCount.textContent=String(summary.removed);
-  els.snapshotChangedCount.textContent=String(summary.changed);
-  els.snapshotUnchangedCount.textContent=String(summary.unchanged);
-  const timestamp=snapshotPreview.timestamp?new Date(snapshotPreview.timestamp).toLocaleString('ca-ES',{dateStyle:'medium',timeStyle:'medium'}):'sense timestamp';
-  const warnings=[];
-  if(snapshotPreview.invalid)warnings.push(`${snapshotPreview.invalid} resultat${snapshotPreview.invalid===1?'':'s'} invàlid${snapshotPreview.invalid===1?'':'s'} ignorat${snapshotPreview.invalid===1?'':'s'}`);
-  if(okBaseInconsistencies.length)warnings.push(`${okBaseInconsistencies.length} inconsistència${okBaseInconsistencies.length===1?'':'es'} al snapshot actual`);
-  els.snapshotStatus.textContent=`Previsualització preparada amb dades de ${timestamp}.${warnings.length?` ${warnings.join(' · ')}.`:''}`;
-}
-function compareSnapshotItems(nextItems){
-  const currentByObject=new Map(okBaseItems.map(item=>[objectKeyFor(item),item]));
-  const nextByObject=new Map(nextItems.map(item=>[objectKeyFor(item),item]));
-  let added=0;
-  let removed=0;
-  let changed=0;
-  let unchanged=0;
-  for(const[itemKey,item]of nextByObject){
-    const current=currentByObject.get(itemKey);
-    if(!current){added++;continue;}
-    if(sameState(current,item))unchanged++;
-    else changed++;
-  }
-  for(const itemKey of currentByObject.keys())if(!nextByObject.has(itemKey))removed++;
-  return{current:okBaseRawCount||okBaseItems.length,next:nextByObject.size,added,removed,changed,unchanged};
-}
-async function prepareMonitorSnapshot(){
-  if(!snapshotSourceAvailable())throw new Error('La tasca no té una font de snapshot configurada.');
-  snapshotBusy=true;
-  snapshotPreview=null;
-  renderSnapshotAdmin();
-  activity.begin('Regenerant snapshot',`Consultant la font actual de ${state.config.name}`);
-  try{
-    const source=await getMonitorSnapshotData();
-    if(!source.features.length&&okBaseItems.length)throw new Error('La font no ha retornat cap objecte. No es generarà un snapshot buit.');
-    activity.step(`Font rebuda: ${source.features.length} resultats`,'Validant objectes i preparant el JSON compacte');
-    const parsed=parsePostpass(source);
-    if(!parsed.items.length&&okBaseItems.length)throw new Error('La font no ha produït cap objecte vàlid. No es generarà un snapshot buit.');
-    const payload=payloadFromItems(parsed.items);
-    const summary=compareSnapshotItems(parsed.items);
-    const invalid=Math.max(0,source.features.length-parsed.items.length);
-    snapshotPreview={payload,summary,invalid,timestamp:parsed.timestamp};
-    renderSnapshotAdmin();
-    activity.done(`Snapshot preparat: ${summary.next} objectes · ${summary.added} nous · ${summary.removed} ja no hi són · ${summary.changed} canviats`);
-  }catch(error){
-    snapshotPreview=null;
-    renderSnapshotAdmin();
-    showError(`No s’ha pogut preparar el snapshot. ${error?.message||error}`);
-    activity.fail('No s’ha pogut preparar el snapshot',error);
-    throw error;
-  }finally{
-    snapshotBusy=false;
-    renderSnapshotAdmin();
-  }
 }
 function setMode(mode){
   if(isMonitorTask()&&mode==='accepted')mode='pending';
@@ -355,7 +102,7 @@ function selectTaskConfig(){
   state.config=task;
 }
 async function handleProposalFiles(files){
-  activity.begin('Important propostes',`${files.length} fitxer${files.length===1?'':'s'} seleccionat${files.length===1?'':'s'}`);
+  activity.begin('Important propostes',`${files.length} fitxer${pluralS(files.length)} seleccionat${pluralS(files.length)}`);
   try{
     const messages=await importProposalFiles(files);
     els.proposalStatus.textContent=messages.join(' · ');
@@ -363,10 +110,70 @@ async function handleProposalFiles(files){
     renderCounters();
     renderProposalManager();
     const merged=buildMergedPayload();
-    activity.done(`Importació acabada: ${state.importedProposals.length} proposta${state.importedProposals.length===1?'':'es'} i ${merged.unresolved.length} decisió${merged.unresolved.length===1?'':'s'} pendent${merged.unresolved.length===1?'':'s'}`);
+    activity.done(`Importació acabada: ${state.importedProposals.length} proposta${state.importedProposals.length===1?'':'es'} i ${merged.unresolved.length} decisió${pluralS(merged.unresolved.length)} pendent${pluralS(merged.unresolved.length)}`);
   }catch(error){
     activity.fail('Error en importar propostes',error);
     throw error;
+  }
+}
+function pluralS(count){
+  return count===1?'':'s';
+}
+function downloadJson(filename,payload){
+  downloadText(filename,stringifyJson(payload),'application/json;charset=utf-8');
+}
+function copyJson(payload,button,label){
+  return copyText(stringifyJson(payload),button,label);
+}
+function failUnresolved(merged){
+  const count=merged.unresolved.length;
+  if(!count)return false;
+  activity.fail('Hi ha decisions pendents',`${count} decisió${pluralS(count)} pendent${pluralS(count)}`);
+  return true;
+}
+async function exportProposal(copy){
+  activity.begin(copy?'Copiant proposta WERT':'Generant proposta WERT',copy?'Generant contingut JSON':'Recollint altes, baixes, resolucions i estat base');
+  try{
+    const proposal=buildProposalPayload();
+    activity.step(`Proposta ${proposal.id} preparada`,copy?'Demanant accés al porta-retalls':'Generant fitxer JSON');
+    if(copy)await copyJson(proposal,els.copyProposalBtn,'Copiada');
+    else downloadJson(proposalFilename(proposal),proposal);
+    markCurrentChangesSaved();
+    activity.done(copy?'Proposta copiada al porta-retalls':`Proposta descarregada: ${proposal.changes.add.length} altes, ${proposal.changes.remove.length} baixes i ${proposal.changes.resolve.length} resolucions`);
+  }catch(error){
+    if(copy)showError('El navegador no ha permès copiar la proposta al porta-retalls.');
+    activity.fail(copy?'No s’ha pogut copiar la proposta':'No s’ha pogut generar la proposta',error);
+  }
+}
+async function exportOk(copy){
+  const filename=state.config.elementsFile;
+  activity.begin(`${copy?'Copiant':'Generant'} ${filename}`,'Aplicant els canvis de la sessió');
+  try{
+    const result=buildResultPayload();
+    activity.step(`Fitxer resultant: ${result.elements.length} elements`,copy?'Demanant accés al porta-retalls':'Preparant descàrrega');
+    if(copy)await copyJson(result,els.copyOkBtn,'Copiat');
+    else downloadJson(filename,result);
+    markCurrentChangesSaved();
+    activity.done(`${filename} ${copy?'copiat':'descarregat'}`);
+  }catch(error){
+    if(copy)showError('El navegador no ha permès copiar el JSON al porta-retalls.');
+    activity.fail(`${copy?'No s’ha pogut copiar':'No s’ha pogut generar'} ${filename}`,error);
+  }
+}
+async function exportMerged(copy){
+  const filename=state.config.elementsFile;
+  activity.begin(copy?'Copiant consolidat':'Consolidant propostes',copy?'Calculant fusió de propostes':`Calculant fusió sobre ${filename}`);
+  try{
+    const merged=buildMergedPayload();
+    activity.step(`Fusió calculada: ${merged.payload.elements.length} elements`);
+    if(failUnresolved(merged))return;
+    activity.step('Sense decisions pendents',copy?'Demanant accés al porta-retalls':`Preparant ${filename} consolidat`);
+    if(copy)await copyJson(merged.payload,els.copyMergedBtn,'Copiat');
+    else downloadJson(filename,merged.payload);
+    activity.done(copy?'Consolidat copiat al porta-retalls':`${filename} consolidat descarregat`);
+  }catch(error){
+    if(copy)showError('El navegador no ha permès copiar el consolidat al porta-retalls.');
+    activity.fail(copy?'No s’ha pogut copiar el consolidat':'No s’ha pogut consolidar',error);
   }
 }
 async function refreshData(resetActivity=true){
@@ -378,6 +185,7 @@ async function refreshData(resetActivity=true){
     const acceptedPayload=await loadJson(state.config.elementsFile);
     const acceptedParsed=parseAccepted(acceptedPayload);
     setOkCheckBase(acceptedParsed);
+    resetSnapshotAdmin();
     activity.step(`${state.config.elementsFile} carregat: ${state.accepted.length} acceptats i ${state.inconsistencies.length} inconsistència${state.inconsistencies.length===1?'':'es'}`,'Calculant empremta SHA-256 de la base');
     await refreshBaseHash();
     if(isMonitorTask()){
@@ -416,12 +224,16 @@ async function refreshData(resetActivity=true){
     throw error;
   }finally{
     refreshBusy=false;
-    startReloadClock();
-    startOkCheckClock();
+    startClocks();
   }
 }
+function startClocks(){
+  startReloadClock();
+  startOkCheckClock();
+}
 function wireEvents(){
-  ensureOkCheckButton();
+  wireOkCheck(renderAll);
+  wireMonitorSnapshot();
   els.pendingTab.addEventListener('click',()=>setMode('pending'));
   els.acceptedTab.addEventListener('click',()=>setMode('accepted'));
   els.inconsistenciesTab.addEventListener('click',()=>setMode('inconsistency'));
@@ -445,97 +257,23 @@ function wireEvents(){
   els.changesBtn.addEventListener('click',()=>{renderChangesDialog();els.changesDialog.showModal();});
   for(const button of document.querySelectorAll('[data-close-dialog]'))button.addEventListener('click',()=>$(button.dataset.closeDialog)?.close());
   els.copyQueryBtn.addEventListener('click',async()=>{try{await copyText(compileQuery(),els.copyQueryBtn,'Copiada');}catch{showError('El navegador no ha permès copiar la consulta al porta-retalls.');}});
-  els.snapshotCompareBtn?.addEventListener('click',async()=>{if(snapshotBusy)return;try{await prepareMonitorSnapshot();}catch{}});
-  els.snapshotDownloadBtn?.addEventListener('click',()=>{
-    if(!snapshotPreview)return;
-    const message=`Es descarregarà un ${state.config.elementsFile} complet amb l’estat actual d’OSM. Això farà que tots els noms actuals passin a ser la nova referència del monitor. Vols continuar?`;
-    if(!window.confirm(message))return;
-    downloadText(state.config.elementsFile,stringifyJson(snapshotPreview.payload),'application/json;charset=utf-8');
-    els.snapshotStatus.textContent=`${state.config.elementsFile} descarregat. Substitueix el fitxer del repositori només si vols adoptar aquest snapshot com a nova referència.`;
-  });
-  els.downloadProposalBtn.addEventListener('click',()=>{
-    activity.begin('Generant proposta WERT','Recollint altes, baixes, resolucions i estat base');
-    try{
-      const proposal=buildProposalPayload();
-      activity.step(`Proposta ${proposal.id} preparada`,'Generant fitxer JSON');
-      downloadText(proposalFilename(proposal),stringifyJson(proposal),'application/json;charset=utf-8');
-      markCurrentChangesSaved();
-      activity.done(`Proposta descarregada: ${proposal.changes.add.length} altes, ${proposal.changes.remove.length} baixes i ${proposal.changes.resolve.length} resolucions`);
-    }catch(error){activity.fail('No s’ha pogut generar la proposta',error);}
-  });
-  els.copyProposalBtn.addEventListener('click',async()=>{
-    activity.begin('Copiant proposta WERT','Generant contingut JSON');
-    try{
-      const proposal=buildProposalPayload();
-      activity.step(`Proposta ${proposal.id} preparada`,'Demanant accés al porta-retalls');
-      await copyText(stringifyJson(proposal),els.copyProposalBtn,'Copiada');
-      markCurrentChangesSaved();
-      activity.done('Proposta copiada al porta-retalls');
-    }catch(error){
-      showError('El navegador no ha permès copiar la proposta al porta-retalls.');
-      activity.fail('No s’ha pogut copiar la proposta',error);
-    }
-  });
-  els.downloadOkBtn.addEventListener('click',()=>{
-    activity.begin(`Generant ${state.config.elementsFile}`,'Aplicant els canvis de la sessió');
-    try{
-      const result=buildResultPayload();
-      activity.step(`Fitxer resultant: ${result.elements.length} elements`,'Preparant descàrrega');
-      downloadText(state.config.elementsFile,stringifyJson(result),'application/json;charset=utf-8');
-      markCurrentChangesSaved();
-      activity.done(`${state.config.elementsFile} descarregat`);
-    }catch(error){activity.fail(`No s’ha pogut generar ${state.config.elementsFile}`,error);}
-  });
-  els.copyOkBtn.addEventListener('click',async()=>{
-    activity.begin(`Copiant ${state.config.elementsFile}`,'Aplicant els canvis de la sessió');
-    try{
-      const result=buildResultPayload();
-      activity.step(`Fitxer resultant: ${result.elements.length} elements`,'Demanant accés al porta-retalls');
-      await copyText(stringifyJson(result),els.copyOkBtn,'Copiat');
-      markCurrentChangesSaved();
-      activity.done(`${state.config.elementsFile} copiat`);
-    }catch(error){
-      showError('El navegador no ha permès copiar el JSON al porta-retalls.');
-      activity.fail(`No s’ha pogut copiar ${state.config.elementsFile}`,error);
-    }
-  });
+  els.downloadProposalBtn.addEventListener('click',()=>exportProposal(false));
+  els.copyProposalBtn.addEventListener('click',()=>exportProposal(true));
+  els.downloadOkBtn.addEventListener('click',()=>exportOk(false));
+  els.copyOkBtn.addEventListener('click',()=>exportOk(true));
   els.proposalDropzone.addEventListener('click',()=>els.proposalFileInput.click());
   els.proposalFileInput.addEventListener('change',async()=>{await handleProposalFiles([...els.proposalFileInput.files]);els.proposalFileInput.value='';});
   els.proposalDropzone.addEventListener('dragover',event=>{event.preventDefault();els.proposalDropzone.classList.add('dragover');});
   els.proposalDropzone.addEventListener('dragleave',()=>els.proposalDropzone.classList.remove('dragover'));
   els.proposalDropzone.addEventListener('drop',async event=>{event.preventDefault();els.proposalDropzone.classList.remove('dragover');await handleProposalFiles([...event.dataTransfer.files].filter(file=>file.name.toLowerCase().endsWith('.json')));});
   els.clearProposalsBtn.addEventListener('click',()=>{state.importedProposals=[];state.conflictResolutions.clear();els.proposalStatus.textContent='Sense propostes importades.';renderCounters();renderProposalManager();});
-  els.downloadMergedBtn.addEventListener('click',()=>{
-    activity.begin('Consolidant propostes',`Calculant fusió sobre ${state.config.elementsFile}`);
-    try{
-      const merged=buildMergedPayload();
-      activity.step(`Fusió calculada: ${merged.payload.elements.length} elements`);
-      if(merged.unresolved.length){activity.fail('Hi ha decisions pendents',`${merged.unresolved.length} decisió${merged.unresolved.length===1?'':'s'} pendent${merged.unresolved.length===1?'':'s'}`);return;}
-      activity.step('Sense decisions pendents',`Preparant ${state.config.elementsFile} consolidat`);
-      downloadText(state.config.elementsFile,stringifyJson(merged.payload),'application/json;charset=utf-8');
-      activity.done(`${state.config.elementsFile} consolidat descarregat`);
-    }catch(error){activity.fail('No s’ha pogut consolidar',error);}
-  });
-  els.copyMergedBtn.addEventListener('click',async()=>{
-    activity.begin('Copiant consolidat','Calculant fusió de propostes');
-    try{
-      const merged=buildMergedPayload();
-      activity.step(`Fusió calculada: ${merged.payload.elements.length} elements`);
-      if(merged.unresolved.length){activity.fail('Hi ha decisions pendents',`${merged.unresolved.length} decisió${merged.unresolved.length===1?'':'s'} pendent${merged.unresolved.length===1?'':'s'}`);return;}
-      activity.step('Sense decisions pendents','Demanant accés al porta-retalls');
-      await copyText(stringifyJson(merged.payload),els.copyMergedBtn,'Copiat');
-      activity.done('Consolidat copiat al porta-retalls');
-    }catch(error){
-      showError('El navegador no ha permès copiar el consolidat al porta-retalls.');
-      activity.fail('No s’ha pogut copiar el consolidat',error);
-    }
-  });
+  els.downloadMergedBtn.addEventListener('click',()=>exportMerged(false));
+  els.copyMergedBtn.addEventListener('click',()=>exportMerged(true));
   els.discardBtn.addEventListener('click',discardChanges);
   window.addEventListener('beforeunload',event=>{if(!hasUnsavedChanges())return;event.preventDefault();event.returnValue='';});
   window.addEventListener('storage',event=>{if(event.key?.startsWith('wert:postpass-cache:v2:')||event.key?.startsWith('wert:monitor-cache:v1:'))startReloadClock();if(event.key?.startsWith('wert:okcheck-cache:v1:'))startOkCheckClock();});
-  window.addEventListener('focus',()=>{startReloadClock();startOkCheckClock();});
-  window.addEventListener('resize',updateOkCheckButton);
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden){startReloadClock();startOkCheckClock();}});
+  window.addEventListener('focus',startClocks);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)startClocks();});
 }
 async function start(){
   activity.step('Mòduls JavaScript carregats','Carregant config.json');
