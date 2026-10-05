@@ -1,6 +1,6 @@
 import {activity} from './activity.js';
 import {state} from './state.js';
-import {acceptedToItem,isCompleteItem,keyFor,objectKeyFor,normalizeType,elementForFile,payloadFromItems,sameState,issueSignature,itemDisplayLabel} from './elements.js';
+import {fileElementToItem,fileTypeCode,fileTypeToInternal,isCompleteItem,keyFor,objectKeyFor,elementForFile,payloadFromItems,sameState,issueSignature,itemDisplayLabel} from './elements.js';
 import {getAddedItems,getRemovedItems,getResolvedInconsistencies} from './changes.js';
 function baseRepresentation(){
   return JSON.stringify({taskId:state.taskId,accepted:payloadFromItems(state.accepted).elements,inconsistencies:state.inconsistencies.map(issue=>({objectKey:issue.objectKey,signature:issueSignature(issue)})).sort((a,b)=>a.objectKey.localeCompare(b.objectKey))});
@@ -33,14 +33,14 @@ export function buildProposalPayload(){
     const objectKey=objectKeyFor(item);
     if(touched.has(objectKey))continue;
     const current=currentByObject.get(objectKey)||null;
-    touched.set(objectKey,{type:item.type,id:typeof item.id==='number'?item.id:Number.isSafeInteger(Number(item.id))?Number(item.id):String(item.id),accepted:current?elementForFile(current):null});
+    touched.set(objectKey,{type:fileTypeCode(item.type),id:typeof item.id==='number'?item.id:Number.isSafeInteger(Number(item.id))?Number(item.id):String(item.id),accepted:current?elementForFile(current):null});
   }
   const acceptedObjects=new Set(state.accepted.map(objectKeyFor));
   const extraIssues=state.inconsistencies.reduce((sum,issue)=>acceptedObjects.has(issue.objectKey)?sum:sum+(issue.sourceCount||issue.duplicateCount||1),0);
   return{format:'WERT-proposal',id:randomProposalId(),createdAt:new Date().toISOString(),taskId:state.taskId,taskName:state.config.name,base:{sha256:state.baseHash,elementsCount:state.accepted.length+extraIssues,elementsFile:state.config.elementsFile},baseState:[...touched.values()],source:{postpassTimestamp:state.postpassTimestamp},changes:{add:added.map(elementForFile),remove:removed.map(elementForFile),resolve:resolved.map(({issue,resolution})=>({issueKey:issue.objectKey,issueSignature:issueSignature(issue),desired:resolution.desired?elementForFile(resolution.desired):null}))}};
 }
 export function normalizeProposalItem(value){
-  const item=acceptedToItem(value);
+  const item=fileElementToItem(value);
   if(!isCompleteItem(item))throw new Error('La proposta conté un element no vàlid o sense coordenades.');
   return item;
 }
@@ -82,7 +82,7 @@ export function normalizeProposal(payload,filename){
   for(const objectKey of addByObject.keys())if(resolutionObjects.has(objectKey))throw new Error(`La proposta barreja un canvi normal i una resolució per a ${objectKey}.`);
   const normalizedBase=new Map();
   for(const entry of baseState){
-    const type=normalizeType(entry?.type);
+    const type=fileTypeToInternal(entry?.type);
     const idValue=entry?.id;
     if(!['node','way','relation'].includes(type)||idValue===undefined||idValue===null)throw new Error('La proposta conté un estat base no vàlid.');
     const objectKey=`${type}:${String(idValue)}`;

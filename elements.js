@@ -13,6 +13,19 @@ export function normalizeType(type){
   if(value==='r')return'relation';
   return value;
 }
+export function fileTypeCode(type){
+  const value=normalizeType(type);
+  if(value==='node')return'N';
+  if(value==='way')return'W';
+  if(value==='relation')return'R';
+  return'';
+}
+export function fileTypeToInternal(type){
+  if(type==='N')return'node';
+  if(type==='W')return'way';
+  if(type==='R')return'relation';
+  return'';
+}
 export function normalizeCoordinates(value){
   if(!Array.isArray(value)||value.length<2)return null;
   const lon=Number(value[0]);
@@ -75,6 +88,12 @@ export function acceptedToItem(value){
   const name=Object.prototype.hasOwnProperty.call(tags,displayTag)&&tags[displayTag]!==null&&tags[displayTag]!==undefined?String(tags[displayTag]):String(value?.name??'');
   return{type:normalizeType(value?.type),id:value?.id,name,coordinates:normalizeCoordinates(value?.coordinates),tags};
 }
+export function fileElementToItem(value){
+  const tags=normalizeTags(value?.tags);
+  const displayTag=displayTagKey();
+  const name=Object.prototype.hasOwnProperty.call(tags,displayTag)&&tags[displayTag]!==null&&tags[displayTag]!==undefined?String(tags[displayTag]):'';
+  return{type:fileTypeToInternal(value?.type),id:value?.id,name,coordinates:normalizeCoordinates(value?.coordinates),tags};
+}
 export function hasValidIdentity(item){
   const id=Number(item?.id);
   return['node','way','relation'].includes(item?.type)&&Number.isSafeInteger(id)&&id>0;
@@ -109,7 +128,7 @@ function compactTags(item){
   return tags;
 }
 function rawSnapshot(value,index){
-  const item=acceptedToItem(value);
+  const item=fileElementToItem(value);
   return{index:index+1,type:value?.type??null,id:value?.id??null,tags:compactTags(item),coordinates:Array.isArray(value?.coordinates)?value.coordinates:null};
 }
 function issueSignatureValue(objectKey,kind,rawEntries){
@@ -133,12 +152,13 @@ function malformedIssue(value,index,item){
   return{issueId:`issue:${objectKey}`,objectKey,lookupObjectKey:identityValid?objectKey:null,type:displayType,id:displayId,name:displayName,coordinates:identityValid&&coordsValid?item.coordinates:null,candidates:[],duplicateCount:1,sourceCount:1,kind:'invalid-data',message:reasons.join(' '),rawEntries,tags:item.tags||{},signature:issueSignatureValue(objectKey,'invalid-data',rawEntries)};
 }
 export function parseAccepted(payload){
-  const source=Array.isArray(payload)?payload:payload?.elements;
-  if(!Array.isArray(source))throw new Error(`${state.config?.elementsFile||'El fitxer OK'} ha de contenir un array o un objecte amb "elements".`);
+  const source=payload?.elements;
+  if(!payload||typeof payload!=='object'||Array.isArray(payload)||!Array.isArray(source))throw new Error(`${state.config?.elementsFile||'El fitxer OK'} ha de contenir un objecte JSON amb un array "elements".`);
+  if(source.some(value=>!['N','W','R'].includes(value?.type)))throw new Error(`${state.config?.elementsFile||'El fitxer OK'} només admet type "N", "W" o "R".`);
   const groups=new Map();
   const inconsistencies=[];
   source.forEach((value,index)=>{
-    const item=acceptedToItem(value);
+    const item=fileElementToItem(value);
     if(!hasValidIdentity(item)){inconsistencies.push(malformedIssue(value,index,item));return;}
     const objectKey=objectKeyFor(item);
     if(!groups.has(objectKey))groups.set(objectKey,[]);
@@ -172,7 +192,7 @@ export function parsePostpass(payload){
   return{items,timestamp:payload.postpass_properties?.timestamp||null};
 }
 export function elementForFile(item){
-  return{type:item.type,id:typeof item.id==='number'?item.id:Number.isSafeInteger(Number(item.id))?Number(item.id):String(item.id),coordinates:item.coordinates||null,tags:compactTags(item)};
+  return{type:fileTypeCode(item.type),id:typeof item.id==='number'?item.id:Number.isSafeInteger(Number(item.id))?Number(item.id):String(item.id),coordinates:item.coordinates||null,tags:compactTags(item)};
 }
 export function compareItemsByName(a,b){
   return String(a.name||'').localeCompare(String(b.name||''),'ca',{sensitivity:'base',numeric:true})||trackedStateText(a).localeCompare(trackedStateText(b),'ca',{sensitivity:'base',numeric:true})||String(a.type||'').localeCompare(String(b.type||''),'ca')||String(a.id).localeCompare(String(b.id),'ca',{numeric:true});
