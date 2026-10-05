@@ -2,7 +2,7 @@ const maplibregl=window.maplibregl;
 import {state} from './state.js';
 import './tagfilters.js';
 import {els} from './dom.js';
-import {keyFor,uiKeyFor,trackedStateText} from './elements.js';
+import {keyFor,uiKeyFor,trackedStateText,trackedDifferences,objectKeyFor} from './elements.js';
 import {currentAction,getCurrentItems,getFilteredItems,getInconsistencyChoices,getInconsistencyResolutionValue,setInconsistencyResolution} from './changes.js';
 import {osmViewUrl,osmEditUrl} from './osm.js';
 const hooks={renderAll:()=>{},renderList:()=>{}};
@@ -112,14 +112,25 @@ export function openPopup(item){
   const actions=document.createElement('div');
   actions.className='popup-actions';
   actions.append(linkButton('Veure a OSM',osmViewUrl(item)),linkButton('Editar amb iD',osmEditUrl(item)));
-  card.append(name,meta,tracked,actions);
+  card.append(name,meta,tracked);
+  if(state.config?.mode==='monitor'&&state.mode==='pending'){
+    const previous=state.accepted.find(candidate=>objectKeyFor(candidate)===objectKeyFor(item));
+    const differences=previous?trackedDifferences(previous,item):[];
+    if(differences.length){
+      const change=document.createElement('div');
+      change.className='popup-tracked-tags';
+      change.textContent=differences.map(entry=>`${entry.key}: ${entry.before??'(absent)'} → ${entry.after??'(absent)'}`).join(' · ');
+      card.append(change);
+    }
+  }
+  card.append(actions);
   if(item.issueId)appendIssuePopup(card,item);
   else{
     const review=document.createElement('button');
     review.type='button';
     review.className=`popup-review ${state.mode==='pending'?'add':'remove'}`;
     const active=Boolean(currentAction(item));
-    review.textContent=state.mode==='pending'?(active?'Desmarcar OK':'Marcar OK'):(active?'Conservar':'Retirar');
+    review.textContent=state.mode==='pending'?(state.config?.mode==='monitor'?(active?'Desmarcar canvi':'Acceptar canvi'):(active?'Desmarcar OK':'Marcar OK')):(active?'Conservar':'Retirar');
     review.addEventListener('click',()=>{
       toggleReview(item);
       const fresh=getCurrentItems().find(candidate=>keyFor(candidate)===keyFor(item));

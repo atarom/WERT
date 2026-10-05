@@ -78,16 +78,16 @@ export function getInconsistencyChoices(issue){
     const value=`item:${keyFor(item)}`;
     if(seen.has(value))continue;
     seen.add(value);
-    choices.push({value,label:`Conservar: ${itemDisplayLabel(item)}`,item});
+    choices.push({value,label:`${state.config?.mode==='monitor'?'Conservar al monitor':'Conservar'}: ${itemDisplayLabel(item)}`,item});
   }
   if(issue.current){
     const value=`item:${keyFor(issue.current)}`;
     if(!seen.has(value)){
       seen.add(value);
-      choices.push({value,label:`Fer OK l'actual: ${itemDisplayLabel(issue.current)}`,item:issue.current});
+      choices.push({value,label:`${state.config?.mode==='monitor'?'Acceptar l’estat actual':"Fer OK l'actual"}: ${itemDisplayLabel(issue.current)}`,item:issue.current});
     }
   }
-  choices.push({value:'remove',label:"Eliminar d'OK",item:null});
+  choices.push({value:'remove',label:state.config?.mode==='monitor'?'Eliminar del monitor':"Eliminar d'OK",item:null});
   return choices;
 }
 export function setInconsistencyResolution(issue,value){

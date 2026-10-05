@@ -12,11 +12,18 @@
 
 ---
 
+## Modes
+
+- `review` descobreix candidats amb una consulta Postpass i els compara amb el fitxer OK de la tasca.
+- `monitor` usa el fitxer de la tasca com a snapshot, consulta els objectes guardats directament per `type + id` i només mostra canvis en els tags controlats o incidències.
+- Les tasques `monitor` fan una primera consulta lleugera de `type + id + trackedTags` i només demanen geometria i tags complets per als objectes que han canviat.
+
 ## Tasques
 
-- `NoCatName` usa `NoCatName.json` i controla el tag `name`.
-- `NameNoName_ca` usa `NameNoName_ca.json` i controla els tags `name` i `name:ca` quan tots dos existeixen i són diferents.
-- Cada tasca manté separat el seu fitxer OK, la memòria cau i les propostes WERT mitjançant el seu `taskId`.
+- `NoCatName` usa `NoCatName.json`, mode `review` i controla el tag `name`.
+- `NameNoName_ca` usa `NameNoName_ca.json`, mode `review` i controla els tags `name` i `name:ca` quan tots dos existeixen i són diferents.
+- `LaFranjaDePonent` usa `LaFranjaDePonent.json`, mode `monitor`, controla el tag `name` i parteix dels objectes amb nom de la relació OSM `11744144`.
+- Cada tasca manté separat el seu fitxer, la memòria cau i les propostes WERT mitjançant el seu `taskId`.
 
 ## Tecnologies i dades
 

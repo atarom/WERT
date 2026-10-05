@@ -1,13 +1,14 @@
 import {state} from './state.js';
 import {$,els} from './dom.js';
 import {parseAccepted,parsePostpass,objectKeyFor,acceptedToItem,isCompleteItem,trackedDifferences,sameState,trackedState} from './elements.js';
-import {compileQuery,loadJson,getPostpassData,getPostpassCacheStatus,getOkCheckData,getOkCheckCacheStatus} from './postpass.js';
+import {compileQuery,loadJson,getPostpassData,getPostpassCacheStatus,getOkCheckData,getOkCheckCacheStatus,getMonitorData,getMonitorCacheStatus,getMonitorDetailData,isMonitorTask} from './postpass.js';
 import {rebuildCollections,hasUnsavedChanges,buildResultPayload,markCurrentChangesSaved,clearSessionChanges} from './changes.js';
 import {createMap,renderMap,setMapHooks} from './map.js';
 import {showError,clearError,renderList,renderCounters,renderTabs,renderChangesDialog,renderProposalManager,renderInfo,renderRegexTest} from './ui.js';
 import {activity} from './activity.js';
 import {downloadText,copyText} from './io.js';
 import {refreshBaseHash,proposalFilename,buildProposalPayload,importProposalFiles,buildMergedPayload} from './proposals.js';
+import {compareMonitorPayload} from './monitor.js';
 function renderAll(){
   renderTabs();
   renderCounters();
@@ -22,39 +23,43 @@ let okCheckBusy=false;
 let okCheckButton=null;
 let okBaseItems=[];
 let okBaseInconsistencies=[];
+function reloadCacheStatus(){
+  return isMonitorTask()?getMonitorCacheStatus(okBaseItems):getPostpassCacheStatus();
+}
 function updateReloadButton(){
   if(!state.config?.postpass)return;
+  const label=isMonitorTask()?'Comprova':'Actualitza';
   if(refreshBusy){
     els.reloadBtn.disabled=true;
     els.reloadBtn.classList.remove('cooldown');
     els.reloadBtn.style.setProperty('--cooldown-progress','100%');
-    els.reloadBtn.textContent='Actualitzant…';
+    els.reloadBtn.textContent=isMonitorTask()?'Comprovant…':'Actualitzant…';
     els.reloadBtn.title='Consulta Postpass en curs';
     return;
   }
-  const status=getPostpassCacheStatus();
+  const status=reloadCacheStatus();
   if(status.fresh){
     const seconds=Math.max(1,Math.ceil(status.remainingMs/1000));
     const progress=status.ttlMs?Math.max(0,Math.min(100,status.remainingMs/status.ttlMs*100)):0;
     els.reloadBtn.disabled=true;
     els.reloadBtn.classList.add('cooldown');
     els.reloadBtn.style.setProperty('--cooldown-progress',`${progress}%`);
-    els.reloadBtn.textContent=`Actualitza ${seconds}s`;
+    els.reloadBtn.textContent=`${label} ${seconds}s`;
     els.reloadBtn.title=`La memòria cau Postpass continua vigent. Nova consulta disponible en ${seconds} s`;
     return;
   }
   els.reloadBtn.disabled=false;
   els.reloadBtn.classList.remove('cooldown');
   els.reloadBtn.style.setProperty('--cooldown-progress','0%');
-  els.reloadBtn.textContent='Actualitza';
-  els.reloadBtn.title='Torna a consultar Postpass';
+  els.reloadBtn.textContent=label;
+  els.reloadBtn.title=isMonitorTask()?'Torna a comprovar els objectes monitoritzats':'Torna a consultar Postpass';
 }
 function startReloadClock(){
   clearInterval(reloadTimer);
   reloadTimer=null;
   updateReloadButton();
-  if(refreshBusy||!getPostpassCacheStatus().fresh)return;
-  reloadTimer=setInterval(()=>{updateReloadButton();if(!getPostpassCacheStatus().fresh){clearInterval(reloadTimer);reloadTimer=null;}},250);
+  if(refreshBusy||!reloadCacheStatus().fresh)return;
+  reloadTimer=setInterval(()=>{updateReloadButton();if(!reloadCacheStatus().fresh){clearInterval(reloadTimer);reloadTimer=null;}},250);
 }
 function ensureOkCheckButton(){
   if(okCheckButton)return okCheckButton;
@@ -81,6 +86,8 @@ function ensureOkCheckButton(){
 }
 function updateOkCheckButton(){
   if(!okCheckButton)return;
+  okCheckButton.classList.toggle('hidden',isMonitorTask());
+  if(isMonitorTask())return;
   const compact=window.matchMedia('(max-width:760px)').matches;
   if(okCheckBusy){
     okCheckButton.disabled=true;
@@ -110,6 +117,7 @@ function startOkCheckClock(){
   clearInterval(okCheckTimer);
   okCheckTimer=null;
   updateOkCheckButton();
+  if(isMonitorTask())return;
   if(okCheckBusy||!okBaseItems.length||!getOkCheckCacheStatus(okBaseItems).fresh)return;
   okCheckTimer=setInterval(()=>{updateOkCheckButton();if(!getOkCheckCacheStatus(okBaseItems).fresh){clearInterval(okCheckTimer);okCheckTimer=null;}},250);
 }
@@ -193,7 +201,32 @@ async function performOkCheck(rebuildNow){
     startOkCheckClock();
   }
 }
+async function performMonitorCheck(){
+  const result=await getMonitorData(okBaseItems);
+  activity.step(result.source==='cache'?'Monitor recuperat de la memòria cau':result.source==='empty'?'No hi ha objectes per monitoritzar':'Nova comprovació monitor rebuda',`Comparant ${okBaseItems.length} objectes per type + id i tags controlats`);
+  const comparison=compareMonitorPayload(okBaseItems,okBaseInconsistencies,result.payload);
+  state.accepted=okBaseItems.map(item=>({...item,tags:{...(item.tags||{})}}));
+  state.inconsistencies=comparison.issues;
+  state.rawFeatures=comparison.changed;
+  state.postpassTimestamp=comparison.timestamp;
+  if(comparison.changed.length){
+    activity.step(`${comparison.changed.length} canvis detectats`,'Carregant geometria i tags complets només dels objectes modificats');
+    try{
+      const detailPayload=await getMonitorDetailData(comparison.changed);
+      const detail=parsePostpass(detailPayload);
+      const detailByObject=new Map(detail.items.map(item=>[objectKeyFor(item),item]));
+      state.rawFeatures=comparison.changed.map(item=>detailByObject.get(objectKeyFor(item))||item);
+      state.postpassTimestamp=detail.timestamp||comparison.timestamp;
+      activity.step(`Detall carregat per ${detail.items.length} objectes modificats`,'Preparant la revisió');
+    }catch(error){
+      activity.step(`No s’ha pogut carregar el detall dels canvis: ${error?.message||error}`,'Es mostraran amb els tags controlats i les coordenades guardades');
+    }
+  }
+  rebuildCollections();
+  return comparison.summary;
+}
 function setMode(mode){
+  if(isMonitorTask()&&mode==='accepted')mode='pending';
   if(state.mode===mode)return;
   state.mode=mode;
   state.selectedKey=null;
@@ -222,6 +255,10 @@ function configureTasks(){
     option.selected=task.id===state.taskId;
     els.taskSelect.append(option);
   }
+  const pendingText=els.pendingTab.childNodes[0];
+  if(pendingText)pendingText.textContent=isMonitorTask()?'Canvis ':'Pendents ';
+  els.acceptedTab.classList.toggle('hidden',isMonitorTask());
+  if(isMonitorTask()&&state.mode==='accepted')state.mode='pending';
 }
 function selectTaskConfig(){
   const requested=new URLSearchParams(location.search).get('task');
@@ -259,6 +296,15 @@ async function refreshData(resetActivity=true){
     setOkCheckBase(acceptedParsed);
     activity.step(`${state.config.elementsFile} carregat: ${state.accepted.length} acceptats i ${state.inconsistencies.length} inconsistència${state.inconsistencies.length===1?'':'es'}`,'Calculant empremta SHA-256 de la base');
     await refreshBaseHash();
+    if(isMonitorTask()){
+      activity.step(`Base identificada: ${state.baseHash.slice(0,10)}…`,'Comprovant els objectes monitoritzats per type + id');
+      const summary=await performMonitorCheck();
+      activity.step(`Monitor: ${summary.ok} sense canvis, ${summary.changed} modificats, ${summary.missing} inexistents i ${summary.invalid} amb estat invàlid`,'Actualitzant interfície i mapa');
+      renderInfo();
+      renderAll();
+      activity.done(`WERT llest: ${summary.changed} canvis i ${summary.issues} incidències`);
+      return;
+    }
     activity.step(`Base identificada: ${state.baseHash.slice(0,10)}…`,'Comprovant elements OK per type + id');
     try{
       const summary=await performOkCheck(false);
@@ -305,7 +351,7 @@ function wireEvents(){
   els.searchInput.addEventListener('input',()=>{state.search=els.searchInput.value;state.selectedKey=null;state.popup?.remove();renderAll();});
   els.typeFilter.addEventListener('change',()=>{state.type=els.typeFilter.value;state.selectedKey=null;state.popup?.remove();renderAll();});
   els.reloadBtn.addEventListener('click',async()=>{
-    if(getPostpassCacheStatus().fresh)return;
+    if(reloadCacheStatus().fresh)return;
     if(hasUnsavedChanges()&&!window.confirm('Hi ha canvis sense exportar. Si actualitzes les dades només es mantindran quan continuïn sent vàlids. Vols continuar?'))return;
     try{await refreshData();}catch{}
   });
@@ -394,7 +440,7 @@ function wireEvents(){
   });
   els.discardBtn.addEventListener('click',discardChanges);
   window.addEventListener('beforeunload',event=>{if(!hasUnsavedChanges())return;event.preventDefault();event.returnValue='';});
-  window.addEventListener('storage',event=>{if(event.key?.startsWith('wert:postpass-cache:v2:'))startReloadClock();if(event.key?.startsWith('wert:okcheck-cache:v1:'))startOkCheckClock();});
+  window.addEventListener('storage',event=>{if(event.key?.startsWith('wert:postpass-cache:v2:')||event.key?.startsWith('wert:monitor-cache:v1:'))startReloadClock();if(event.key?.startsWith('wert:okcheck-cache:v1:'))startOkCheckClock();});
   window.addEventListener('focus',()=>{startReloadClock();startOkCheckClock();});
   window.addEventListener('resize',updateOkCheckButton);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden){startReloadClock();startOkCheckClock();}});

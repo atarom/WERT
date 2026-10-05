@@ -35,7 +35,9 @@ export function buildProposalPayload(){
     const current=currentByObject.get(objectKey)||null;
     touched.set(objectKey,{type:item.type,id:typeof item.id==='number'?item.id:Number.isSafeInteger(Number(item.id))?Number(item.id):String(item.id),accepted:current?elementForFile(current):null});
   }
-  return{format:'WERT-proposal',id:randomProposalId(),createdAt:new Date().toISOString(),taskId:state.taskId,taskName:state.config.name,base:{sha256:state.baseHash,elementsCount:state.accepted.length+state.inconsistencies.reduce((sum,issue)=>sum+(issue.sourceCount||issue.duplicateCount||1),0),elementsFile:state.config.elementsFile},baseState:[...touched.values()],source:{postpassTimestamp:state.postpassTimestamp},changes:{add:added.map(elementForFile),remove:removed.map(elementForFile),resolve:resolved.map(({issue,resolution})=>({issueKey:issue.objectKey,issueSignature:issueSignature(issue),desired:resolution.desired?elementForFile(resolution.desired):null}))}};
+  const acceptedObjects=new Set(state.accepted.map(objectKeyFor));
+  const extraIssues=state.inconsistencies.reduce((sum,issue)=>acceptedObjects.has(issue.objectKey)?sum:sum+(issue.sourceCount||issue.duplicateCount||1),0);
+  return{format:'WERT-proposal',id:randomProposalId(),createdAt:new Date().toISOString(),taskId:state.taskId,taskName:state.config.name,base:{sha256:state.baseHash,elementsCount:state.accepted.length+extraIssues,elementsFile:state.config.elementsFile},baseState:[...touched.values()],source:{postpassTimestamp:state.postpassTimestamp},changes:{add:added.map(elementForFile),remove:removed.map(elementForFile),resolve:resolved.map(({issue,resolution})=>({issueKey:issue.objectKey,issueSignature:issueSignature(issue),desired:resolution.desired?elementForFile(resolution.desired):null}))}};
 }
 export function normalizeProposalItem(value){
   const item=acceptedToItem(value);
@@ -180,7 +182,7 @@ export function conflictChoices(conflict){
   if(conflict.current)add(`item:${keyFor(conflict.current)}`,`Conservar l’actual: ${itemDisplayLabel(conflict.current)}`,conflict.current);
   for(const item of conflict.currentIssue?.candidates||[])add(`item:${keyFor(item)}`,`Conservar del fitxer OK: ${itemDisplayLabel(item)}`,item);
   for(const item of conflict.candidates.filter(Boolean))add(`item:${keyFor(item)}`,`Acceptar proposta: ${itemDisplayLabel(item)}`,item);
-  add('remove',"Eliminar d'OK",null);
+  add('remove',state.config?.mode==='monitor'?'Eliminar del monitor':"Eliminar d'OK",null);
   return choices;
 }
 export function buildMergedPayload(){

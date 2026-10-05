@@ -1,10 +1,10 @@
 import {state} from './state.js';
 import {els} from './dom.js';
-import {keyFor,uiKeyFor,trackedStateText,itemDisplayLabel} from './elements.js';
+import {keyFor,uiKeyFor,trackedStateText,itemDisplayLabel,objectKeyFor,trackedDifferences} from './elements.js';
 import {currentAction,getCurrentItems,getFilteredItems,getAddedItems,getRemovedItems,getResolvedInconsistencies,getUnresolvedInconsistencies,getInconsistencyChoices,getInconsistencyResolutionValue,setInconsistencyResolution,buildResultPayload} from './changes.js';
 import {selectItem,toggleReview,renderMap} from './map.js';
 import {buildMergedPayload,conflictChoices,formatShortHash} from './proposals.js';
-import {compileQuery} from './postpass.js';
+import {compileQuery,isMonitorTask} from './postpass.js';
 export function showError(message){
   els.errorBanner.textContent=message;
   els.errorBanner.classList.remove('hidden');
@@ -26,7 +26,7 @@ function appendMeta(main,item,action){
   if(action){
     const badge=document.createElement('span');
     badge.className=`state-badge ${action}`;
-    badge.textContent=action==='add'?'Afegir':action==='remove'?'Retirar':'Inconsistència';
+    badge.textContent=action==='add'?(isMonitorTask()?'Actualitzar':'Afegir'):action==='remove'?(isMonitorTask()?'Retirar del monitor':'Retirar'):'Inconsistència';
     meta.append(badge);
   }
   main.append(meta);
@@ -38,6 +38,18 @@ function appendTrackedDetail(main,item){
   detail.className='item-tracked-tags';
   detail.textContent=text;
   detail.title=text;
+  main.append(detail);
+}
+function appendMonitorChange(main,item){
+  if(!isMonitorTask()||state.mode!=='pending')return;
+  const previous=state.accepted.find(candidate=>objectKeyFor(candidate)===objectKeyFor(item));
+  if(!previous)return;
+  const differences=trackedDifferences(previous,item);
+  if(!differences.length)return;
+  const detail=document.createElement('div');
+  detail.className='item-tracked-tags';
+  detail.textContent=differences.map(change=>`${change.key}: ${change.before??'(absent)'} → ${change.after??'(absent)'}`).join(' · ');
+  detail.title=detail.textContent;
   main.append(detail);
 }
 function makeIssueCard(item){
@@ -106,10 +118,11 @@ export function makeItemCard(item){
   main.append(name);
   appendMeta(main,item,action);
   appendTrackedDetail(main,item);
+  appendMonitorChange(main,item);
   const toggle=document.createElement('button');
   toggle.type='button';
   toggle.className=`item-toggle ${state.mode==='pending'?'add':'remove'}${action?' active':''}`;
-  toggle.title=state.mode==='pending'?'Marcar o desmarcar com a OK':'Marcar o desmarcar per retirar';
+  toggle.title=state.mode==='pending'?(isMonitorTask()?'Marcar o desmarcar per acceptar el nou estat':'Marcar o desmarcar com a OK'):'Marcar o desmarcar per retirar';
   toggle.setAttribute('aria-label',toggle.title);
   toggle.textContent=state.mode==='pending'?'✓':'−';
   toggle.addEventListener('click',event=>{event.stopPropagation();toggleReview(item);});
@@ -125,7 +138,7 @@ export function renderList(){
   if(!items.length){
     const empty=document.createElement('div');
     empty.className='empty-state';
-    empty.textContent=state.mode==='pending'?'No hi ha elements pendents que coincideixin amb els filtres.':state.mode==='accepted'?'No hi ha elements acceptats que coincideixin amb els filtres.':'No hi ha inconsistències que coincideixin amb els filtres.';
+    empty.textContent=state.mode==='pending'?(isMonitorTask()?'No hi ha canvis detectats que coincideixin amb els filtres.':'No hi ha elements pendents que coincideixin amb els filtres.'):state.mode==='accepted'?'No hi ha elements acceptats que coincideixin amb els filtres.':'No hi ha inconsistències que coincideixin amb els filtres.';
     els.itemList.append(empty);
   }else{
     const fragment=document.createDocumentFragment();
@@ -144,6 +157,9 @@ export function renderCounters(){
   els.proposalsCount.textContent=String(state.importedProposals.length);
 }
 export function renderTabs(){
+  const pendingText=els.pendingTab.childNodes[0];
+  if(pendingText)pendingText.textContent=isMonitorTask()?'Canvis ':'Pendents ';
+  els.acceptedTab.classList.toggle('hidden',isMonitorTask());
   const modes={pending:els.pendingTab,accepted:els.acceptedTab,inconsistency:els.inconsistenciesTab};
   for(const[mode,button]of Object.entries(modes)){
     const active=state.mode===mode;
@@ -181,6 +197,10 @@ export function renderChangesDialog(){
   const removed=getRemovedItems();
   const resolved=getResolvedInconsistencies();
   const unresolved=getUnresolvedInconsistencies();
+  els.addSummaryLabel.textContent=isMonitorTask()?'Actualitzar snapshot':'Afegir a OK';
+  els.removeSummaryLabel.textContent=isMonitorTask()?'Retirar del monitor':'Retirar d’OK';
+  els.addListTitle.textContent=isMonitorTask()?'Actualitzacions':'Altes';
+  els.removeListTitle.textContent=isMonitorTask()?'Retirades':'Baixes';
   els.addCount.textContent=String(added.length);
   els.removeCount.textContent=String(removed.length);
   els.resolvedIssuesCount.textContent=String(resolved.length);
@@ -189,8 +209,8 @@ export function renderChangesDialog(){
     try{result=buildResultPayload();}catch{}
   }
   els.resultCount.textContent=result?String(result.elements.length):'—';
-  fillChangeList(els.addList,added,'Sense altes');
-  fillChangeList(els.removeList,removed,'Sense baixes');
+  fillChangeList(els.addList,added,isMonitorTask()?'Sense actualitzacions':'Sense altes');
+  fillChangeList(els.removeList,removed,isMonitorTask()?'Sense retirades':'Sense baixes');
   fillChangeList(els.issueChangeList,resolved,'Sense resolucions',makeIssueChangeRow);
   const hasChanges=added.length+removed.length+resolved.length>0;
   els.downloadProposalBtn.disabled=!hasChanges;
@@ -200,7 +220,7 @@ export function renderChangesDialog(){
   els.discardBtn.disabled=!hasChanges;
   els.downloadOkBtn.textContent=`Descarrega ${state.config.elementsFile}`;
   els.copyOkBtn.textContent=`Copia ${state.config.elementsFile}`;
-  els.changesHint.textContent=unresolved.length?`Hi ha ${unresolved.length} inconsistència${unresolved.length===1?'':'es'} sense resoldre. Pots descarregar una proposta WERT, però cal resoldre-les totes per generar ${state.config.elementsFile}.`:'Totes les inconsistències actuals estan resoltes o no n’hi ha.';
+  els.changesHint.textContent=unresolved.length?`Hi ha ${unresolved.length} inconsistència${unresolved.length===1?'':'es'} sense resoldre. Pots descarregar una proposta WERT, però cal resoldre-les totes per generar ${state.config.elementsFile}.`:isMonitorTask()?'Els canvis seleccionats actualitzaran el snapshot monitoritzat.':'Totes les inconsistències actuals estan resoltes o no n’hi ha.';
 }
 export function makeProposalCard(proposal){
   const card=document.createElement('div');
