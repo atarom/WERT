@@ -2161,6 +2161,15 @@
       ]
     },
     {
+      "type": "way",
+      "id": 567873398,
+      "name": "Monte mar",
+      "coordinates": [
+        0.936840578,
+        41.007032
+      ]
+    },
+    {
       "type": "node",
       "id": 13997216296,
       "name": "Monte Trucks",
@@ -2432,6 +2441,15 @@
     },
     {
       "type": "way",
+      "id": 567594520,
+      "name": "Playa Dorada",
+      "coordinates": [
+        0.933136883,
+        41.00208325
+      ]
+    },
+    {
+      "type": "way",
       "id": 1086540970,
       "name": "Playa Dorada",
       "coordinates": [
@@ -2522,11 +2540,47 @@
     },
     {
       "type": "way",
+      "id": 648831031,
+      "name": "playa montroig campresort basketball court",
+      "coordinates": [
+        0.967579304,
+        41.0341316
+      ]
+    },
+    {
+      "type": "way",
+      "id": 704190188,
+      "name": "playa montroig campresort Tennis court 3",
+      "coordinates": [
+        0.967103142,
+        41.0340441
+      ]
+    },
+    {
+      "type": "way",
+      "id": 648831029,
+      "name": "playa montroig campresort Tennis courts 1 and 2",
+      "coordinates": [
+        0.96730863,
+        41.0338261
+      ]
+    },
+    {
+      "type": "way",
       "id": 431825685,
       "name": "Playa Moreia",
       "coordinates": [
         3.3717286,
         39.5664618
+      ]
+    },
+    {
+      "type": "way",
+      "id": 685217098,
+      "name": "Playa Paraiso",
+      "coordinates": [
+        1.153670651,
+        41.08930075
       ]
     },
     {
