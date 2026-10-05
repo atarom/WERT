@@ -1208,11 +1208,29 @@
     },
     {
       "type": "node",
+      "id": 11938074716,
+      "name": "Centro SaludHableMente",
+      "coordinates": [
+        1.9679461,
+        41.4474564
+      ]
+    },
+    {
+      "type": "node",
       "id": 10048756197,
       "name": "Centro Salvat",
       "coordinates": [
         2.1533076,
         41.396806
+      ]
+    },
+    {
+      "type": "node",
+      "id": 13206659731,
+      "name": "Centro Somos Uno",
+      "coordinates": [
+        2.0316959,
+        41.3504527
       ]
     },
     {
@@ -1357,6 +1375,96 @@
       "coordinates": [
         1.3786343,
         38.8827569
+      ]
+    },
+    {
+      "type": "node",
+      "id": 2670770972,
+      "name": "Cruz Roja",
+      "coordinates": [
+        3.9614704,
+        39.937743
+      ]
+    },
+    {
+      "type": "node",
+      "id": 4793263367,
+      "name": "Cruz Roja",
+      "coordinates": [
+        1.6652678,
+        41.1977843
+      ]
+    },
+    {
+      "type": "node",
+      "id": 12406770899,
+      "name": "Cruz roja",
+      "coordinates": [
+        2.6541535,
+        39.5856696
+      ]
+    },
+    {
+      "type": "way",
+      "id": 306235575,
+      "name": "Cruz Roja",
+      "coordinates": [
+        4.141977632,
+        39.93534525
+      ]
+    },
+    {
+      "type": "way",
+      "id": 567568110,
+      "name": "Cruz Roja",
+      "coordinates": [
+        0.93383445,
+        40.99649745
+      ]
+    },
+    {
+      "type": "way",
+      "id": 936696627,
+      "name": "Cruz Roja",
+      "coordinates": [
+        2.65343569,
+        39.58433425
+      ]
+    },
+    {
+      "type": "way",
+      "id": 1284706960,
+      "name": "Cruz Roja",
+      "coordinates": [
+        2.653289019,
+        39.58410235
+      ]
+    },
+    {
+      "type": "node",
+      "id": 3301198459,
+      "name": "Cruz Roja Española",
+      "coordinates": [
+        1.4266082,
+        38.9074642
+      ]
+    },
+    {
+      "type": "node",
+      "id": 6053107259,
+      "name": "Cruz Roja Sabadell",
+      "coordinates": [
+        2.1162827,
+        41.5450226
+      ]
+    },
+    {
+      "type": "node",
+      "id": 7494669854,
+      "name": "Cruz Roja Sant Celoni",
+      "coordinates": [
+        2.4924689,
+        41.688658
       ]
     },
     {
