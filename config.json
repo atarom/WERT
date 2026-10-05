@@ -71,7 +71,10 @@
       ],
       "displayTag": "name",
       "monitor": {
-        "sourceRelationId": 11744144
+        "sourceRelationId": 11744144,
+        "sourceRequireTags": [
+          "name"
+        ]
       },
       "postpass": {
         "endpoint": "https://postpass.geofabrik.de/api/interpreter",

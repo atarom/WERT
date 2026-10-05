@@ -1,6 +1,6 @@
 import {activity} from './activity.js';
 import {state} from './state.js';
-import {trackedTagKeys} from './elements.js';
+import {trackedTagKeys,displayTagKey} from './elements.js';
 const POSTPASS_LOCK_KEY='wert:postpass-lock:v2';
 const OK_CHECK_CACHE_PREFIX='wert:okcheck-cache:v1:';
 const MONITOR_CACHE_PREFIX='wert:monitor-cache:v1:';
@@ -43,6 +43,14 @@ export function compileMonitorDetailQuery(items){
   const clauses=objectClauses(items);
   if(!clauses.length)return'';
   return[`SELECT DISTINCT ON (e.osm_type,e.osm_id)`,`CASE e.osm_type WHEN 'N' THEN 'node' WHEN 'W' THEN 'way' WHEN 'R' THEN 'relation' END AS type,`,`e.osm_id AS id,`,`e.tags->>'name' AS name,`,`e.tags AS tags,`,`ST_PointOnSurface(e.geom) AS geom`,`FROM postpass_pointlinepolygon e`,`WHERE ${clauses.join('\nOR\n')}`,`ORDER BY e.osm_type,e.osm_id`].join('\n');
+}
+export function compileMonitorSnapshotQuery(){
+  const relationId=Number(state.config?.monitor?.sourceRelationId);
+  if(!Number.isSafeInteger(relationId)||relationId<=0)return'';
+  const required=Array.isArray(state.config?.monitor?.sourceRequireTags)&&state.config.monitor.sourceRequireTags.length?state.config.monitor.sourceRequireTags:trackedTagKeys();
+  const tagConditions=[...new Set(required.map(value=>String(value).trim()).filter(Boolean))].map(key=>`tags ? '${key.replaceAll("'","''")}'`);
+  const displayTag=displayTagKey().replaceAll("'","''");
+  return[`WITH area AS MATERIALIZED (`,`SELECT geom`,`FROM postpass_polygon`,`WHERE osm_type='R'`,`AND osm_id=${relationId}`,`)`,`SELECT DISTINCT ON (e.osm_type,e.osm_id)`,`CASE e.osm_type WHEN 'N' THEN 'node' WHEN 'W' THEN 'way' WHEN 'R' THEN 'relation' END AS type,`,`e.osm_id AS id,`,`e.tags->>'${displayTag}' AS name,`,`${trackedTagsExpression()} AS tags,`,`ST_PointOnSurface(e.geom) AS geom`,`FROM area a`,`CROSS JOIN LATERAL (`,`SELECT osm_type,osm_id,tags,geom`,`FROM postpass_pointlinepolygon`,`WHERE geom && a.geom${tagConditions.length?`\nAND ${tagConditions.join('\nAND ')}`:''}`,`) e`,`WHERE ST_Intersects(a.geom,ST_PointOnSurface(e.geom))`,`ORDER BY e.osm_type,e.osm_id`].join('\n');
 }
 export function compileQuery(){
   if(isMonitorTask())return compileOkCheckQuery(state.accepted);
@@ -209,6 +217,13 @@ async function fetchMonitorDetailNetwork(items){
   if(payload?.type!=='FeatureCollection'||!Array.isArray(payload?.features))throw new Error('El detall monitor no ha retornat un FeatureCollection GeoJSON vàlid.');
   return payload;
 }
+async function fetchMonitorSnapshotNetwork(){
+  const query=compileMonitorSnapshotQuery();
+  if(!query)throw new Error('La tasca monitor no té una font de snapshot vàlida configurada.');
+  const payload=await postForm(query,{progressLabel:`Regeneració de snapshot preparada: ${query.length} caràcters`,responseLabel:'Snapshot Postpass'});
+  if(payload?.type!=='FeatureCollection'||!Array.isArray(payload?.features))throw new Error('La regeneració del snapshot no ha retornat un FeatureCollection GeoJSON vàlid.');
+  return payload;
+}
 async function fallbackLock(task){
   const token=crypto.randomUUID?crypto.randomUUID():`${Date.now()}-${Math.random()}`;
   const maxWait=Math.max(10000,Number(state.config?.postpass?.timeoutMs)||180000)+5000;
@@ -312,4 +327,8 @@ export async function getMonitorData(items){
 export async function getMonitorDetailData(items){
   if(!items?.length)return{postpass_properties:{timestamp:new Date().toISOString()},type:'FeatureCollection',features:[]};
   return withQueryLock(()=>fetchMonitorDetailNetwork(items));
+}
+export async function getMonitorSnapshotData(){
+  if(!isMonitorTask())throw new Error('La regeneració de snapshot només està disponible en tasques monitor.');
+  return withQueryLock(()=>fetchMonitorSnapshotNetwork());
 }

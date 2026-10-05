@@ -107,6 +107,24 @@
             <pre id="query-text" class="code-block code-block-large"></pre>
           </div>
         </details>
+        <section id="snapshot-admin-section" class="export-section hidden">
+          <h3>Administració del snapshot</h3>
+          <p class="hint">Reconstrueix completament el snapshot a partir de l’estat actual d’OSM. Els canvis pendents de revisió no s’apliquen: el nou fitxer adopta directament l’estat actual de la font.</p>
+          <p id="snapshot-source-text" class="hint"></p>
+          <div class="export-actions">
+            <button id="snapshot-compare-btn" class="button button-ghost" type="button">Compara i prepara snapshot</button>
+            <button id="snapshot-download-btn" class="button button-primary" type="button" disabled>Descarrega snapshot nou</button>
+          </div>
+          <div class="change-summary proposal-summary">
+            <div class="summary-card"><span>Snapshot actual</span><strong id="snapshot-current-count">—</strong></div>
+            <div class="summary-card"><span>Snapshot nou</span><strong id="snapshot-new-count">—</strong></div>
+            <div class="summary-card"><span>Nous</span><strong id="snapshot-added-count">—</strong></div>
+            <div class="summary-card"><span>Ja no hi són</span><strong id="snapshot-removed-count">—</strong></div>
+            <div class="summary-card"><span>Estat canviat</span><strong id="snapshot-changed-count">—</strong></div>
+            <div class="summary-card"><span>Sense canvis</span><strong id="snapshot-unchanged-count">—</strong></div>
+          </div>
+          <div id="snapshot-status" class="hint">Encara no s’ha generat cap previsualització.</div>
+        </section>
         <section class="info-meta">
           <div><span>Endpoint</span><strong id="endpoint-text"></strong></div>
           <div><span>Dades Postpass</span><strong id="timestamp-text">Sense carregar</strong></div>

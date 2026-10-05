@@ -17,6 +17,7 @@
 - `review` descobreix candidats amb una consulta Postpass i els compara amb el fitxer OK de la tasca.
 - `monitor` usa el fitxer de la tasca com a snapshot, consulta els objectes guardats directament per `type + id` i només mostra canvis en els tags controlats o incidències.
 - Les tasques `monitor` fan una primera consulta lleugera de `type + id + trackedTags` i només demanen geometria i tags complets per als objectes que han canviat.
+- Les tasques `monitor` amb `sourceRelationId` poden regenerar un snapshot complet des d’Informació, comparar-lo amb l’actual i descarregar el nou JSON abans de substituir-lo al repositori.
 
 ## Tasques
 

@@ -1,7 +1,7 @@
 import {state} from './state.js';
 import {$,els} from './dom.js';
-import {parseAccepted,parsePostpass,objectKeyFor,acceptedToItem,isCompleteItem,trackedDifferences,sameState,trackedState} from './elements.js';
-import {compileQuery,loadJson,getPostpassData,getPostpassCacheStatus,getOkCheckData,getOkCheckCacheStatus,getMonitorData,getMonitorCacheStatus,getMonitorDetailData,isMonitorTask} from './postpass.js';
+import {parseAccepted,parsePostpass,objectKeyFor,acceptedToItem,isCompleteItem,trackedDifferences,sameState,trackedState,payloadFromItems} from './elements.js';
+import {compileQuery,loadJson,getPostpassData,getPostpassCacheStatus,getOkCheckData,getOkCheckCacheStatus,getMonitorData,getMonitorCacheStatus,getMonitorDetailData,getMonitorSnapshotData,isMonitorTask} from './postpass.js';
 import {rebuildCollections,hasUnsavedChanges,buildResultPayload,markCurrentChangesSaved,clearSessionChanges} from './changes.js';
 import {createMap,renderMap,setMapHooks} from './map.js';
 import {showError,clearError,renderList,renderCounters,renderTabs,renderChangesDialog,renderProposalManager,renderInfo,renderRegexTest} from './ui.js';
@@ -23,6 +23,9 @@ let okCheckBusy=false;
 let okCheckButton=null;
 let okBaseItems=[];
 let okBaseInconsistencies=[];
+let okBaseRawCount=0;
+let snapshotPreview=null;
+let snapshotBusy=false;
 function reloadCacheStatus(){
   return isMonitorTask()?getMonitorCacheStatus(okBaseItems):getPostpassCacheStatus();
 }
@@ -127,8 +130,11 @@ function cloneBaseIssue(issue){
 function setOkCheckBase(parsed){
   okBaseItems=parsed.items.map(item=>({...item,tags:{...(item.tags||{})}}));
   okBaseInconsistencies=parsed.inconsistencies.map(cloneBaseIssue);
+  okBaseRawCount=Number(parsed.rawCount)||okBaseItems.length+okBaseInconsistencies.length;
   state.accepted=okBaseItems.map(item=>({...item,tags:{...(item.tags||{})}}));
   state.inconsistencies=okBaseInconsistencies.map(cloneBaseIssue);
+  snapshotPreview=null;
+  renderSnapshotAdmin();
   startOkCheckClock();
 }
 function makeOkCheckIssue(item,row,kind){
@@ -224,6 +230,84 @@ async function performMonitorCheck(){
   }
   rebuildCollections();
   return comparison.summary;
+}
+function snapshotSourceAvailable(){
+  const relationId=Number(state.config?.monitor?.sourceRelationId);
+  return isMonitorTask()&&Number.isSafeInteger(relationId)&&relationId>0;
+}
+function renderSnapshotAdmin(){
+  if(!els.snapshotAdminSection)return;
+  const available=snapshotSourceAvailable();
+  els.snapshotAdminSection.classList.toggle('hidden',!available);
+  if(!available)return;
+  const relationId=Number(state.config.monitor.sourceRelationId);
+  const required=Array.isArray(state.config.monitor.sourceRequireTags)&&state.config.monitor.sourceRequireTags.length?state.config.monitor.sourceRequireTags:state.config.trackedTags||[];
+  els.snapshotSourceText.textContent=`Font: relació OSM ${relationId} · tags obligatoris: ${required.join(', ')||'—'}.`;
+  els.snapshotCurrentCount.textContent=String(okBaseRawCount||okBaseItems.length);
+  els.snapshotCompareBtn.disabled=snapshotBusy;
+  els.snapshotCompareBtn.textContent=snapshotBusy?'Preparant…':'Compara i prepara snapshot';
+  els.snapshotDownloadBtn.disabled=snapshotBusy||!snapshotPreview;
+  if(!snapshotPreview){
+    for(const element of[els.snapshotNewCount,els.snapshotAddedCount,els.snapshotRemovedCount,els.snapshotChangedCount,els.snapshotUnchangedCount])element.textContent='—';
+    els.snapshotStatus.textContent=okBaseInconsistencies.length?`El snapshot actual conté ${okBaseInconsistencies.length} inconsistència${okBaseInconsistencies.length===1?'':'es'}. La regeneració partirà directament de l’estat actual d’OSM.`:'Encara no s’ha generat cap previsualització.';
+    return;
+  }
+  const summary=snapshotPreview.summary;
+  els.snapshotNewCount.textContent=String(summary.next);
+  els.snapshotAddedCount.textContent=String(summary.added);
+  els.snapshotRemovedCount.textContent=String(summary.removed);
+  els.snapshotChangedCount.textContent=String(summary.changed);
+  els.snapshotUnchangedCount.textContent=String(summary.unchanged);
+  const timestamp=snapshotPreview.timestamp?new Date(snapshotPreview.timestamp).toLocaleString('ca-ES',{dateStyle:'medium',timeStyle:'medium'}):'sense timestamp';
+  const warnings=[];
+  if(snapshotPreview.invalid)warnings.push(`${snapshotPreview.invalid} resultat${snapshotPreview.invalid===1?'':'s'} invàlid${snapshotPreview.invalid===1?'':'s'} ignorat${snapshotPreview.invalid===1?'':'s'}`);
+  if(okBaseInconsistencies.length)warnings.push(`${okBaseInconsistencies.length} inconsistència${okBaseInconsistencies.length===1?'':'es'} al snapshot actual`);
+  els.snapshotStatus.textContent=`Previsualització preparada amb dades de ${timestamp}.${warnings.length?` ${warnings.join(' · ')}.`:''}`;
+}
+function compareSnapshotItems(nextItems){
+  const currentByObject=new Map(okBaseItems.map(item=>[objectKeyFor(item),item]));
+  const nextByObject=new Map(nextItems.map(item=>[objectKeyFor(item),item]));
+  let added=0;
+  let removed=0;
+  let changed=0;
+  let unchanged=0;
+  for(const[itemKey,item]of nextByObject){
+    const current=currentByObject.get(itemKey);
+    if(!current){added++;continue;}
+    if(sameState(current,item))unchanged++;
+    else changed++;
+  }
+  for(const itemKey of currentByObject.keys())if(!nextByObject.has(itemKey))removed++;
+  return{current:okBaseRawCount||okBaseItems.length,next:nextByObject.size,added,removed,changed,unchanged};
+}
+async function prepareMonitorSnapshot(){
+  if(!snapshotSourceAvailable())throw new Error('La tasca no té una font de snapshot configurada.');
+  snapshotBusy=true;
+  snapshotPreview=null;
+  renderSnapshotAdmin();
+  activity.begin('Regenerant snapshot',`Consultant la font actual de ${state.config.name}`);
+  try{
+    const source=await getMonitorSnapshotData();
+    if(!source.features.length&&okBaseItems.length)throw new Error('La font no ha retornat cap objecte. No es generarà un snapshot buit.');
+    activity.step(`Font rebuda: ${source.features.length} resultats`,'Validant objectes i preparant el JSON compacte');
+    const parsed=parsePostpass(source);
+    if(!parsed.items.length&&okBaseItems.length)throw new Error('La font no ha produït cap objecte vàlid. No es generarà un snapshot buit.');
+    const payload=payloadFromItems(parsed.items);
+    const summary=compareSnapshotItems(parsed.items);
+    const invalid=Math.max(0,source.features.length-parsed.items.length);
+    snapshotPreview={payload,summary,invalid,timestamp:parsed.timestamp};
+    renderSnapshotAdmin();
+    activity.done(`Snapshot preparat: ${summary.next} objectes · ${summary.added} nous · ${summary.removed} ja no hi són · ${summary.changed} canviats`);
+  }catch(error){
+    snapshotPreview=null;
+    renderSnapshotAdmin();
+    showError(`No s’ha pogut preparar el snapshot. ${error?.message||error}`);
+    activity.fail('No s’ha pogut preparar el snapshot',error);
+    throw error;
+  }finally{
+    snapshotBusy=false;
+    renderSnapshotAdmin();
+  }
 }
 function setMode(mode){
   if(isMonitorTask()&&mode==='accepted')mode='pending';
@@ -355,12 +439,20 @@ function wireEvents(){
     if(hasUnsavedChanges()&&!window.confirm('Hi ha canvis sense exportar. Si actualitzes les dades només es mantindran quan continuïn sent vàlids. Vols continuar?'))return;
     try{await refreshData();}catch{}
   });
-  els.infoBtn.addEventListener('click',()=>{renderInfo();els.infoDialog.showModal();});
+  els.infoBtn.addEventListener('click',()=>{renderInfo();renderSnapshotAdmin();els.infoDialog.showModal();});
   els.regexTesterInput.addEventListener('input',renderRegexTest);
   els.proposalsBtn.addEventListener('click',()=>{renderProposalManager();els.proposalsDialog.showModal();});
   els.changesBtn.addEventListener('click',()=>{renderChangesDialog();els.changesDialog.showModal();});
   for(const button of document.querySelectorAll('[data-close-dialog]'))button.addEventListener('click',()=>$(button.dataset.closeDialog)?.close());
   els.copyQueryBtn.addEventListener('click',async()=>{try{await copyText(compileQuery(),els.copyQueryBtn,'Copiada');}catch{showError('El navegador no ha permès copiar la consulta al porta-retalls.');}});
+  els.snapshotCompareBtn?.addEventListener('click',async()=>{if(snapshotBusy)return;try{await prepareMonitorSnapshot();}catch{}});
+  els.snapshotDownloadBtn?.addEventListener('click',()=>{
+    if(!snapshotPreview)return;
+    const message=`Es descarregarà un ${state.config.elementsFile} complet amb l’estat actual d’OSM. Això farà que tots els noms actuals passin a ser la nova referència del monitor. Vols continuar?`;
+    if(!window.confirm(message))return;
+    downloadText(state.config.elementsFile,JSON.stringify(snapshotPreview.payload,null,2)+'\n','application/json;charset=utf-8');
+    els.snapshotStatus.textContent=`${state.config.elementsFile} descarregat. Substitueix el fitxer del repositori només si vols adoptar aquest snapshot com a nova referència.`;
+  });
   els.downloadProposalBtn.addEventListener('click',()=>{
     activity.begin('Generant proposta WERT','Recollint altes, baixes, resolucions i estat base');
     try{
