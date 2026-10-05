@@ -1,12 +1,14 @@
 {
   "appName": "WERT",
-  "defaultTaskId": "nocatname",
+  "defaultTaskId": "NoCatName",
   "tasks": [
     {
-      "id": "nocatname",
+      "id": "NoCatName",
       "name": "NoCatName",
       "available": true,
-      "elementsFile": "elementsOK.json",
+      "elementsFile": "NoCatName.json",
+      "trackedTags": ["name"],
+      "displayTag": "name",
       "postpass": {
         "endpoint": "https://postpass.geofabrik.de/api/interpreter",
         "method": "POST",
@@ -17,19 +19,33 @@
       },
       "map": {
         "style": "https://tiles.openfreemap.org/styles/dark",
-        "initialCenter": [
-          2.2,
-          40.0
-        ],
+        "initialCenter": [2.2,40.0],
         "initialZoom": 6.1,
         "focusZoom": 17,
         "focusDurationMs": 180
       }
     },
     {
-      "id": "future",
-      "name": "Tasques futures",
-      "available": false
+      "id": "NameNoName_ca",
+      "name": "NameNoName_ca",
+      "available": true,
+      "elementsFile": "NameNoName_ca.json",
+      "trackedTags": ["name","name:ca"],
+      "displayTag": "name",
+      "postpass": {
+        "endpoint": "https://postpass.geofabrik.de/api/interpreter",
+        "method": "POST",
+        "timeoutMs": 180000,
+        "query": "WITH areas AS MATERIALIZED (\n    SELECT geom\n    FROM postpass_polygon\n    WHERE osm_type = 'R'\n      AND osm_id = ANY(ARRAY[9407,348981,349053]::bigint[])\n)\nSELECT\n    CASE e.osm_type\n        WHEN 'N' THEN 'node'\n        WHEN 'W' THEN 'way'\n        WHEN 'R' THEN 'relation'\n    END AS type,\n    e.osm_id AS id,\n    e.tags->>'name' AS name,\n    e.tags AS tags,\n    ST_PointOnSurface(e.geom) AS geom\nFROM areas a\nCROSS JOIN LATERAL (\n    SELECT osm_type,osm_id,tags,geom\n    FROM postpass_pointlinepolygon\n    WHERE (\n           geom && ST_MakeEnvelope(0.1,40.45,3.4,42.9,4326)\n        OR geom && ST_MakeEnvelope(1.1,38.6,4.4,40.2,4326)\n    )\n      AND geom && a.geom\n      AND tags ? 'name:ca'\n      AND tags->>'name' <> tags->>'name:ca'\n) e\nWHERE ST_Intersects(a.geom,ST_PointOnSurface(e.geom))",
+        "cacheSeconds": 60
+      },
+      "map": {
+        "style": "https://tiles.openfreemap.org/styles/dark",
+        "initialCenter": [2.2,40.0],
+        "initialZoom": 6.1,
+        "focusZoom": 17,
+        "focusDurationMs": 180
+      }
     }
   ]
 }

@@ -1,5 +1,5 @@
 import {state} from './state.js';
-import {keyFor,objectKeyFor,uiKeyFor,payloadFromItems,compareItemsByName} from './elements.js';
+import {keyFor,objectKeyFor,uiKeyFor,payloadFromItems,compareItemsByName,itemDisplayLabel,trackedStateText} from './elements.js';
 export function rebuildCollections(){
   const rawByKey=new Map(state.rawFeatures.map(item=>[keyFor(item),item]));
   const rawByObject=new Map();
@@ -62,7 +62,7 @@ export function getFilteredItems(){
     if(state.type!=='all'&&item.type!==state.type)return false;
     if(q){
       const extra=item.issueId?`${item.message} ${(item.candidates||[]).map(candidate=>candidate.name).join(' ')} ${item.current?.name||''}`:'';
-      if(!`${item.name} ${item.id} ${extra}`.toLocaleLowerCase('ca').includes(q))return false;
+      if(!`${item.name} ${trackedStateText(item,false)} ${item.id} ${extra}`.toLocaleLowerCase('ca').includes(q))return false;
     }
     if(!tagKey)return true;
     const tags=itemTags(item);
@@ -78,13 +78,13 @@ export function getInconsistencyChoices(issue){
     const value=`item:${keyFor(item)}`;
     if(seen.has(value))continue;
     seen.add(value);
-    choices.push({value,label:`Conservar: ${item.name}`,item});
+    choices.push({value,label:`Conservar: ${itemDisplayLabel(item)}`,item});
   }
   if(issue.current){
     const value=`item:${keyFor(issue.current)}`;
     if(!seen.has(value)){
       seen.add(value);
-      choices.push({value,label:`Fer OK l'actual: ${issue.current.name}`,item:issue.current});
+      choices.push({value,label:`Fer OK l'actual: ${itemDisplayLabel(issue.current)}`,item:issue.current});
     }
   }
   choices.push({value:'remove',label:"Eliminar d'OK",item:null});
@@ -123,7 +123,7 @@ export function hasUnsavedChanges(){
 }
 export function buildResultPayload(){
   const unresolved=getUnresolvedInconsistencies();
-  if(unresolved.length)throw new Error(`Cal resoldre ${unresolved.length} inconsistència${unresolved.length===1?'':'es'} abans de generar elementsOK.json.`);
+  if(unresolved.length)throw new Error(`Cal resoldre ${unresolved.length} inconsistència${unresolved.length===1?'':'es'} abans de generar ${state.config?.elementsFile||'el fitxer OK'}.`);
   const byObject=new Map(state.accepted.map(item=>[objectKeyFor(item),item]));
   for(const{issue,resolution}of getResolvedInconsistencies()){
     if(resolution.desired)byObject.set(objectKeyFor(resolution.desired),resolution.desired);

@@ -2,7 +2,7 @@ const maplibregl=window.maplibregl;
 import {state} from './state.js';
 import './tagfilters.js';
 import {els} from './dom.js';
-import {keyFor,uiKeyFor} from './elements.js';
+import {keyFor,uiKeyFor,trackedStateText} from './elements.js';
 import {currentAction,getCurrentItems,getFilteredItems,getInconsistencyChoices,getInconsistencyResolutionValue,setInconsistencyResolution} from './changes.js';
 import {osmViewUrl,osmEditUrl} from './osm.js';
 const hooks={renderAll:()=>{},renderList:()=>{}};
@@ -104,10 +104,15 @@ export function openPopup(item){
   const meta=document.createElement('div');
   meta.className='popup-meta';
   meta.textContent=`${item.type} / ${item.id}`;
+  const trackedText=trackedStateText(item,false);
+  const tracked=document.createElement('div');
+  tracked.className='popup-tracked-tags';
+  tracked.textContent=trackedText;
+  tracked.classList.toggle('hidden',!trackedText);
   const actions=document.createElement('div');
   actions.className='popup-actions';
   actions.append(linkButton('Veure a OSM',osmViewUrl(item)),linkButton('Editar amb iD',osmEditUrl(item)));
-  card.append(name,meta,actions);
+  card.append(name,meta,tracked,actions);
   if(item.issueId)appendIssuePopup(card,item);
   else{
     const review=document.createElement('button');

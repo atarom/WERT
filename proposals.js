@@ -1,6 +1,6 @@
 import {activity} from './activity.js';
 import {state} from './state.js';
-import {acceptedToItem,isCompleteItem,keyFor,objectKeyFor,normalizeType,elementForFile,payloadFromItems,sameState,issueSignature} from './elements.js';
+import {acceptedToItem,isCompleteItem,keyFor,objectKeyFor,normalizeType,elementForFile,payloadFromItems,sameState,issueSignature,itemDisplayLabel} from './elements.js';
 import {getAddedItems,getRemovedItems,getResolvedInconsistencies} from './changes.js';
 function baseRepresentation(){
   return JSON.stringify({taskId:state.taskId,accepted:payloadFromItems(state.accepted).elements,inconsistencies:state.inconsistencies.map(issue=>({objectKey:issue.objectKey,signature:issueSignature(issue)})).sort((a,b)=>a.objectKey.localeCompare(b.objectKey))});
@@ -35,7 +35,7 @@ export function buildProposalPayload(){
     const current=currentByObject.get(objectKey)||null;
     touched.set(objectKey,{type:item.type,id:typeof item.id==='number'?item.id:Number.isSafeInteger(Number(item.id))?Number(item.id):String(item.id),accepted:current?elementForFile(current):null});
   }
-  return{format:'WERT-proposal',version:1,id:randomProposalId(),createdAt:new Date().toISOString(),taskId:state.taskId,taskName:state.config.name,base:{sha256:state.baseHash,elementsCount:state.accepted.length+state.inconsistencies.reduce((sum,issue)=>sum+(issue.sourceCount||issue.duplicateCount||1),0),elementsFile:state.config.elementsFile},baseState:[...touched.values()],source:{postpassTimestamp:state.postpassTimestamp},changes:{add:added.map(elementForFile),remove:removed.map(elementForFile),resolve:resolved.map(({issue,resolution})=>({issueKey:issue.objectKey,issueSignature:issueSignature(issue),desired:resolution.desired?elementForFile(resolution.desired):null}))}};
+  return{format:'WERT-proposal',id:randomProposalId(),createdAt:new Date().toISOString(),taskId:state.taskId,taskName:state.config.name,base:{sha256:state.baseHash,elementsCount:state.accepted.length+state.inconsistencies.reduce((sum,issue)=>sum+(issue.sourceCount||issue.duplicateCount||1),0),elementsFile:state.config.elementsFile},baseState:[...touched.values()],source:{postpassTimestamp:state.postpassTimestamp},changes:{add:added.map(elementForFile),remove:removed.map(elementForFile),resolve:resolved.map(({issue,resolution})=>({issueKey:issue.objectKey,issueSignature:issueSignature(issue),desired:resolution.desired?elementForFile(resolution.desired):null}))}};
 }
 export function normalizeProposalItem(value){
   const item=acceptedToItem(value);
@@ -52,9 +52,9 @@ function normalizeResolution(value){
   return{objectKey,issueSignature:signature,desired};
 }
 export function normalizeProposal(payload,filename){
-  const version=Number(payload?.version);
-  if(payload?.format!=='WERT-proposal'||version!==1)throw new Error('No és una proposta WERT compatible.');
-  if(String(payload?.taskId||'')!==state.taskId)throw new Error(`La proposta pertany a la tasca "${payload?.taskId||'desconeguda'}", no a "${state.taskId}".`);
+  if(payload?.format!=='WERT-proposal')throw new Error('No és una proposta WERT compatible.');
+  const proposalTaskId=String(payload?.taskId||'');
+  if(proposalTaskId!==state.taskId)throw new Error(`La proposta pertany a la tasca "${proposalTaskId||'desconeguda'}", no a "${state.taskId}".`);
   const add=payload?.changes?.add;
   const remove=payload?.changes?.remove;
   const resolve=payload?.changes?.resolve;
@@ -90,7 +90,7 @@ export function normalizeProposal(payload,filename){
   }
   const touched=new Set([...normalizedAdd,...normalizedRemove].map(objectKeyFor));
   for(const objectKey of touched)if(!normalizedBase.has(objectKey))throw new Error(`Falta l’estat base de ${objectKey}.`);
-  return{version,id,filename,createdAt:payload.createdAt||null,baseHash:String(payload?.base?.sha256||''),baseCount:Number(payload?.base?.elementsCount),baseState:normalizedBase,add:normalizedAdd,remove:normalizedRemove,resolve:normalizedResolve};
+  return{id,filename,createdAt:payload.createdAt||null,baseHash:String(payload?.base?.sha256||''),baseCount:Number(payload?.base?.elementsCount),baseState:normalizedBase,add:normalizedAdd,remove:normalizedRemove,resolve:normalizedResolve};
 }
 export async function importProposalFiles(files){
   const messages=[];
@@ -177,9 +177,9 @@ export function conflictChoices(conflict){
   const choices=[];
   const seen=new Set();
   const add=(value,label,item)=>{if(seen.has(value))return;seen.add(value);choices.push({value,label,item});};
-  if(conflict.current)add(`item:${keyFor(conflict.current)}`,`Conservar l’actual: ${conflict.current.name}`,conflict.current);
-  for(const item of conflict.currentIssue?.candidates||[])add(`item:${keyFor(item)}`,`Conservar d’elementsOK: ${item.name}`,item);
-  for(const item of conflict.candidates.filter(Boolean))add(`item:${keyFor(item)}`,`Acceptar proposta: ${item.name}`,item);
+  if(conflict.current)add(`item:${keyFor(conflict.current)}`,`Conservar l’actual: ${itemDisplayLabel(conflict.current)}`,conflict.current);
+  for(const item of conflict.currentIssue?.candidates||[])add(`item:${keyFor(item)}`,`Conservar del fitxer OK: ${itemDisplayLabel(item)}`,item);
+  for(const item of conflict.candidates.filter(Boolean))add(`item:${keyFor(item)}`,`Acceptar proposta: ${itemDisplayLabel(item)}`,item);
   add('remove',"Eliminar d'OK",null);
   return choices;
 }

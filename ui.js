@@ -1,6 +1,6 @@
 import {state} from './state.js';
 import {els} from './dom.js';
-import {keyFor,uiKeyFor} from './elements.js';
+import {keyFor,uiKeyFor,trackedStateText,itemDisplayLabel} from './elements.js';
 import {currentAction,getCurrentItems,getFilteredItems,getAddedItems,getRemovedItems,getResolvedInconsistencies,getUnresolvedInconsistencies,getInconsistencyChoices,getInconsistencyResolutionValue,setInconsistencyResolution,buildResultPayload} from './changes.js';
 import {selectItem,toggleReview,renderMap} from './map.js';
 import {buildMergedPayload,conflictChoices,formatShortHash} from './proposals.js';
@@ -31,6 +31,15 @@ function appendMeta(main,item,action){
   }
   main.append(meta);
 }
+function appendTrackedDetail(main,item){
+  const text=trackedStateText(item,false);
+  if(!text)return;
+  const detail=document.createElement('div');
+  detail.className='item-tracked-tags';
+  detail.textContent=text;
+  detail.title=text;
+  main.append(detail);
+}
 function makeIssueCard(item){
   const key=uiKeyFor(item);
   const action=currentAction(item);
@@ -46,9 +55,10 @@ function makeIssueCard(item){
   name.title=item.name;
   main.append(name);
   appendMeta(main,item,action||'issue');
+  appendTrackedDetail(main,item);
   const note=document.createElement('div');
   note.className='issue-note';
-  const variants=(item.candidates||[]).map(candidate=>candidate.name).join(' · ');
+  const variants=(item.candidates||[]).map(itemDisplayLabel).join(' · ');
   const count=(item.sourceCount||item.duplicateCount||1)>1?`${item.sourceCount||item.duplicateCount} entrades`:'';
   note.textContent=[item.message,count,variants].filter(Boolean).join(' · ');
   const select=document.createElement('select');
@@ -95,6 +105,7 @@ export function makeItemCard(item){
   name.title=item.name;
   main.append(name);
   appendMeta(main,item,action);
+  appendTrackedDetail(main,item);
   const toggle=document.createElement('button');
   toggle.type='button';
   toggle.className=`item-toggle ${state.mode==='pending'?'add':'remove'}${action?' active':''}`;
@@ -144,7 +155,7 @@ export function makeChangeRow(item){
   const row=document.createElement('div');
   row.className='change-row';
   const name=document.createElement('strong');
-  name.textContent=item.name;
+  name.textContent=itemDisplayLabel(item);
   const meta=document.createElement('span');
   meta.textContent=`${item.type} / ${item.id}`;
   row.append(name,meta);
@@ -153,7 +164,7 @@ export function makeChangeRow(item){
 function makeIssueChangeRow(entry){
   const row=makeChangeRow(entry.resolution.desired||entry.issue);
   const detail=document.createElement('span');
-  detail.textContent=entry.resolution.desired?`Resolució: ${entry.resolution.desired.name}`:"Resolució: eliminar d'OK";
+  detail.textContent=entry.resolution.desired?`Resolució: ${itemDisplayLabel(entry.resolution.desired)}`:"Resolució: eliminar d'OK";
   row.append(detail);
   return row;
 }
@@ -187,7 +198,9 @@ export function renderChangesDialog(){
   els.downloadOkBtn.disabled=!hasChanges||unresolved.length>0;
   els.copyOkBtn.disabled=!hasChanges||unresolved.length>0;
   els.discardBtn.disabled=!hasChanges;
-  els.changesHint.textContent=unresolved.length?`Hi ha ${unresolved.length} inconsistència${unresolved.length===1?'':'es'} sense resoldre. Pots descarregar una proposta WERT, però cal resoldre-les totes per generar elementsOK.json.`:'Totes les inconsistències actuals estan resoltes o no n’hi ha.';
+  els.downloadOkBtn.textContent=`Descarrega ${state.config.elementsFile}`;
+  els.copyOkBtn.textContent=`Copia ${state.config.elementsFile}`;
+  els.changesHint.textContent=unresolved.length?`Hi ha ${unresolved.length} inconsistència${unresolved.length===1?'':'es'} sense resoldre. Pots descarregar una proposta WERT, però cal resoldre-les totes per generar ${state.config.elementsFile}.`:'Totes les inconsistències actuals estan resoltes o no n’hi ha.';
 }
 export function makeProposalCard(proposal){
   const card=document.createElement('div');
@@ -230,7 +243,7 @@ export function makeConflictCard(conflict){
   title.textContent=conflict.objectKey;
   const details=document.createElement('div');
   details.className='conflict-details';
-  const names=conflict.candidates.filter(Boolean).map(item=>item.name).join(' · ');
+  const names=conflict.candidates.filter(Boolean).map(itemDisplayLabel).join(' · ');
   const reasons=conflict.reasons.length?` · ${conflict.reasons.join(' ')}`:'';
   details.textContent=`Propostes: ${conflict.sources.join(', ')}${names?` · Estats proposats: ${names}`:''}${reasons}`;
   const select=document.createElement('select');
@@ -277,14 +290,16 @@ export function renderProposalManager(){
     const issueCount=merged.unresolved.filter(item=>item.type==='inconsistency').length;
     const conflictCount=merged.unresolved.filter(item=>item.type==='conflict').length;
     els.mergeHint.textContent=`Cal resoldre ${conflictCount} conflicte${conflictCount===1?'':'s'} i ${issueCount} inconsistència${issueCount===1?'':'es'} abans de generar el consolidat.`;
-  }else if(stale)els.mergeHint.textContent=`${stale} proposta${stale===1?'':'es'} parteix${stale===1?'':'en'} d’una versió diferent d’elementsOK.json. S’aplicaran de manera idempotent sobre la versió actual.`;
-  else els.mergeHint.textContent='Les propostes es poden consolidar sobre l’elementsOK.json actual.';
+  }else if(stale)els.mergeHint.textContent=`${stale} proposta${stale===1?'':'es'} parteix${stale===1?'':'en'} d’una versió diferent de ${state.config.elementsFile}. S’aplicaran de manera idempotent sobre la versió actual.`;
+  else els.mergeHint.textContent=`Les propostes es poden consolidar sobre ${state.config.elementsFile}.`;
+  els.downloadMergedBtn.textContent=`Descarrega ${state.config.elementsFile} consolidat`;
 }
 export function renderRegexTest(){
   const box=els.regexTesterBox;
   const input=els.regexTesterInput;
   const status=els.regexTesterStatus;
   if(!box||!input||!status)return;
+  if(!state.config?.postpass?.nameRegex){box.dataset.state='neutral';status.textContent='Aquesta tasca no utilitza regex.';return;}
   const value=input.value;
   box.dataset.state='neutral';
   if(!value){status.textContent='Escriu un text per provar-lo.';return;}
@@ -299,6 +314,9 @@ export function renderRegexTest(){
   }
 }
 export function renderInfo(){
+  const hasRegex=Boolean(state.config.postpass.nameRegex);
+  els.regexTesterBox?.classList.toggle('hidden',!hasRegex);
+  els.regexText?.closest('details')?.classList.toggle('hidden',!hasRegex);
   els.regexText.textContent=state.config.postpass.nameRegex||'';
   els.queryText.textContent=compileQuery();
   els.endpointText.textContent=state.config.postpass.endpoint||'';

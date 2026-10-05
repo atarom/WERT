@@ -1,5 +1,6 @@
 import {activity} from './activity.js';
 import {state} from './state.js';
+import {trackedTagKeys} from './elements.js';
 const POSTPASS_LOCK_KEY='wert:postpass-lock:v2';
 const OK_CHECK_CACHE_PREFIX='wert:okcheck-cache:v1:';
 const OK_CHECK_TTL_MS=60000;
@@ -25,7 +26,13 @@ export function compileOkCheckQuery(items){
     if(ids.length)clauses.push(`(e.osm_type='${code}' AND e.osm_id=ANY(ARRAY[${ids.join(',')}]::bigint[]))`);
   }
   if(!clauses.length)return'';
-  return[`SELECT DISTINCT ON (e.osm_type,e.osm_id)`,`CASE e.osm_type WHEN 'N' THEN 'node' WHEN 'W' THEN 'way' WHEN 'R' THEN 'relation' END AS type,`,`e.osm_id AS id,`,`e.tags->>'name' AS name`,`FROM postpass_pointlinepolygon e`,`WHERE ${clauses.join('\nOR\n')}`].join('\n');
+  const tagArgs=[];
+  for(const key of trackedTagKeys()){
+    const escaped=key.replaceAll("'","''");
+    tagArgs.push(`'${escaped}'`,`e.tags->>'${escaped}'`);
+  }
+  const tagsExpression=tagArgs.length?`jsonb_build_object(${tagArgs.join(',')})`:`'{}'::jsonb`;
+  return[`SELECT DISTINCT ON (e.osm_type,e.osm_id)`,`CASE e.osm_type WHEN 'N' THEN 'node' WHEN 'W' THEN 'way' WHEN 'R' THEN 'relation' END AS type,`,`e.osm_id AS id,`,`${tagsExpression} AS tags`,`FROM postpass_pointlinepolygon e`,`WHERE ${clauses.join('\nOR\n')}`,`ORDER BY e.osm_type,e.osm_id`].join('\n');
 }
 export async function loadJson(url){
   const response=await fetch(url,{cache:'no-store'});
@@ -140,7 +147,7 @@ async function fetchOkCheckNetwork(items){
   activity.step(`Consulta de comprovació preparada: ${items.length} elements i ${query.length} caràcters`,`Enviant petició a ${postpass.endpoint}`);
   try{
     const response=await fetch(postpass.endpoint,{method:postpass.method||'POST',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},body:params.toString(),signal:controller.signal});
-    activity.step(`Comprovació Postpass ha respost HTTP ${response.status}`,'Llegint type, id i name');
+    activity.step(`Comprovació Postpass ha respost HTTP ${response.status}`,'Llegint type, id i tags controlats');
     if(!response.ok){
       const detail=await response.text().catch(()=>'');
       throw new Error(`Postpass ha respost HTTP ${response.status}${detail?`: ${detail.slice(0,300)}`:''}`);

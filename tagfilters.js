@@ -1,5 +1,6 @@
 import {state} from './state.js';
 import {getCurrentItems} from './changes.js';
+import {trackedStateText} from './elements.js';
 let keySelect=null;
 let valueSelect=null;
 function itemTags(item){
@@ -11,7 +12,7 @@ function matchesBaseFilters(item){
   const q=state.search.trim().toLocaleLowerCase('ca');
   if(!q)return true;
   const extra=item.issueId?`${item.message} ${(item.candidates||[]).map(candidate=>candidate.name).join(' ')} ${item.current?.name||''}`:'';
-  return`${item.name} ${item.id} ${extra}`.toLocaleLowerCase('ca').includes(q);
+  return`${item.name} ${trackedStateText(item,false)} ${item.id} ${extra}`.toLocaleLowerCase('ca').includes(q);
 }
 function contextualItems(){
   return getCurrentItems().filter(matchesBaseFilters);

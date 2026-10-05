@@ -1,6 +1,6 @@
 import {state} from './state.js';
 import {$,els} from './dom.js';
-import {parseAccepted,parsePostpass,objectKeyFor} from './elements.js';
+import {parseAccepted,parsePostpass,objectKeyFor,acceptedToItem,isCompleteItem,trackedDifferences,sameState,trackedState} from './elements.js';
 import {compileQuery,loadJson,getPostpassData,getPostpassCacheStatus,getOkCheckData,getOkCheckCacheStatus} from './postpass.js';
 import {rebuildCollections,hasUnsavedChanges,buildResultPayload,markCurrentChangesSaved,clearSessionChanges} from './changes.js';
 import {createMap,renderMap,setMapHooks} from './map.js';
@@ -104,7 +104,7 @@ function updateOkCheckButton(){
   }
   okCheckButton.disabled=false;
   okCheckButton.textContent=compact?'OK':'Comprova OK';
-  okCheckButton.title='Comprova que els elements d’elementsOK.json existeixen i mantenen el mateix nom';
+  okCheckButton.title=`Comprova que els elements de ${state.config?.elementsFile||'la base OK'} existeixen i mantenen els tags controlats`;
 }
 function startOkCheckClock(){
   clearInterval(okCheckTimer);
@@ -117,18 +117,20 @@ function cloneBaseIssue(issue){
   return{...issue,candidates:[...(issue.candidates||[])]};
 }
 function setOkCheckBase(parsed){
-  okBaseItems=parsed.items.map(item=>({...item}));
+  okBaseItems=parsed.items.map(item=>({...item,tags:{...(item.tags||{})}}));
   okBaseInconsistencies=parsed.inconsistencies.map(cloneBaseIssue);
-  state.accepted=okBaseItems.map(item=>({...item}));
+  state.accepted=okBaseItems.map(item=>({...item,tags:{...(item.tags||{})}}));
   state.inconsistencies=okBaseInconsistencies.map(cloneBaseIssue);
   startOkCheckClock();
 }
 function makeOkCheckIssue(item,row,kind){
   const objectKey=objectKeyFor(item);
-  const currentName=row?.name===null||row?.name===undefined?'':String(row.name);
-  const current=currentName?{...item,name:currentName}:null;
-  const message=kind==='osm-missing'?`L’objecte ${item.type} ${item.id} no apareix a la base actual de Postpass i s’ha marcat per eliminar d’OK.`:`El nom actual a OSM és "${currentName||'(sense name)'}" i elementsOK.json conté "${item.name}". S’ha marcat per eliminar d’OK.`;
-  return{issueId:`issue:okcheck:${objectKey}`,objectKey,lookupObjectKey:objectKey,type:item.type,id:item.id,name:item.name,coordinates:item.coordinates,candidates:[item],current,duplicateCount:1,sourceCount:1,kind,message,rawEntries:[],tags:item.tags||{},signature:JSON.stringify({objectKey,kind,expectedName:item.name,currentName})};
+  const currentCandidate=row?acceptedToItem({type:item.type,id:item.id,coordinates:item.coordinates,tags:row.tags}):null;
+  const current=currentCandidate&&isCompleteItem(currentCandidate)?currentCandidate:null;
+  const differences=currentCandidate?trackedDifferences(item,currentCandidate):[];
+  const detail=differences.map(change=>`${change.key}: ${JSON.stringify(change.before)} → ${JSON.stringify(change.after)}`).join(' · ');
+  const message=kind==='osm-missing'?`L’objecte ${item.type} ${item.id} no apareix a la base actual de Postpass i s’ha marcat per eliminar d’OK.`:`Han canviat els tags controlats${detail?`: ${detail}`:''}. S’ha marcat per eliminar d’OK.`;
+  return{issueId:`issue:okcheck:${objectKey}`,objectKey,lookupObjectKey:objectKey,type:item.type,id:item.id,name:item.name,coordinates:item.coordinates,candidates:[item],current,duplicateCount:1,sourceCount:1,kind,message,rawEntries:[],tags:item.tags||{},signature:JSON.stringify({objectKey,kind,expected:trackedState(item),current:currentCandidate?trackedState(currentCandidate):null})};
 }
 function applyOkCheckPayload(payload){
   if(!Array.isArray(payload?.result))throw new Error('La resposta de comprovació no conté un array result vàlid.');
@@ -143,7 +145,7 @@ function applyOkCheckPayload(payload){
   const accepted=[];
   const issues=[];
   let missing=0;
-  let renamed=0;
+  let changed=0;
   for(const item of okBaseItems){
     const objectKey=objectKeyFor(item);
     const row=byObject.get(objectKey);
@@ -152,13 +154,13 @@ function applyOkCheckPayload(payload){
       issues.push(makeOkCheckIssue(item,null,'osm-missing'));
       continue;
     }
-    const currentName=row.name===null||row.name===undefined?'':String(row.name);
-    if(currentName!==item.name){
-      renamed++;
-      issues.push(makeOkCheckIssue(item,row,'osm-name-changed'));
+    const current=acceptedToItem({type:item.type,id:item.id,coordinates:item.coordinates,tags:row.tags});
+    if(!sameState(item,current)){
+      changed++;
+      issues.push(makeOkCheckIssue(item,row,'osm-state-changed'));
       continue;
     }
-    accepted.push({...item});
+    accepted.push({...item,tags:{...item.tags}});
   }
   state.accepted=accepted;
   state.inconsistencies=[...okBaseInconsistencies.map(cloneBaseIssue),...issues];
@@ -168,17 +170,17 @@ function applyOkCheckPayload(payload){
     const previous=previousIssues.get(issue.objectKey);
     if(!previous||previous.signature!==issue.signature||!state.inconsistencyResolutions.has(issue.objectKey))state.inconsistencyResolutions.set(issue.objectKey,{desired:null});
   }
-  return{checked:okBaseItems.length,ok:accepted.length,missing,renamed,issues:issues.length};
+  return{checked:okBaseItems.length,ok:accepted.length,missing,changed,issues:issues.length};
 }
 function formatOkCheckSummary(summary){
-  return`Comprovació OK: ${summary.checked} comprovats · ${summary.ok} correctes · ${summary.missing} inexistents · ${summary.renamed} noms canviats`;
+  return`Comprovació OK: ${summary.checked} comprovats · ${summary.ok} correctes · ${summary.missing} inexistents · ${summary.changed} estats canviats`;
 }
 async function performOkCheck(rebuildNow){
   okCheckBusy=true;
   updateOkCheckButton();
   try{
     const result=await getOkCheckData(okBaseItems);
-    activity.step(result.source==='cache'?'Comprovació OK recuperada de la memòria cau':result.source==='empty'?'No hi ha elements OK per comprovar':'Nova comprovació OK rebuda','Comparant type, id i name amb elementsOK.json');
+    activity.step(result.source==='cache'?'Comprovació OK recuperada de la memòria cau':result.source==='empty'?'No hi ha elements OK per comprovar':'Nova comprovació OK rebuda',`Comparant type, id i tags controlats amb ${state.config.elementsFile}`);
     const summary=applyOkCheckPayload(result.payload);
     activity.step(formatOkCheckSummary(summary),summary.issues?'Classificant incidències com a eliminar d’OK':'Tots els elements OK continuen vigents');
     if(rebuildNow){
@@ -224,8 +226,9 @@ function configureTasks(){
 function selectTaskConfig(){
   const requested=new URLSearchParams(location.search).get('task');
   const tasks=state.appConfig.tasks||[];
-  let task=tasks.find(item=>item.id===requested&&item.available);
-  if(!task)task=tasks.find(item=>item.id===state.appConfig.defaultTaskId&&item.available)||tasks.find(item=>item.available);
+  const matches=(item,value)=>item.id===value;
+  let task=tasks.find(item=>requested&&matches(item,requested)&&item.available);
+  if(!task)task=tasks.find(item=>matches(item,state.appConfig.defaultTaskId)&&item.available)||tasks.find(item=>item.available);
   if(!task)throw new Error('No hi ha cap tasca disponible a config.json.');
   state.taskId=task.id;
   state.config=task;
@@ -249,7 +252,7 @@ async function refreshData(resetActivity=true){
   clearError();
   refreshBusy=true;
   updateReloadButton();
-  if(resetActivity)activity.begin('Actualitzant WERT','Carregant elementsOK.json');else activity.step('Carregant elementsOK.json');
+  if(resetActivity)activity.begin('Actualitzant WERT',`Carregant ${state.config.elementsFile}`);else activity.step(`Carregant ${state.config.elementsFile}`);
   try{
     const acceptedPayload=await loadJson(state.config.elementsFile);
     const acceptedParsed=parseAccepted(acceptedPayload);
@@ -270,7 +273,7 @@ async function refreshData(resetActivity=true){
     const parsed=parsePostpass(postpassResult.payload);
     state.rawFeatures=parsed.items;
     state.postpassTimestamp=parsed.timestamp;
-    activity.step(`Postpass: ${state.rawFeatures.length} elements rebuts`,'Comparant resultats amb elementsOK.json');
+    activity.step(`Postpass: ${state.rawFeatures.length} elements rebuts`,`Comparant resultats amb ${state.config.elementsFile}`);
     rebuildCollections();
     activity.step(`Comparació acabada: ${state.pending.length} pendents, ${state.accepted.length} acceptats i ${state.inconsistencies.length} inconsistència${state.inconsistencies.length===1?'':'es'}`,'Actualitzant interfície i mapa');
     renderInfo();
@@ -336,26 +339,26 @@ function wireEvents(){
     }
   });
   els.downloadOkBtn.addEventListener('click',()=>{
-    activity.begin('Generant elementsOK.json','Aplicant els canvis de la sessió');
+    activity.begin(`Generant ${state.config.elementsFile}`,'Aplicant els canvis de la sessió');
     try{
       const result=buildResultPayload();
       activity.step(`Fitxer resultant: ${result.elements.length} elements`,'Preparant descàrrega');
       downloadText(state.config.elementsFile,JSON.stringify(result,null,2)+'\n','application/json;charset=utf-8');
       markCurrentChangesSaved();
-      activity.done('elementsOK.json descarregat');
-    }catch(error){activity.fail('No s’ha pogut generar elementsOK.json',error);}
+      activity.done(`${state.config.elementsFile} descarregat`);
+    }catch(error){activity.fail(`No s’ha pogut generar ${state.config.elementsFile}`,error);}
   });
   els.copyOkBtn.addEventListener('click',async()=>{
-    activity.begin('Copiant elementsOK.json','Aplicant els canvis de la sessió');
+    activity.begin(`Copiant ${state.config.elementsFile}`,'Aplicant els canvis de la sessió');
     try{
       const result=buildResultPayload();
       activity.step(`Fitxer resultant: ${result.elements.length} elements`,'Demanant accés al porta-retalls');
       await copyText(JSON.stringify(result,null,2)+'\n',els.copyOkBtn,'Copiat');
       markCurrentChangesSaved();
-      activity.done('elementsOK.json copiat');
+      activity.done(`${state.config.elementsFile} copiat`);
     }catch(error){
       showError('El navegador no ha permès copiar el JSON al porta-retalls.');
-      activity.fail('No s’ha pogut copiar elementsOK.json',error);
+      activity.fail(`No s’ha pogut copiar ${state.config.elementsFile}`,error);
     }
   });
   els.proposalDropzone.addEventListener('click',()=>els.proposalFileInput.click());
@@ -365,14 +368,14 @@ function wireEvents(){
   els.proposalDropzone.addEventListener('drop',async event=>{event.preventDefault();els.proposalDropzone.classList.remove('dragover');await handleProposalFiles([...event.dataTransfer.files].filter(file=>file.name.toLowerCase().endsWith('.json')));});
   els.clearProposalsBtn.addEventListener('click',()=>{state.importedProposals=[];state.conflictResolutions.clear();els.proposalStatus.textContent='Sense propostes importades.';renderCounters();renderProposalManager();});
   els.downloadMergedBtn.addEventListener('click',()=>{
-    activity.begin('Consolidant propostes','Calculant fusió sobre l’elementsOK.json actual');
+    activity.begin('Consolidant propostes',`Calculant fusió sobre ${state.config.elementsFile}`);
     try{
       const merged=buildMergedPayload();
       activity.step(`Fusió calculada: ${merged.payload.elements.length} elements`);
       if(merged.unresolved.length){activity.fail('Hi ha decisions pendents',`${merged.unresolved.length} decisió${merged.unresolved.length===1?'':'s'} pendent${merged.unresolved.length===1?'':'s'}`);return;}
-      activity.step('Sense decisions pendents','Preparant elementsOK.json consolidat');
+      activity.step('Sense decisions pendents',`Preparant ${state.config.elementsFile} consolidat`);
       downloadText(state.config.elementsFile,JSON.stringify(merged.payload,null,2)+'\n','application/json;charset=utf-8');
-      activity.done('elementsOK.json consolidat descarregat');
+      activity.done(`${state.config.elementsFile} consolidat descarregat`);
     }catch(error){activity.fail('No s’ha pogut consolidar',error);}
   });
   els.copyMergedBtn.addEventListener('click',async()=>{
