@@ -981,10 +981,11 @@ body{background:#090b09;color:var(--text)}
 .button-primary{background:var(--accent);border-color:var(--accent);color:#10130d;font-weight:800}
 .button-danger{background:#281715;border-color:#7d3f3b;color:#ffb3ae}
 .button-count,.mode-count{min-width:20px;height:auto;margin-left:5px;padding:1px 5px;border:0;border-left:1px solid currentColor;border-radius:0;background:transparent;font:700 .66rem/1.2 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.mode-button .mode-count{flex:0 0 auto;min-width:auto;margin-left:0;padding:0 0 0 5px}
 .workspace{grid-template-columns:minmax(300px,360px) minmax(0,1fr)}
 .sidebar{background:#101410;border-right:1px solid #4d5945}
 .mode-switch{gap:0;padding:0;border-bottom:1px solid var(--border);background:#0d100d}
-.mode-button{min-height:44px;border:0;border-right:1px solid var(--border);border-radius:0;background:#121612;color:#aab49d;font:700 .69rem/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;text-transform:uppercase;letter-spacing:.035em;padding:0 5px}
+.mode-button{min-width:0;min-height:44px;display:flex;align-items:center;justify-content:center;gap:4px;border:0;border-right:1px solid var(--border);border-radius:0;background:#121612;color:#aab49d;font:700 .66rem/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;text-transform:uppercase;letter-spacing:.015em;padding:0 4px;white-space:nowrap}
 .mode-button:last-child{border-right:0}
 .mode-button:hover{background:#1a2018;color:var(--text)}
 .mode-button.active{color:#10130d;border-color:var(--border);background:var(--accent)}
@@ -1015,7 +1016,6 @@ body{background:#090b09;color:var(--text)}
 .item-toggle.remove.active{background:#341a18;border-color:var(--red);color:#ffaaa5}
 .item-tracked-tags{margin-top:4px;color:#b9ca9d;font:500 .66rem/1.35 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 .map-panel{background:#090b09;border-left:0}
-.map::after{content:"WERT / OSM REVIEW";position:absolute;left:10px;bottom:8px;z-index:1;padding:3px 6px;border:1px solid rgba(215,255,95,.35);background:rgba(9,11,9,.78);color:rgba(215,255,95,.72);font:600 9px/1.2 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.08em;pointer-events:none}
 .maplibregl-ctrl-group{border:1px solid #56604e!important;border-radius:2px!important;background:#111511!important;box-shadow:none!important;overflow:hidden}
 .maplibregl-ctrl-group button{border-radius:0!important;background-color:#111511!important}
 .maplibregl-ctrl-group button+button{border-top:1px solid #424b3c!important}
@@ -1081,5 +1081,5 @@ body{background:#090b09;color:var(--text)}
 .task-start-option:hover span,.task-start-option:focus-visible span{color:#30382b}
 #reload-btn::after{height:2px;background:var(--accent)}
 #reload-btn.cooldown:disabled{background:#0d100d;border-color:#394334;color:#788271}
-@media(max-width:760px){.topbar{min-height:50px;padding:6px 8px}.brand-mark{width:30px;height:30px}.top-actions{gap:3px}.top-actions .button{min-height:32px;padding:5px 7px;border-radius:2px;font-size:.72rem}.workspace{grid-template-rows:minmax(235px,38dvh) minmax(0,1fr)}.filters{padding:5px}.mode-switch{padding:0}.mode-button{min-height:39px;font-size:.62rem}.item-list{padding:0}.dialog-card{border-radius:2px}.task-start-logo{width:72px;max-height:36px}.task-start-list{grid-template-columns:1fr}.task-start-option{min-height:72px;padding:12px 12px 12px 48px}.task-start-option::before{left:13px;top:14px}}
+@media(max-width:760px){.topbar{min-height:50px;padding:6px 8px}.brand-mark{width:30px;height:30px}.top-actions{gap:3px}.top-actions .button{min-height:32px;padding:5px 7px;border-radius:2px;font-size:.72rem}.workspace{grid-template-rows:minmax(235px,38dvh) minmax(0,1fr)}.filters{padding:5px}.mode-switch{padding:0}.mode-button{min-height:39px;gap:3px;padding:0 2px;font-size:.58rem;letter-spacing:0}.mode-button .mode-count{padding-left:3px;font-size:.58rem}.item-list{padding:0}.dialog-card{border-radius:2px}.task-start-logo{width:72px;max-height:36px}.task-start-list{grid-template-columns:1fr}.task-start-option{min-height:72px;padding:12px 12px 12px 48px}.task-start-option::before{left:13px;top:14px}}
 @media(max-width:520px){.topbar{gap:5px}.top-actions{border-top:1px solid #313a2d;padding-top:5px}.top-actions .button{font-size:.68rem}.task-start-dialog .dialog-header{padding:13px}.task-start-header{min-height:72px}.task-start-logo{width:60px;max-height:30px;opacity:.42}.task-start-dialog .dialog-body{padding:0}}
