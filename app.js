@@ -18,6 +18,7 @@ function renderAll(){
 setMapHooks({renderAll,renderList});
 let reloadTimer=null;
 let refreshBusy=false;
+const TASK_SWITCH_KEY='wert:task-switch';
 function reloadCacheStatus(){
   return isMonitorTask()?getMonitorCacheStatus(getOkBaseItems()):getPostpassCacheStatus();
 }
@@ -91,15 +92,51 @@ function configureTasks(){
   els.acceptedTab.classList.toggle('hidden',isMonitorTask());
   if(isMonitorTask()&&state.mode==='accepted')state.mode='pending';
 }
-function selectTaskConfig(){
-  const requested=new URLSearchParams(location.search).get('task');
-  const tasks=state.appConfig.tasks||[];
-  const matches=(item,value)=>item.id===value;
-  let task=tasks.find(item=>requested&&matches(item,requested)&&item.available);
-  if(!task)task=tasks.find(item=>matches(item,state.appConfig.defaultTaskId)&&item.available)||tasks.find(item=>item.available);
-  if(!task)throw new Error('No hi ha cap tasca disponible a config.json.');
+function applyTaskConfig(task){
   state.taskId=task.id;
   state.config=task;
+  const url=new URL(location.href);
+  url.searchParams.set('task',task.id);
+  history.replaceState(null,'',url);
+}
+async function selectTaskConfig(){
+  const tasks=(state.appConfig.tasks||[]).filter(task=>task.available);
+  if(!tasks.length)throw new Error('No hi ha cap tasca disponible a config.json.');
+  let switched='';
+  try{switched=sessionStorage.getItem(TASK_SWITCH_KEY)||'';sessionStorage.removeItem(TASK_SWITCH_KEY);}catch{}
+  const switchedTask=tasks.find(task=>task.id===switched);
+  if(switchedTask){applyTaskConfig(switchedTask);return;}
+  const dialog=$('task-start-dialog');
+  const list=$('task-start-list');
+  if(!dialog||!list)throw new Error('No s’ha trobat el selector inicial de tasques.');
+  const requested=new URLSearchParams(location.search).get('task');
+  const preferred=tasks.find(task=>task.id===requested)||tasks.find(task=>task.id===state.appConfig.defaultTaskId)||tasks[0];
+  list.replaceChildren();
+  await new Promise(resolve=>{
+    const blockCancel=event=>event.preventDefault();
+    dialog.addEventListener('cancel',blockCancel);
+    let preferredButton=null;
+    for(const task of tasks){
+      const button=document.createElement('button');
+      button.type='button';
+      button.className='task-start-option';
+      const name=document.createElement('strong');
+      name.textContent=task.name;
+      const detail=document.createElement('span');
+      detail.textContent=task.mode==='monitor'?'Monitorització':'Revisió';
+      button.append(name,detail);
+      button.addEventListener('click',()=>{
+        dialog.removeEventListener('cancel',blockCancel);
+        applyTaskConfig(task);
+        dialog.close();
+        resolve();
+      },{once:true});
+      list.append(button);
+      if(task.id===preferred.id)preferredButton=button;
+    }
+    dialog.showModal();
+    (preferredButton||list.firstElementChild)?.focus();
+  });
 }
 async function handleProposalFiles(files){
   activity.begin('Important propostes',`${files.length} fitxer${pluralS(files.length)} seleccionat${pluralS(files.length)}`);
@@ -240,6 +277,7 @@ function wireEvents(){
   els.taskSelect.addEventListener('change',()=>{
     if(els.taskSelect.value===state.taskId)return;
     if(hasUnsavedChanges()&&!window.confirm('Hi ha canvis sense exportar. Si canvies de tasca es perdran. Vols continuar?')){els.taskSelect.value=state.taskId;return;}
+    try{sessionStorage.setItem(TASK_SWITCH_KEY,els.taskSelect.value);}catch{}
     const url=new URL(location.href);
     url.searchParams.set('task',els.taskSelect.value);
     location.href=url.toString();
@@ -279,7 +317,10 @@ async function start(){
   activity.step('Mòduls JavaScript carregats','Carregant config.json');
   try{
     state.appConfig=await loadJson('config.json');
-    selectTaskConfig();
+    activity.hide();
+    await Promise.resolve();
+    await selectTaskConfig();
+    activity.begin('Iniciant WERT',`Tasca seleccionada: ${state.config.name}`);
     configureTasks();
     activity.step(`Configuració carregada: ${state.config.name}`,'Preparant interfície');
     renderInfo();
