@@ -527,6 +527,9 @@ button {
 .dialog-body section + section {
   margin-top: 22px;
 }
+.change-columns > section + section {
+  margin-top: 0;
+}
 .dialog-body h3 {
   margin: 0 0 10px;
   font-size: .95rem;
