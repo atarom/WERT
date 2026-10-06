@@ -17,7 +17,7 @@ export function createMap(){
   state.map.on('load',()=>{
     state.mapReady=true;
     state.map.addSource('wert-points',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
-    state.map.addLayer({id:'wert-points',type:'circle',source:'wert-points',paint:{'circle-radius':['case',['==',['get','selected'],true],9,6.5],'circle-color':['match',['get','action'],'add','#7ee6ad','remove','#ff9eae','accepted','#7ee6ad','issue','#f4d57d','#c7a6ff'],'circle-stroke-width':['case',['==',['get','selected'],true],3,1.5],'circle-stroke-color':['case',['==',['get','selected'],true],'#ffffff','#202532'],'circle-opacity':0.95}});
+    state.map.addLayer({id:'wert-points',type:'circle',source:'wert-points',paint:{'circle-radius':['case',['==',['get','selected'],true],8.5,6],'circle-color':['match',['get','action'],'add','#7bd99a','remove','#ff756d','accepted','#7bd99a','issue','#f0c45c','#d7ff5f'],'circle-stroke-width':['case',['==',['get','selected'],true],3,1.5],'circle-stroke-color':['case',['==',['get','selected'],true],'#f4f7ec','#182016'],'circle-opacity':0.94}});
     state.map.on('click','wert-points',event=>{const key=event.features?.[0]?.properties?.key;if(key)selectItem(key,{fly:false,popup:true,scroll:true});});
     state.map.on('mouseenter','wert-points',()=>{state.map.getCanvas().style.cursor='pointer';});
     state.map.on('mouseleave','wert-points',()=>{state.map.getCanvas().style.cursor='';});
