@@ -19,6 +19,21 @@ setMapHooks({renderAll,renderList});
 let reloadTimer=null;
 let refreshBusy=false;
 const TASK_SWITCH_KEY='wert:task-switch';
+const MAINTAINER_KEY='wert:maintainer-mode';
+function setMaintainerMode(enabled){
+  const button=$('maintainer-btn');
+  document.body.classList.toggle('maintainer-mode',enabled);
+  if(button){
+    button.setAttribute('aria-pressed',String(enabled));
+    button.title=enabled?'Desactiva el mode mantenedor':'Activa el mode mantenedor';
+  }
+  try{if(enabled)sessionStorage.setItem(MAINTAINER_KEY,'1');else sessionStorage.removeItem(MAINTAINER_KEY);}catch{}
+}
+function restoreMaintainerMode(){
+  let enabled=false;
+  try{enabled=sessionStorage.getItem(MAINTAINER_KEY)==='1';}catch{}
+  setMaintainerMode(enabled);
+}
 function reloadCacheStatus(){
   return isMonitorTask()?getMonitorCacheStatus(getOkBaseItems()):getPostpassCacheStatus();
 }
@@ -271,6 +286,7 @@ function startClocks(){
 function wireEvents(){
   wireOkCheck(renderAll);
   wireMonitorSnapshot();
+  $('maintainer-btn')?.addEventListener('click',event=>setMaintainerMode(event.currentTarget.getAttribute('aria-pressed')!=='true'));
   els.pendingTab.addEventListener('click',()=>setMode('pending'));
   els.acceptedTab.addEventListener('click',()=>setMode('accepted'));
   els.inconsistenciesTab.addEventListener('click',()=>setMode('inconsistency'));
@@ -320,6 +336,7 @@ async function start(){
     activity.hide();
     await Promise.resolve();
     await selectTaskConfig();
+    restoreMaintainerMode();
     activity.begin('Iniciant WERT',`Tasca seleccionada: ${state.config.name}`);
     configureTasks();
     activity.step(`Configuració carregada: ${state.config.name}`,'Preparant interfície');

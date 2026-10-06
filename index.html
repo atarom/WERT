@@ -25,9 +25,10 @@
       </div>
       <nav class="top-actions" aria-label="Accions principals">
         <button id="reload-btn" class="button button-ghost" type="button">Actualitza</button>
-        <button id="info-btn" class="button button-ghost" type="button">Informació</button>
-        <button id="proposals-btn" class="button button-ghost" type="button">Propostes <span id="proposals-count" class="button-count">0</span></button>
+        <button id="info-btn" class="button button-ghost maintainer-only" type="button">Informació</button>
+        <button id="proposals-btn" class="button button-ghost maintainer-only" type="button">Propostes <span id="proposals-count" class="button-count">0</span></button>
         <button id="changes-btn" class="button button-accent" type="button">Canvis <span id="changes-count" class="button-count">0</span></button>
+        <button id="maintainer-btn" class="button maintainer-toggle" type="button" aria-pressed="false" title="Activa el mode mantenedor">Mantenedor</button>
       </nav>
     </header>
     <main class="workspace">
@@ -150,8 +151,8 @@
     <div class="dialog-card dialog-card-wide">
       <div class="dialog-header">
         <div>
-          <h2>Prepara canvis</h2>
-          <p>La proposta WERT és el format recomanat per treballar simultàniament.</p>
+          <h2>Prepara proposta</h2>
+          <p>Revisa els canvis seleccionats i descarrega la proposta per enviar-la al mantenidor.</p>
         </div>
         <button class="icon-button" data-close-dialog="changes-dialog" type="button" aria-label="Tanca">×</button>
       </div>
@@ -160,7 +161,7 @@
           <div class="summary-card"><span id="add-summary-label">Afegir a OK</span><strong id="add-count">0</strong></div>
           <div class="summary-card"><span id="remove-summary-label">Retirar d’OK</span><strong id="remove-count">0</strong></div>
           <div class="summary-card"><span>Inconsistències resoltes</span><strong id="resolved-issues-count">0</strong></div>
-          <div class="summary-card"><span>Total resultant</span><strong id="result-count">0</strong></div>
+          <div class="summary-card maintainer-only"><span>Total resultant</span><strong id="result-count">0</strong></div>
         </div>
         <div class="change-columns change-columns-three">
           <section><h3 id="add-list-title">Altes</h3><div id="add-list" class="change-list"></div></section>
@@ -168,14 +169,14 @@
           <section><h3>Resolucions</h3><div id="issue-change-list" class="change-list"></div></section>
         </div>
         <section class="export-section">
-          <h3>Per a col·laboradors</h3>
-          <p class="hint">Cada proposta té un nom únic i només conté els canvis seleccionats, de manera que diversos usuaris poden treballar alhora sense sobreescriure’s.</p>
+          <h3>Proposta</h3>
+          <p class="hint">El fitxer només conté els canvis que has seleccionat i està preparat per enviar-lo al mantenidor.</p>
           <div class="export-actions">
             <button id="download-proposal-btn" class="button button-primary" type="button">Descarrega proposta WERT</button>
-            <button id="copy-proposal-btn" class="button button-ghost" type="button">Copia proposta</button>
+            <button id="copy-proposal-btn" class="button button-ghost maintainer-only" type="button">Copia proposta</button>
           </div>
         </section>
-        <section class="export-section">
+        <section class="export-section maintainer-only">
           <h3>Per al mantenidor</h3>
           <p id="changes-hint" class="hint"></p>
           <div class="export-actions">
