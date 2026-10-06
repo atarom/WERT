@@ -954,10 +954,13 @@ button {
 @media (max-width:360px){.top-actions{gap:3px}.top-actions .button{padding:6px 3px;font-size:.68rem}.top-actions .button-count{min-width:17px;height:17px;padding:0 3px;margin-left:2px;font-size:.64rem}}
 .item-tracked-tags{margin-top:5px;color:var(--accent);font-size:.76rem;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.popup-tracked-tags{margin-top:6px;color:var(--accent);font-size:.78rem;line-height:1.4;overflow-wrap:anywhere}
 .task-start-dialog{width:min(720px,calc(100vw - 28px))}
+.task-start-header{align-items:center}
+.task-start-header>div{min-width:0}
+.task-start-logo{width:116px;height:auto;max-height:58px;object-fit:contain;flex:0 0 auto;opacity:.9}
 .task-start-card{width:100%}
 .task-start-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
 .task-start-option{min-width:0;min-height:86px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:6px;padding:15px 16px;border:1px solid var(--border);border-radius:12px;background:var(--panel);color:var(--text);text-align:left;cursor:pointer;transition:border-color .15s ease,background .15s ease,transform .15s ease}
 .task-start-option:hover,.task-start-option:focus-visible{border-color:var(--accent);background:rgba(199,166,255,.14);outline:none;transform:translateY(-1px)}
 .task-start-option strong{max-width:100%;font-size:.98rem;overflow-wrap:anywhere}
 .task-start-option span{color:var(--muted);font-size:.78rem}
-@media (max-width:520px){.task-start-dialog{width:calc(100vw - 14px);max-height:calc(100dvh - 14px)}.task-start-list{grid-template-columns:1fr}.task-start-option{min-height:72px;padding:13px 14px}.task-start-dialog .dialog-header{padding:16px}.task-start-dialog .dialog-body{padding:14px 16px 16px}}
+@media (max-width:520px){.task-start-dialog{width:calc(100vw - 14px);max-height:calc(100dvh - 14px)}.task-start-list{grid-template-columns:1fr}.task-start-option{min-height:72px;padding:13px 14px}.task-start-dialog .dialog-header{padding:16px}.task-start-logo{width:76px;max-height:38px;opacity:.82}.task-start-dialog .dialog-body{padding:14px 16px 16px}}
