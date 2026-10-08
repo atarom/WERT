@@ -5,6 +5,7 @@ import {currentAction,getCurrentItems,getFilteredItems,getAddedItems,getRemovedI
 import {selectItem,toggleReview,renderMap} from './map.js';
 import {buildMergedPayload,conflictChoices,formatShortHash} from './proposals.js';
 import {compileQuery,isMonitorTask} from './postpass.js';
+import {createVirtualList} from './virtual-list.js';
 export function showError(message){
   els.errorBanner.textContent=message;
   els.errorBanner.classList.remove('hidden');
@@ -132,19 +133,15 @@ export function makeItemCard(item){
   card.append(main,toggle);
   return card;
 }
+let virtualList=null;
+export function scrollToListItem(key){
+  virtualList?.scrollToKey(key);
+}
 export function renderList(){
   const items=getFilteredItems();
-  els.itemList.replaceChildren();
-  if(!items.length){
-    const empty=document.createElement('div');
-    empty.className='empty-state';
-    empty.textContent=state.mode==='pending'?(isMonitorTask()?'No hi ha canvis detectats que coincideixin amb els filtres.':'No hi ha elements pendents que coincideixin amb els filtres.'):state.mode==='accepted'?'No hi ha elements acceptats que coincideixin amb els filtres.':'No hi ha inconsistències que coincideixin amb els filtres.';
-    els.itemList.append(empty);
-  }else{
-    const fragment=document.createDocumentFragment();
-    for(const item of items)fragment.append(makeItemCard(item));
-    els.itemList.append(fragment);
-  }
+  if(!virtualList)virtualList=createVirtualList(els.itemList,makeItemCard,uiKeyFor);
+  const emptyMessage=state.mode==='pending'?(isMonitorTask()?'No hi ha canvis detectats que coincideixin amb els filtres.':'No hi ha elements pendents que coincideixin amb els filtres.'):state.mode==='accepted'?'No hi ha elements acceptats que coincideixin amb els filtres.':'No hi ha inconsistències que coincideixin amb els filtres.';
+  virtualList.setItems(items,emptyMessage);
   els.statusLine.textContent=`${items.length} visibles de ${getCurrentItems().length}`;
 }
 export function renderCounters(){

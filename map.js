@@ -4,6 +4,7 @@ import {els} from './dom.js';
 import {keyFor,uiKeyFor,displayTagKey,trackedDifferences,objectKeyFor} from './elements.js';
 import {currentAction,getCurrentItems,getFilteredItems,getInconsistencyChoices,getInconsistencyResolutionValue,setInconsistencyResolution} from './changes.js';
 import {osmViewUrl,osmEditUrl} from './osm.js';
+import {scrollToListItem} from './ui.js';
 const hooks={renderAll:()=>{}};
 let highlightedKey=null;
 function syncMapSelection(key){
@@ -67,7 +68,7 @@ export function selectItem(key,options){
   const card=selectedCard(key);
   if(card)card.classList.add('selected');
   syncMapSelection(key);
-  if(options.scroll&&card)requestAnimationFrame(()=>card.scrollIntoView({behavior:'smooth',block:'nearest'}));
+  if(options.scroll)scrollToListItem(key);
   if(item.coordinates&&options.fly!==false)state.map.easeTo({center:item.coordinates,zoom:Math.max(state.map.getZoom(),Number(state.config.map.focusZoom)||17),duration:Number(state.config.map.focusDurationMs)||180,essential:true});
   if(item.coordinates&&options.popup)openPopup(item);
 }
