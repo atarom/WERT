@@ -79,8 +79,8 @@
       "postpass": {
         "endpoint": "https://postpass.geofabrik.de/api/interpreter",
         "method": "POST",
-        "timeoutMs": 180000,
-        "cacheSeconds": 60
+        "timeoutMs": 300000,
+        "cacheSeconds": 300
       },
       "map": {
         "style": "https://tiles.openfreemap.org/styles/dark",
