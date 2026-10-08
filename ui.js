@@ -53,6 +53,11 @@ function appendMonitorChange(main,item){
   detail.title=detail.textContent;
   main.append(detail);
 }
+function wireCardActivation(card,key){
+  const activate=()=>selectItem(key,{fly:true,popup:true,scroll:false});
+  card.addEventListener('click',activate);
+  card.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();activate();}});
+}
 function makeIssueCard(item){
   const key=uiKeyFor(item);
   const action=currentAction(item);
@@ -96,9 +101,7 @@ function makeIssueCard(item){
     renderList();
     renderMap();
   });
-  const activate=()=>selectItem(key,{fly:true,popup:true,scroll:false});
-  card.addEventListener('click',activate);
-  card.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();activate();}});
+  wireCardActivation(card,key);
   card.append(main,note,select);
   return card;
 }
@@ -127,9 +130,7 @@ export function makeItemCard(item){
   toggle.setAttribute('aria-label',toggle.title);
   toggle.textContent=state.mode==='pending'?'✓':'−';
   toggle.addEventListener('click',event=>{event.stopPropagation();toggleReview(item);});
-  const activate=()=>selectItem(key,{fly:true,popup:true,scroll:false});
-  card.addEventListener('click',activate);
-  card.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();activate();}});
+  wireCardActivation(card,key);
   card.append(main,toggle);
   return card;
 }

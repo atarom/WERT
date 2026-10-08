@@ -42,9 +42,15 @@ export function getCurrentItems(){
   if(state.mode==='accepted')return state.accepted;
   return state.inconsistencies;
 }
-function itemTags(item){
+export function itemTags(item){
   const tags=item?.tags||item?.current?.tags;
   return tags&&typeof tags==='object'&&!Array.isArray(tags)?tags:{};
+}
+export function matchesBaseFilters(item,q=state.search.trim().toLocaleLowerCase('ca')){
+  if(state.type!=='all'&&item.type!==state.type)return false;
+  if(!q)return true;
+  const extra=item.issueId?`${item.message} ${(item.candidates||[]).map(candidate=>candidate.name).join(' ')} ${item.current?.name||''}`:'';
+  return`${item.name} ${trackedStateText(item,false)} ${item.id} ${extra}`.toLocaleLowerCase('ca').includes(q);
 }
 let tagFilterMode=state.mode;
 let filteredCache={source:null,mode:'',search:'',type:'',tagKey:'',tagValue:'',result:null};
@@ -64,11 +70,7 @@ export function getFilteredItems(){
   if(filteredCache.source===source&&filteredCache.mode===state.mode&&filteredCache.search===search&&filteredCache.type===type&&filteredCache.tagKey===tagKey&&filteredCache.tagValue===tagValue)return filteredCache.result;
   const q=search.toLocaleLowerCase('ca');
   const result=source.filter(item=>{
-    if(type!=='all'&&item.type!==type)return false;
-    if(q){
-      const extra=item.issueId?`${item.message} ${(item.candidates||[]).map(candidate=>candidate.name).join(' ')} ${item.current?.name||''}`:'';
-      if(!`${item.name} ${trackedStateText(item,false)} ${item.id} ${extra}`.toLocaleLowerCase('ca').includes(q))return false;
-    }
+    if(!matchesBaseFilters(item,q))return false;
     if(!tagKey)return true;
     const tags=itemTags(item);
     if(!Object.prototype.hasOwnProperty.call(tags,tagKey))return false;

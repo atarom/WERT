@@ -1,25 +1,14 @@
 import {state} from './state.js';
-import {getCurrentItems} from './changes.js';
-import {trackedStateText} from './elements.js';
+import {getCurrentItems,itemTags,matchesBaseFilters} from './changes.js';
 let keySelect=null;
 let valueSelect=null;
 let refreshSource=null;
 let refreshSearch=null;
 let refreshType=null;
 let refreshTagKey=null;
-function itemTags(item){
-  const tags=item?.tags||item?.current?.tags;
-  return tags&&typeof tags==='object'&&!Array.isArray(tags)?tags:{};
-}
-function matchesBaseFilters(item){
-  if(state.type!=='all'&&item.type!==state.type)return false;
-  const q=state.search.trim().toLocaleLowerCase('ca');
-  if(!q)return true;
-  const extra=item.issueId?`${item.message} ${(item.candidates||[]).map(candidate=>candidate.name).join(' ')} ${item.current?.name||''}`:'';
-  return`${item.name} ${trackedStateText(item,false)} ${item.id} ${extra}`.toLocaleLowerCase('ca').includes(q);
-}
 function contextualItems(){
-  return getCurrentItems().filter(matchesBaseFilters);
+  const q=state.search.trim().toLocaleLowerCase('ca');
+  return getCurrentItems().filter(item=>matchesBaseFilters(item,q));
 }
 function allKeys(items){
   const keys=new Set();

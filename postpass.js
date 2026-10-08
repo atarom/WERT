@@ -14,17 +14,21 @@ const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 export function isMonitorTask(){
   return state.config?.mode==='monitor';
 }
-function objectClauses(items,alias='e'){
+function groupedObjectIds(items){
   const groups={N:new Set(),W:new Set(),R:new Set()};
   const codes={node:'N',way:'W',relation:'R'};
   for(const item of items||[]){
     const code=codes[String(item?.type||'').toLowerCase()];
     const id=Number(item?.id);
-    if(code&&Number.isSafeInteger(id)&&id>0)groups[code].add(String(id));
+    if(code&&Number.isSafeInteger(id)&&id>0)groups[code].add(id);
   }
+  return groups;
+}
+function objectClauses(items,alias='e'){
+  const groups=groupedObjectIds(items);
   const clauses=[];
   for(const code of['N','W','R']){
-    const ids=[...groups[code]].sort((a,b)=>a.localeCompare(b,'en',{numeric:true}));
+    const ids=[...groups[code]].sort((a,b)=>a-b);
     if(ids.length)clauses.push(`(${alias}.osm_type='${code}' AND ${alias}.osm_id=ANY(ARRAY[${ids.join(',')}]::bigint[]))`);
   }
   return clauses;
@@ -42,13 +46,7 @@ function okCheckSignature(items){
     const cached=okCheckSignatureCache.get(items);
     if(cached)return cached;
   }
-  const groups={N:new Set(),W:new Set(),R:new Set()};
-  const codes={node:'N',way:'W',relation:'R'};
-  for(const item of items||[]){
-    const code=codes[String(item?.type||'').toLowerCase()];
-    const id=Number(item?.id);
-    if(code&&Number.isSafeInteger(id)&&id>0)groups[code].add(id);
-  }
+  const groups=groupedObjectIds(items);
   let first=2166136261;
   let second=2246822519;
   let length=0;
@@ -185,18 +183,16 @@ async function fetchPostpassNetwork(){
   const query=compileQuery();
   return postForm(query,{progressLabel:`Consulta Postpass preparada: ${query.length} caràcters`,responseLabel:'Postpass'});
 }
-async function fetchOkCheckNetwork(items){
+async function fetchCheckNetwork(items,monitor){
   const query=compileOkCheckQuery(items);
   if(!query)return{postpass_properties:{timestamp:new Date().toISOString()},result:[]};
-  const payload=await postForm(query,{geojson:false,timeoutMs:Math.min(Number(state.config.postpass.timeoutMs)||180000,60000),progressLabel:`Consulta de comprovació preparada: ${items.length} elements i ${query.length} caràcters`,responseLabel:'Comprovació Postpass'});
-  if(!Array.isArray(payload?.result))throw new Error('La comprovació Postpass no ha retornat un array result vàlid.');
-  return payload;
-}
-async function fetchMonitorNetwork(items){
-  const query=compileOkCheckQuery(items);
-  if(!query)return{postpass_properties:{timestamp:new Date().toISOString()},result:[]};
-  const payload=await postForm(query,{geojson:false,progressLabel:`Consulta monitor preparada: ${items.length} elements i ${query.length} caràcters`,responseLabel:'Monitor Postpass'});
-  if(!Array.isArray(payload?.result))throw new Error('La consulta monitor no ha retornat un array result vàlid.');
+  const payload=await postForm(query,{
+    geojson:false,
+    ...(monitor?{}:{timeoutMs:Math.min(Number(state.config.postpass.timeoutMs)||180000,60000)}),
+    progressLabel:monitor?`Consulta monitor preparada: ${items.length} elements i ${query.length} caràcters`:`Consulta de comprovació preparada: ${items.length} elements i ${query.length} caràcters`,
+    responseLabel:monitor?'Monitor Postpass':'Comprovació Postpass'
+  });
+  if(!Array.isArray(payload?.result))throw new Error(monitor?'La consulta monitor no ha retornat un array result vàlid.':'La comprovació Postpass no ha retornat un array result vàlid.');
   return payload;
 }
 async function fetchMonitorDetailNetwork(items){
@@ -246,72 +242,73 @@ async function withQueryLock(task){
   if(navigator.locks?.request)return navigator.locks.request('wert-postpass-query',{mode:'exclusive'},task);
   return fallbackLock(task);
 }
-export async function getPostpassData(){
-  const initial=await readCache('postpass');
+const cacheMessages={
+  postpass:{
+    using:'Usant memòria cau Postpass',
+    skip:'No es fa una nova consulta al servidor',
+    expired:'Memòria cau Postpass caducada',
+    missing:'No hi ha memòria cau Postpass',
+    updated:'Una altra pestanya ha actualitzat la memòria cau',
+    saved:'Resposta Postpass desada en memòria cau',
+    temporary:'Resposta Postpass en memòria cau temporal d’aquesta pestanya',
+    persisted:'La consulta queda bloquejada fins que caduqui la memòria cau'
+  },
+  ok:{
+    using:'Usant comprovació OK en memòria cau',
+    skip:'No es fa una nova consulta de comprovació',
+    expired:'Comprovació OK caducada',
+    missing:'No hi ha comprovació OK en memòria cau',
+    updated:'Una altra pestanya ha comprovat els OK',
+    saved:'Comprovació OK desada en memòria cau',
+    temporary:'Comprovació OK en memòria cau temporal d’aquesta pestanya',
+    persisted:'Nova comprovació disponible quan caduqui la memòria cau'
+  },
+  monitor:{
+    using:'Usant monitor en memòria cau',
+    skip:'No es fa una nova consulta dels objectes vigilats',
+    expired:'Monitor caducat',
+    missing:'No hi ha monitor en memòria cau',
+    updated:'Una altra pestanya ha actualitzat el monitor',
+    saved:'Monitor desat en memòria cau',
+    temporary:'Monitor en memòria cau temporal d’aquesta pestanya',
+    persisted:'Nova comprovació disponible quan caduqui la memòria cau'
+  }
+};
+async function getCachedData(kind,items,fetchNetwork){
+  const messages=cacheMessages[kind];
+  const initial=await readCache(kind,items);
   const initialStatus=statusForEntry(initial);
   if(initial&&initialStatus.fresh){
-    activity.step(`Usant memòria cau Postpass: ${Math.floor(initialStatus.ageMs/1000)} s d’antiguitat`,'No es fa una nova consulta al servidor');
+    activity.step(`${messages.using}: ${Math.floor(initialStatus.ageMs/1000)} s d’antiguitat`,messages.skip);
     return{payload:initial.payload,source:'cache',savedAt:initialStatus.savedAt};
   }
-  activity.step(initialStatus.exists?`Memòria cau Postpass caducada: ${Math.floor(initialStatus.ageMs/1000)} s d’antiguitat`:'No hi ha memòria cau Postpass','Esperant torn de consulta');
+  activity.step(initialStatus.exists?`${messages.expired}: ${Math.floor(initialStatus.ageMs/1000)} s d’antiguitat`:messages.missing,'Esperant torn de consulta');
   return withQueryLock(async()=>{
-    const current=await readCache('postpass');
+    const current=await readCache(kind,items);
     const status=statusForEntry(current);
     if(current&&status.fresh){
-      activity.step('Una altra pestanya ha actualitzat la memòria cau','Reutilitzant la resposta sense consultar Postpass');
+      activity.step(messages.updated,'Reutilitzant la resposta sense consultar Postpass');
       return{payload:current.payload,source:'cache',savedAt:status.savedAt};
     }
-    const payload=await fetchPostpassNetwork();
-    const saved=await writeCache('postpass',null,payload);
-    activity.step(saved.persisted?`Resposta Postpass desada en memòria cau durant ${Math.round(cacheTtlMs()/1000)} s`:'Resposta Postpass en memòria cau temporal d’aquesta pestanya',saved.persisted?'La consulta queda bloquejada fins que caduqui la memòria cau':'L’emmagatzematge persistent del navegador no està disponible');
+    const payload=await fetchNetwork();
+    const saved=await writeCache(kind,items,payload);
+    activity.step(saved.persisted?`${messages.saved} durant ${Math.round(cacheTtlMs()/1000)} s`:messages.temporary,saved.persisted?messages.persisted:'L’emmagatzematge persistent del navegador no està disponible');
     return{payload,source:'network',savedAt:saved.entry.savedAt};
   });
 }
-export async function getOkCheckData(items){
-  const query=compileOkCheckQuery(items);
-  if(!query)return{payload:{postpass_properties:{timestamp:new Date().toISOString()},result:[]},source:'empty',savedAt:Date.now()};
-  const initial=await readCache('ok',items);
-  const initialStatus=statusForEntry(initial);
-  if(initial&&initialStatus.fresh){
-    activity.step(`Usant comprovació OK en memòria cau: ${Math.floor(initialStatus.ageMs/1000)} s d’antiguitat`,'No es fa una nova consulta de comprovació');
-    return{payload:initial.payload,source:'cache',savedAt:initialStatus.savedAt};
-  }
-  activity.step(initialStatus.exists?`Comprovació OK caducada: ${Math.floor(initialStatus.ageMs/1000)} s d’antiguitat`:'No hi ha comprovació OK en memòria cau','Esperant torn de consulta');
-  return withQueryLock(async()=>{
-    const current=await readCache('ok',items);
-    const status=statusForEntry(current);
-    if(current&&status.fresh){
-      activity.step('Una altra pestanya ha comprovat els OK','Reutilitzant la resposta sense consultar Postpass');
-      return{payload:current.payload,source:'cache',savedAt:status.savedAt};
-    }
-    const payload=await fetchOkCheckNetwork(items);
-    const saved=await writeCache('ok',items,payload);
-    activity.step(saved.persisted?`Comprovació OK desada en memòria cau durant ${Math.round(cacheTtlMs()/1000)} s`:'Comprovació OK en memòria cau temporal d’aquesta pestanya',saved.persisted?'Nova comprovació disponible quan caduqui la memòria cau':'L’emmagatzematge persistent del navegador no està disponible');
-    return{payload,source:'network',savedAt:saved.entry.savedAt};
-  });
+function emptyCheckData(){
+  return{payload:{postpass_properties:{timestamp:new Date().toISOString()},result:[]},source:'empty',savedAt:Date.now()};
 }
-export async function getMonitorData(items){
-  const query=compileOkCheckQuery(items);
-  if(!query)return{payload:{postpass_properties:{timestamp:new Date().toISOString()},result:[]},source:'empty',savedAt:Date.now()};
-  const initial=await readCache('monitor',items);
-  const initialStatus=statusForEntry(initial);
-  if(initial&&initialStatus.fresh){
-    activity.step(`Usant monitor en memòria cau: ${Math.floor(initialStatus.ageMs/1000)} s d’antiguitat`,'No es fa una nova consulta dels objectes vigilats');
-    return{payload:initial.payload,source:'cache',savedAt:initialStatus.savedAt};
-  }
-  activity.step(initialStatus.exists?`Monitor caducat: ${Math.floor(initialStatus.ageMs/1000)} s d’antiguitat`:'No hi ha monitor en memòria cau','Esperant torn de consulta');
-  return withQueryLock(async()=>{
-    const current=await readCache('monitor',items);
-    const status=statusForEntry(current);
-    if(current&&status.fresh){
-      activity.step('Una altra pestanya ha actualitzat el monitor','Reutilitzant la resposta sense consultar Postpass');
-      return{payload:current.payload,source:'cache',savedAt:status.savedAt};
-    }
-    const payload=await fetchMonitorNetwork(items);
-    const saved=await writeCache('monitor',items,payload);
-    activity.step(saved.persisted?`Monitor desat en memòria cau durant ${Math.round(cacheTtlMs()/1000)} s`:'Monitor en memòria cau temporal d’aquesta pestanya',saved.persisted?'Nova comprovació disponible quan caduqui la memòria cau':'L’emmagatzematge persistent del navegador no està disponible');
-    return{payload,source:'network',savedAt:saved.entry.savedAt};
-  });
+export function getPostpassData(){
+  return getCachedData('postpass',null,fetchPostpassNetwork);
+}
+export function getOkCheckData(items){
+  if(!compileOkCheckQuery(items))return Promise.resolve(emptyCheckData());
+  return getCachedData('ok',items,()=>fetchCheckNetwork(items,false));
+}
+export function getMonitorData(items){
+  if(!compileOkCheckQuery(items))return Promise.resolve(emptyCheckData());
+  return getCachedData('monitor',items,()=>fetchCheckNetwork(items,true));
 }
 export async function getMonitorDetailData(items){
   if(!items?.length)return{postpass_properties:{timestamp:new Date().toISOString()},type:'FeatureCollection',features:[]};
