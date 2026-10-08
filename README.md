@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="logo.png" alt="WERT" width="180">
+  <img src="assets/logo.png" alt="WERT" width="180">
   <p>Wenceslau Evita Rastre Trobable</p>
   <p><a href="https://atarom.github.io/WERT/"><strong>Obre WERT</strong></a></p>
 </div>

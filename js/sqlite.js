@@ -8,7 +8,7 @@ export function sqliteEngine(){
   return sqlitePromise;
 }
 export async function loadSnapshot(filename){
-  const response=await fetch(filename,{cache:'no-store'});
+  const response=await fetch('data/'+filename,{cache:'no-store'});
   if(!response.ok)throw new Error(`${filename}: HTTP ${response.status}`);
   const bytes=new Uint8Array(await response.arrayBuffer());
   const SQL=await sqliteEngine();
