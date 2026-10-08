@@ -216,7 +216,8 @@ export function renderChangesDialog(){
   els.copyOkBtn.disabled=!hasChanges||unresolved.length>0;
   els.discardBtn.disabled=!hasChanges;
   els.downloadOkBtn.textContent=`Descarrega ${state.config.elementsFile}`;
-  els.copyOkBtn.textContent=`Copia ${state.config.elementsFile}`;
+  els.copyOkBtn.textContent='Copia dades JSON';
+  els.copyMergedBtn.textContent='Copia dades JSON';
   els.changesHint.textContent=unresolved.length?`Hi ha ${unresolved.length} inconsistència${unresolved.length===1?'':'es'} sense resoldre. Pots descarregar una proposta WERT, però cal resoldre-les totes per generar ${state.config.elementsFile}.`:isMonitorTask()?'Els canvis seleccionats actualitzaran el snapshot monitoritzat.':'Totes les inconsistències actuals estan resoltes o no n’hi ha.';
 }
 export function makeProposalCard(proposal){

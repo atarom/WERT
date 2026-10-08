@@ -5,7 +5,7 @@ import {getOkCheckData,getOkCheckCacheStatus,getMonitorData,getMonitorDetailData
 import {rebuildCollections} from './changes.js';
 import {activity} from './activity.js';
 import {showError,clearError} from './ui.js';
-import {downloadText,stringifyJson} from './io.js';
+import {downloadSnapshot as downloadSqliteSnapshot} from './sqlite.js';
 let okTimer=null;
 let okClock=null;
 let okBusy=false;
@@ -395,7 +395,7 @@ export async function prepareMonitorSnapshot(){
   try{
     const source=await getMonitorSnapshotData();
     if(!source.features.length&&baseItems.length)throw new Error('La font no ha retornat cap objecte. No es generarà un snapshot buit.');
-    activity.step(`Font rebuda: ${source.features.length} resultats`,'Validant objectes i preparant el JSON compacte');
+    activity.step(`Font rebuda: ${source.features.length} resultats`,'Validant objectes i preparant el snapshot SQLite');
     const parsed=parsePostpass(source);
     if(!parsed.items.length&&baseItems.length)throw new Error('La font no ha produït cap objecte vàlid. No es generarà un snapshot buit.');
     const payload=payloadFromItems(parsed.items);
@@ -417,11 +417,12 @@ export async function prepareMonitorSnapshot(){
     renderSnapshotAdmin();
   }
 }
-function downloadSnapshot(){
+async function downloadSnapshot(){
   if(!snapshotPreview)return;
   const message=`Es descarregarà un ${state.config.elementsFile} complet amb l’estat actual d’OSM. Això farà que tots els noms actuals passin a ser la nova referència del monitor. Vols continuar?`;
   if(!window.confirm(message))return;
-  downloadText(state.config.elementsFile,stringifyJson(snapshotPreview.payload),'application/json;charset=utf-8');
+  try{await downloadSqliteSnapshot(state.config.elementsFile,snapshotPreview.payload);}
+  catch(error){showError(`No s’ha pogut generar el snapshot SQLite. ${error?.message||error}`);return;}
   els.snapshotStatus.textContent=`${state.config.elementsFile} descarregat. Substitueix el fitxer del repositori només si vols adoptar aquest snapshot com a nova referència.`;
 }
 export function resetSnapshotAdmin(){

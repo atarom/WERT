@@ -1,11 +1,12 @@
 import {activity} from './activity.js';
 import {state} from './state.js';
 import {trackedTagKeys,displayTagKey} from './elements.js';
+import {readStoredCache,writeStoredCache} from './sqlite-cache.js';
 const POSTPASS_LOCK_KEY='wert:postpass-lock:v2';
 const caches={
-  postpass:{prefix:'wert:postpass-cache:v2:',memory:null},
-  ok:{prefix:'wert:okcheck-cache:v2:',memory:null},
-  monitor:{prefix:'wert:monitor-cache:v2:',memory:null}
+  postpass:{memory:null},
+  ok:{memory:null},
+  monitor:{memory:null}
 };
 const compiledOkCheckCache=new WeakMap();
 const okCheckSignatureCache=new WeakMap();
@@ -128,45 +129,39 @@ function cacheIdentity(kind,items){
   else identity.signature=okCheckSignature(items);
   return identity;
 }
-function cacheKey(kind){
-  return`${caches[kind].prefix}${state.taskId}`;
-}
 function matchesCache(entry,identity){
   if(!entry||typeof entry!=='object'||!entry.payload||!Number.isFinite(Number(entry.savedAt)))return false;
   return Object.entries(identity).every(([key,value])=>entry[key]===value);
 }
-function readCache(kind,items){
+async function readCache(kind,items){
   const cache=caches[kind];
   const identity=cacheIdentity(kind,items);
   try{
-    const raw=localStorage.getItem(cacheKey(kind));
-    if(raw){
-      const parsed=JSON.parse(raw);
-      if(matchesCache(parsed,identity)){cache.memory=parsed;return parsed;}
-    }
+    const stored=await readStoredCache(kind,identity.taskId);
+    if(matchesCache(stored,identity)){cache.memory=stored;return stored;}
   }catch{}
   return matchesCache(cache.memory,identity)?cache.memory:null;
 }
-function writeCache(kind,items,payload){
+async function writeCache(kind,items,payload){
   const cache=caches[kind];
   const identity=cacheIdentity(kind,items);
   const entry={savedAt:Date.now(),...identity,payload};
   cache.memory=entry;
-  let persisted=true;
-  try{localStorage.setItem(cacheKey(kind),JSON.stringify(entry));}catch{persisted=false;}
+  let persisted=false;
+  try{persisted=await writeStoredCache(kind,entry);}catch{}
   return{entry,persisted};
 }
 export function getPostpassCacheStatus(){
   if(!state.config?.postpass)return emptyStatus(0);
-  return statusForEntry(readCache('postpass'));
+  return statusForEntry(caches.postpass.memory&&matchesCache(caches.postpass.memory,cacheIdentity('postpass'))?caches.postpass.memory:null);
 }
 export function getOkCheckCacheStatus(items){
   if(!state.config?.postpass)return emptyStatus();
-  return statusForEntry(readCache('ok',items));
+  return statusForEntry(caches.ok.memory&&matchesCache(caches.ok.memory,cacheIdentity('ok',items))?caches.ok.memory:null);
 }
 export function getMonitorCacheStatus(items){
   if(!state.config?.postpass)return emptyStatus();
-  return statusForEntry(readCache('monitor',items));
+  return statusForEntry(caches.monitor.memory&&matchesCache(caches.monitor.memory,cacheIdentity('monitor',items))?caches.monitor.memory:null);
 }
 async function postForm(query,{geojson=true,timeoutMs,progressLabel,responseLabel}={}){
   const postpass=state.config.postpass;
@@ -252,7 +247,7 @@ async function withQueryLock(task){
   return fallbackLock(task);
 }
 export async function getPostpassData(){
-  const initial=readCache('postpass');
+  const initial=await readCache('postpass');
   const initialStatus=statusForEntry(initial);
   if(initial&&initialStatus.fresh){
     activity.step(`Usant memòria cau Postpass: ${Math.floor(initialStatus.ageMs/1000)} s d’antiguitat`,'No es fa una nova consulta al servidor');
@@ -260,14 +255,14 @@ export async function getPostpassData(){
   }
   activity.step(initialStatus.exists?`Memòria cau Postpass caducada: ${Math.floor(initialStatus.ageMs/1000)} s d’antiguitat`:'No hi ha memòria cau Postpass','Esperant torn de consulta');
   return withQueryLock(async()=>{
-    const current=readCache('postpass');
+    const current=await readCache('postpass');
     const status=statusForEntry(current);
     if(current&&status.fresh){
       activity.step('Una altra pestanya ha actualitzat la memòria cau','Reutilitzant la resposta sense consultar Postpass');
       return{payload:current.payload,source:'cache',savedAt:status.savedAt};
     }
     const payload=await fetchPostpassNetwork();
-    const saved=writeCache('postpass',null,payload);
+    const saved=await writeCache('postpass',null,payload);
     activity.step(saved.persisted?`Resposta Postpass desada en memòria cau durant ${Math.round(cacheTtlMs()/1000)} s`:'Resposta Postpass en memòria cau temporal d’aquesta pestanya',saved.persisted?'La consulta queda bloquejada fins que caduqui la memòria cau':'L’emmagatzematge persistent del navegador no està disponible');
     return{payload,source:'network',savedAt:saved.entry.savedAt};
   });
@@ -275,7 +270,7 @@ export async function getPostpassData(){
 export async function getOkCheckData(items){
   const query=compileOkCheckQuery(items);
   if(!query)return{payload:{postpass_properties:{timestamp:new Date().toISOString()},result:[]},source:'empty',savedAt:Date.now()};
-  const initial=readCache('ok',items);
+  const initial=await readCache('ok',items);
   const initialStatus=statusForEntry(initial);
   if(initial&&initialStatus.fresh){
     activity.step(`Usant comprovació OK en memòria cau: ${Math.floor(initialStatus.ageMs/1000)} s d’antiguitat`,'No es fa una nova consulta de comprovació');
@@ -283,14 +278,14 @@ export async function getOkCheckData(items){
   }
   activity.step(initialStatus.exists?`Comprovació OK caducada: ${Math.floor(initialStatus.ageMs/1000)} s d’antiguitat`:'No hi ha comprovació OK en memòria cau','Esperant torn de consulta');
   return withQueryLock(async()=>{
-    const current=readCache('ok',items);
+    const current=await readCache('ok',items);
     const status=statusForEntry(current);
     if(current&&status.fresh){
       activity.step('Una altra pestanya ha comprovat els OK','Reutilitzant la resposta sense consultar Postpass');
       return{payload:current.payload,source:'cache',savedAt:status.savedAt};
     }
     const payload=await fetchOkCheckNetwork(items);
-    const saved=writeCache('ok',items,payload);
+    const saved=await writeCache('ok',items,payload);
     activity.step(saved.persisted?`Comprovació OK desada en memòria cau durant ${Math.round(cacheTtlMs()/1000)} s`:'Comprovació OK en memòria cau temporal d’aquesta pestanya',saved.persisted?'Nova comprovació disponible quan caduqui la memòria cau':'L’emmagatzematge persistent del navegador no està disponible');
     return{payload,source:'network',savedAt:saved.entry.savedAt};
   });
@@ -298,7 +293,7 @@ export async function getOkCheckData(items){
 export async function getMonitorData(items){
   const query=compileOkCheckQuery(items);
   if(!query)return{payload:{postpass_properties:{timestamp:new Date().toISOString()},result:[]},source:'empty',savedAt:Date.now()};
-  const initial=readCache('monitor',items);
+  const initial=await readCache('monitor',items);
   const initialStatus=statusForEntry(initial);
   if(initial&&initialStatus.fresh){
     activity.step(`Usant monitor en memòria cau: ${Math.floor(initialStatus.ageMs/1000)} s d’antiguitat`,'No es fa una nova consulta dels objectes vigilats');
@@ -306,14 +301,14 @@ export async function getMonitorData(items){
   }
   activity.step(initialStatus.exists?`Monitor caducat: ${Math.floor(initialStatus.ageMs/1000)} s d’antiguitat`:'No hi ha monitor en memòria cau','Esperant torn de consulta');
   return withQueryLock(async()=>{
-    const current=readCache('monitor',items);
+    const current=await readCache('monitor',items);
     const status=statusForEntry(current);
     if(current&&status.fresh){
       activity.step('Una altra pestanya ha actualitzat el monitor','Reutilitzant la resposta sense consultar Postpass');
       return{payload:current.payload,source:'cache',savedAt:status.savedAt};
     }
     const payload=await fetchMonitorNetwork(items);
-    const saved=writeCache('monitor',items,payload);
+    const saved=await writeCache('monitor',items,payload);
     activity.step(saved.persisted?`Monitor desat en memòria cau durant ${Math.round(cacheTtlMs()/1000)} s`:'Monitor en memòria cau temporal d’aquesta pestanya',saved.persisted?'Nova comprovació disponible quan caduqui la memòria cau':'L’emmagatzematge persistent del navegador no està disponible');
     return{payload,source:'network',savedAt:saved.entry.savedAt};
   });

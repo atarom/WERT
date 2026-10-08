@@ -1,6 +1,7 @@
 import {state} from './state.js';
 import {$,els} from './dom.js';
 import {parseAccepted,parsePostpass} from './elements.js';
+import {loadSnapshot,downloadSnapshot} from './sqlite.js';
 import {compileQuery,loadJson,getPostpassData,getPostpassCacheStatus,getMonitorCacheStatus,isMonitorTask} from './postpass.js';
 import {rebuildCollections,hasUnsavedChanges,buildResultPayload,markCurrentChangesSaved,clearSessionChanges,getFilteredItems} from './changes.js';
 import {createMap,renderMap,setMapHooks} from './map.js';
@@ -237,11 +238,11 @@ async function exportOk(copy){
     const result=buildResultPayload();
     activity.step(`Fitxer resultant: ${result.elements.length} elements`,copy?'Demanant accés al porta-retalls':'Preparant descàrrega');
     if(copy)await copyJson(result,els.copyOkBtn,'Copiat');
-    else downloadJson(filename,result);
+    else await downloadSnapshot(filename,result);
     markCurrentChangesSaved();
     activity.done(`${filename} ${copy?'copiat':'descarregat'}`);
   }catch(error){
-    if(copy)showError('El navegador no ha permès copiar el JSON al porta-retalls.');
+    if(copy)showError('El navegador no ha permès copiar el JSON al porta-retalls.');else showError(`No s’ha pogut generar ${filename}. ${error?.message||error}`);
     activity.fail(`${copy?'No s’ha pogut copiar':'No s’ha pogut generar'} ${filename}`,error);
   }
 }
@@ -254,10 +255,10 @@ async function exportMerged(copy){
     if(failUnresolved(merged))return;
     activity.step('Sense decisions pendents',copy?'Demanant accés al porta-retalls':`Preparant ${filename} consolidat`);
     if(copy)await copyJson(merged.payload,els.copyMergedBtn,'Copiat');
-    else downloadJson(filename,merged.payload);
+    else await downloadSnapshot(filename,merged.payload);
     activity.done(copy?'Consolidat copiat al porta-retalls':`${filename} consolidat descarregat`);
   }catch(error){
-    if(copy)showError('El navegador no ha permès copiar el consolidat al porta-retalls.');
+    if(copy)showError('El navegador no ha permès copiar el consolidat al porta-retalls.');else showError(`No s’ha pogut generar ${filename}. ${error?.message||error}`);
     activity.fail(copy?'No s’ha pogut copiar el consolidat':'No s’ha pogut consolidar',error);
   }
 }
@@ -267,7 +268,7 @@ async function refreshData(resetActivity=true){
   updateReloadButton();
   if(resetActivity)activity.begin('Actualitzant WERT',`Carregant ${state.config.elementsFile}`);else activity.step(`Carregant ${state.config.elementsFile}`);
   try{
-    const acceptedPayload=await loadJson(state.config.elementsFile);
+    const acceptedPayload=await loadSnapshot(state.config.elementsFile);
     const acceptedParsed=parseAccepted(acceptedPayload);
     setOkCheckBase(acceptedParsed);
     resetSnapshotAdmin();
@@ -362,7 +363,8 @@ function wireEvents(){
   els.copyMergedBtn.addEventListener('click',()=>exportMerged(true));
   els.discardBtn.addEventListener('click',discardChanges);
   window.addEventListener('beforeunload',event=>{if(!hasUnsavedChanges())return;event.preventDefault();event.returnValue='';});
-  window.addEventListener('storage',event=>{if(event.key?.startsWith('wert:postpass-cache:v2:')||event.key?.startsWith('wert:monitor-cache:v2:')||event.key?.startsWith('wert:okcheck-cache:v2:'))scheduleClocks();});
+  const cacheUpdates=new BroadcastChannel('wert-sqlite-cache-v1');
+  cacheUpdates.addEventListener('message',scheduleClocks);
   window.addEventListener('focus',scheduleClocks);
   document.addEventListener('visibilitychange',()=>{if(document.hidden){clearTimeout(reloadTimer);reloadTimer=null;if(clockSyncFrame!==null){cancelAnimationFrame(clockSyncFrame);clockSyncFrame=null;}return;}scheduleClocks();});
 }

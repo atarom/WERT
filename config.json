@@ -6,7 +6,7 @@
       "id": "NoCatName",
       "name": "NoCatName",
       "available": true,
-      "elementsFile": "NoCatName.json",
+      "elementsFile": "NoCatName.sqlite",
       "trackedTags": [
         "name"
       ],
@@ -35,7 +35,7 @@
       "id": "NameNoName_ca",
       "name": "NameNoName_ca",
       "available": true,
-      "elementsFile": "NameNoName_ca.json",
+      "elementsFile": "NameNoName_ca.sqlite",
       "trackedTags": [
         "name",
         "name:ca"
@@ -65,7 +65,7 @@
       "name": "LaFranjaAllNameMonitor",
       "available": true,
       "mode": "monitor",
-      "elementsFile": "LaFranjaAllNameMonitor.json",
+      "elementsFile": "LaFranjaAllNameMonitor.sqlite",
       "trackedTags": [
         "name"
       ],
