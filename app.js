@@ -231,35 +231,33 @@ async function exportProposal(copy){
     activity.fail(copy?'No s’ha pogut copiar la proposta':'No s’ha pogut generar la proposta',error);
   }
 }
-async function exportOk(copy){
+async function exportOk(){
   const filename=state.config.elementsFile;
-  activity.begin(`${copy?'Copiant':'Generant'} ${filename}`,'Aplicant els canvis de la sessió');
+  activity.begin(`Generant ${filename}`,'Aplicant els canvis de la sessió');
   try{
     const result=buildResultPayload();
-    activity.step(`Fitxer resultant: ${result.elements.length} elements`,copy?'Demanant accés al porta-retalls':'Preparant descàrrega');
-    if(copy)await copyJson(result,els.copyOkBtn,'Copiat');
-    else await downloadSnapshot(filename,result);
+    activity.step(`Fitxer resultant: ${result.elements.length} elements`,'Preparant descàrrega SQLite');
+    await downloadSnapshot(filename,result);
     markCurrentChangesSaved();
-    activity.done(`${filename} ${copy?'copiat':'descarregat'}`);
+    activity.done(`${filename} descarregat`);
   }catch(error){
-    if(copy)showError('El navegador no ha permès copiar el JSON al porta-retalls.');else showError(`No s’ha pogut generar ${filename}. ${error?.message||error}`);
-    activity.fail(`${copy?'No s’ha pogut copiar':'No s’ha pogut generar'} ${filename}`,error);
+    showError(`No s’ha pogut generar ${filename}. ${error?.message||error}`);
+    activity.fail(`No s’ha pogut generar ${filename}`,error);
   }
 }
-async function exportMerged(copy){
+async function exportMerged(){
   const filename=state.config.elementsFile;
-  activity.begin(copy?'Copiant consolidat':'Consolidant propostes',copy?'Calculant fusió de propostes':`Calculant fusió sobre ${filename}`);
+  activity.begin('Consolidant propostes',`Calculant fusió sobre ${filename}`);
   try{
     const merged=buildMergedPayload();
     activity.step(`Fusió calculada: ${merged.payload.elements.length} elements`);
     if(failUnresolved(merged))return;
-    activity.step('Sense decisions pendents',copy?'Demanant accés al porta-retalls':`Preparant ${filename} consolidat`);
-    if(copy)await copyJson(merged.payload,els.copyMergedBtn,'Copiat');
-    else await downloadSnapshot(filename,merged.payload);
-    activity.done(copy?'Consolidat copiat al porta-retalls':`${filename} consolidat descarregat`);
+    activity.step('Sense decisions pendents',`Preparant ${filename} consolidat`);
+    await downloadSnapshot(filename,merged.payload);
+    activity.done(`${filename} consolidat descarregat`);
   }catch(error){
-    if(copy)showError('El navegador no ha permès copiar el consolidat al porta-retalls.');else showError(`No s’ha pogut generar ${filename}. ${error?.message||error}`);
-    activity.fail(copy?'No s’ha pogut copiar el consolidat':'No s’ha pogut consolidar',error);
+    showError(`No s’ha pogut generar ${filename}. ${error?.message||error}`);
+    activity.fail('No s’ha pogut consolidar',error);
   }
 }
 async function refreshData(resetActivity=true){
@@ -351,16 +349,14 @@ function wireEvents(){
   els.copyQueryBtn.addEventListener('click',async()=>{try{await copyText(compileQuery(),els.copyQueryBtn,'Copiada');}catch{showError('El navegador no ha permès copiar la consulta al porta-retalls.');}});
   els.downloadProposalBtn.addEventListener('click',()=>exportProposal(false));
   els.copyProposalBtn.addEventListener('click',()=>exportProposal(true));
-  els.downloadOkBtn.addEventListener('click',()=>exportOk(false));
-  els.copyOkBtn.addEventListener('click',()=>exportOk(true));
+  els.downloadOkBtn.addEventListener('click',exportOk);
   els.proposalDropzone.addEventListener('click',()=>els.proposalFileInput.click());
   els.proposalFileInput.addEventListener('change',async()=>{await handleProposalFiles([...els.proposalFileInput.files]);els.proposalFileInput.value='';});
   els.proposalDropzone.addEventListener('dragover',event=>{event.preventDefault();els.proposalDropzone.classList.add('dragover');});
   els.proposalDropzone.addEventListener('dragleave',()=>els.proposalDropzone.classList.remove('dragover'));
   els.proposalDropzone.addEventListener('drop',async event=>{event.preventDefault();els.proposalDropzone.classList.remove('dragover');await handleProposalFiles([...event.dataTransfer.files].filter(file=>file.name.toLowerCase().endsWith('.json')));});
   els.clearProposalsBtn.addEventListener('click',()=>{state.importedProposals=[];state.conflictResolutions.clear();els.proposalStatus.textContent='Sense propostes importades.';renderCounters();renderProposalManager();});
-  els.downloadMergedBtn.addEventListener('click',()=>exportMerged(false));
-  els.copyMergedBtn.addEventListener('click',()=>exportMerged(true));
+  els.downloadMergedBtn.addEventListener('click',exportMerged);
   els.discardBtn.addEventListener('click',discardChanges);
   window.addEventListener('beforeunload',event=>{if(!hasUnsavedChanges())return;event.preventDefault();event.returnValue='';});
   const cacheUpdates=new BroadcastChannel('wert-sqlite-cache-v1');

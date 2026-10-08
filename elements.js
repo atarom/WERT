@@ -153,7 +153,7 @@ function malformedIssue(value,index,item){
 }
 export function parseAccepted(payload){
   const source=payload?.elements;
-  if(!payload||typeof payload!=='object'||Array.isArray(payload)||!Array.isArray(source))throw new Error(`${state.config?.elementsFile||'El fitxer OK'} ha de contenir un objecte JSON amb un array "elements".`);
+  if(!payload||typeof payload!=='object'||Array.isArray(payload)||!Array.isArray(source))throw new Error(`${state.config?.elementsFile||'El snapshot SQLite'} no ha retornat una col·lecció d'elements vàlida.`);
   if(source.some(value=>!['N','W','R'].includes(value?.type)))throw new Error(`${state.config?.elementsFile||'El fitxer OK'} només admet type "N", "W" o "R".`);
   const groups=new Map();
   const inconsistencies=[];

@@ -64,7 +64,6 @@ export const els={
   downloadProposalBtn:$('download-proposal-btn'),
   copyProposalBtn:$('copy-proposal-btn'),
   downloadOkBtn:$('download-ok-btn'),
-  copyOkBtn:$('copy-ok-btn'),
   discardBtn:$('discard-btn'),
   changesHint:$('changes-hint'),
   proposalFileInput:$('proposal-file-input'),
@@ -79,6 +78,5 @@ export const els={
   conflictsSection:$('conflicts-section'),
   conflictList:$('conflict-list'),
   downloadMergedBtn:$('download-merged-btn'),
-  copyMergedBtn:$('copy-merged-btn'),
   mergeHint:$('merge-hint')
 };

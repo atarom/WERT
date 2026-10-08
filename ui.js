@@ -213,11 +213,8 @@ export function renderChangesDialog(){
   els.downloadProposalBtn.disabled=!hasChanges;
   els.copyProposalBtn.disabled=!hasChanges;
   els.downloadOkBtn.disabled=!hasChanges||unresolved.length>0;
-  els.copyOkBtn.disabled=!hasChanges||unresolved.length>0;
   els.discardBtn.disabled=!hasChanges;
   els.downloadOkBtn.textContent=`Descarrega ${state.config.elementsFile}`;
-  els.copyOkBtn.textContent='Copia dades JSON';
-  els.copyMergedBtn.textContent='Copia dades JSON';
   els.changesHint.textContent=unresolved.length?`Hi ha ${unresolved.length} inconsistència${unresolved.length===1?'':'es'} sense resoldre. Pots descarregar una proposta WERT, però cal resoldre-les totes per generar ${state.config.elementsFile}.`:isMonitorTask()?'Els canvis seleccionats actualitzaran el snapshot monitoritzat.':'Totes les inconsistències actuals estan resoltes o no n’hi ha.';
 }
 export function makeProposalCard(proposal){
@@ -301,7 +298,6 @@ export function renderProposalManager(){
   els.conflictsSection.classList.toggle('hidden',merged.plan.conflicts.length===0);
   const ready=state.importedProposals.length>0&&merged.unresolved.length===0;
   els.downloadMergedBtn.disabled=!ready;
-  els.copyMergedBtn.disabled=!ready;
   els.clearProposalsBtn.disabled=state.importedProposals.length===0;
   if(!state.importedProposals.length)els.mergeHint.textContent='No hi ha propostes carregades.';
   else if(merged.unresolved.length){
