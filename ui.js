@@ -56,7 +56,7 @@ function appendMonitorChange(main,item){
 function wireCardActivation(card,key){
   const activate=()=>selectItem(key,{fly:true,popup:true,scroll:false});
   card.addEventListener('click',activate);
-  card.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();activate();}});
+  card.addEventListener('keydown',event=>{if(event.target!==card)return;if(event.key==='Enter'||event.key===' '){event.preventDefault();activate();}});
 }
 function makeIssueCard(item){
   const key=uiKeyFor(item);
