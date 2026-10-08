@@ -20,6 +20,7 @@ function restoreDialogs(){
 }
 function blockOutsideOverlay(event){
   if(!locked||!overlay||overlay.contains(event.target))return;
+  if(event.type==='click'&&!event.isTrusted&&event.target instanceof HTMLAnchorElement&&event.target.hasAttribute('download')&&event.target.href.startsWith('blob:'))return;
   event.preventDefault();
   event.stopImmediatePropagation();
 }
