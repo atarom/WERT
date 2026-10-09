@@ -184,22 +184,20 @@ async function download(){
     update();
   }
 }
+let initialized=false;
 export function initCombinedSnapshot(){
-  if(!els.snapshotAdminSection||document.getElementById('snapshot-combined-section'))return;
-  section=element('section','export-section',null,els.snapshotAdminSection);
-  section.id='snapshot-combined-section';
-  element('h3','','Snapshot + propostes WERT',section);
-  element('p','hint','Regenera el snapshot des d’OSM i aplica les propostes importades. Els objectes coincidents no es dupliquen; si OSM i una proposta difereixen, hauràs d’escollir quin estat conservar.',section);
-  const actions=element('div','export-actions',null,section);
-  prepareButton=element('button','button button-ghost','Compara i prepara snapshot + propostes',actions);
-  prepareButton.type='button';
+  if(initialized)return;
+  section=document.getElementById('snapshot-combined-section');
+  if(!els.snapshotAdminSection||!section)return;
+  prepareButton=document.getElementById('snapshot-combined-prepare-btn');
+  downloadButton=document.getElementById('snapshot-combined-download-btn');
+  summary=document.getElementById('snapshot-combined-summary');
+  conflicts=document.getElementById('snapshot-combined-conflicts');
+  status=document.getElementById('snapshot-combined-status');
+  if(!prepareButton||!downloadButton||!summary||!conflicts||!status)return;
+  initialized=true;
   prepareButton.addEventListener('click',prepare);
-  downloadButton=element('button','button button-primary','Descarrega snapshot combinat',actions);
-  downloadButton.type='button';
   downloadButton.addEventListener('click',download);
-  summary=element('div','change-summary proposal-summary',null,section);
-  conflicts=element('div','change-list',null,section);
-  status=element('p','hint','Importa una proposta WERT.',section);
   els.infoBtn?.addEventListener('click',update);
   els.taskSelect?.addEventListener('change',()=>{invalidate();update();});
   if(els.proposalsCount)new MutationObserver(update).observe(els.proposalsCount,{childList:true,subtree:true,characterData:true});

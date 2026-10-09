@@ -24,8 +24,3 @@ export const state={
   tagValue:'',
   mapReady:false
 };
-if(typeof document!=='undefined'){
-  const init=()=>import('./combined-snapshot.js').then(module=>module.initCombinedSnapshot()).catch(error=>{const banner=document.getElementById('error-banner');if(banner){banner.textContent=`No s'ha pogut iniciar la consolidació combinada: ${error?.message||error}`;banner.classList.remove('hidden');}});
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
-  else init();
-}
