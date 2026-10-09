@@ -124,7 +124,8 @@
         </details>
         <section id="snapshot-admin-section" class="export-section hidden">
           <h3>Administració del snapshot</h3>
-          <p class="hint">Reconstrueix completament el snapshot a partir de l’estat actual d’OSM. Els canvis pendents de revisió no s’apliquen: el nou fitxer adopta directament l’estat actual de la font.</p>
+          <p class="hint">Reconstrueix el snapshot des d’OSM i incorpora automàticament les propostes WERT importades. Només hauràs de resoldre les diferències que generin conflictes.</p>
+          <p id="snapshot-auto-notice" class="hint">Sense propostes: es regenerarà el snapshot només des d’OSM.</p>
           <p id="snapshot-source-text" class="hint"></p>
           <div class="export-actions">
             <button id="snapshot-compare-btn" class="button button-ghost" type="button">Compara i prepara snapshot</button>
@@ -144,18 +145,8 @@
             <div id="snapshot-detail-list" class="change-list"></div>
             <div class="export-actions"><button id="snapshot-detail-close-btn" class="button button-ghost button-small" type="button">Tanca detall</button></div>
           </section>
+          <div id="snapshot-auto-conflicts" class="export-section hidden"></div>
           <div id="snapshot-status" class="hint">Encara no s’ha generat cap previsualització.</div>
-          <section id="snapshot-combined-section" class="export-section hidden">
-            <h3>Snapshot + propostes WERT</h3>
-            <p class="hint">Regenera el snapshot des d’OSM i aplica les propostes importades. Els objectes coincidents no es dupliquen; si OSM i una proposta difereixen, cal decidir quin estat conservar.</p>
-            <div class="export-actions">
-              <button id="snapshot-combined-prepare-btn" class="button button-ghost" type="button">Compara i prepara snapshot + propostes</button>
-              <button id="snapshot-combined-download-btn" class="button button-primary" type="button" disabled>Descarrega snapshot combinat</button>
-            </div>
-            <div id="snapshot-combined-summary" class="change-summary proposal-summary"></div>
-            <div id="snapshot-combined-conflicts" class="change-list"></div>
-            <p id="snapshot-combined-status" class="hint">Importa una proposta WERT.</p>
-          </section>
         </section>
         <section class="info-meta">
           <div><span>Endpoint</span><strong id="endpoint-text"></strong></div>
