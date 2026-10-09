@@ -256,7 +256,7 @@ export function initCombinedSnapshot(){
     render();
   });
   intercept(els.snapshotDetailCloseBtn,()=>{detailMode=null;render();});
-  els.infoBtn?.addEventListener('click',render);
+  els.infoBtn?.addEventListener('click',()=>queueMicrotask(render));
   els.taskSelect?.addEventListener('change',()=>{invalidate();render();});
   if(els.proposalsCount)new MutationObserver(render).observe(els.proposalsCount,{childList:true,subtree:true,characterData:true});
   render();
